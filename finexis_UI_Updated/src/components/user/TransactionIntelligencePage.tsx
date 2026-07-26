@@ -20,6 +20,19 @@ import {
   parseCustomDate 
 } from "../../utils/txnRules";
 
+// Define chips to hide in this specific page (Transaction Intelligence)
+const HIDDEN_CHIPS = [
+  "Crypto P2P", "NBFC Payments", "Mobility & Rides", "Fuel & EV Charging",
+  "Business B2B Payment", "Education Fees", "Escrow & Nodal", 
+  "Self / Internal Transfer", "Govt Direct Benefit Transfer",
+  "High Risk / STR", "Political Donation", "Neobanks", "Rent Payments",
+  "Dividend Income", "Demat & Securities", "Real Estate & Stamp Duty",
+  "Microfinance SFB", "Insurance Aggregators", "Wellness & Fitness",
+  "Loan Apps", "Cash Deposit", "NBFC", "Mobility and rides", 
+  "Escrue and nodal", "Polictical donation", "Insurence agrigator",
+  "Realstate ans stamp dutiy", "Mictofinance sfb"
+];
+
 const TXN_TYPES = ["UPI", "IMPS", "RTGS", "NEFT", "NACH", "AEPS", "CASH", "OTHER"];
 const ROWS_PER_PAGE = 10;
 
@@ -240,7 +253,23 @@ const filtered = useMemo(() => {
             </div>
 
             {/* Pattern Lens Chips Bar */}
-            <KeywordChipsBar activeChips={activeChips} onToggleChip={toggleChip} />
+            <div className="flex flex-wrap gap-2">
+              {CHIP_DEFINITIONS
+                .filter(chip => !HIDDEN_CHIPS.includes(chip.label))
+                .map((chip) => (
+                  <button
+                    key={chip.id}
+                    onClick={() => toggleChip(chip.id)}
+                    className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${
+                      activeChips.includes(chip.id)
+                        ? "bg-forensic-500 text-white"
+                        : "bg-surface text-ink hover:bg-paper border border-line"
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+            </div>
 
             {/* Transactions Forensics Table */}
             <div className="rounded-xl border border-line bg-surface shadow-card overflow-hidden">
