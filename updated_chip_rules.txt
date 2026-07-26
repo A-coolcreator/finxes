@@ -1,0 +1,226 @@
+---
+
+## 1. Transaction Channel Detection
+*(unchanged from v1 — reproduced here for completeness)*
+
+| Channel | MATCH | Reference format | CONFIDENCE |
+|---|---|---|---|
+| UPI | `\bUPI\b`, `UPI/`, VPA pattern `user@bank` | RRN — 12 digit numeric | HIGH |
+| IMPS | `\bIMPS\b`, `P2A`, `P2M`, MMID | 12 digit numeric | HIGH |
+| NEFT | `\bNEFT\b` | 16-char alphanumeric UTR | HIGH |
+| RTGS | `\bRTGS\b` | 16-char alphanumeric UTR | HIGH |
+| NACH/ECS/Mandate | `\bNACH\b`,`\bENACH\b`,`\bECS\b`,`\bACH\b`,`\bMANDATE\b`,`\bSI\b`,`\bSTANDING INSTRUCTION\b` | UMRN — 20 char | HIGH (see Sec 10 — `SI` and `NACH` both collision-prone) |
+| Cheque/CTS | `\bCHQ\b`,`\bCHEQUE\b`,`\bCTS\b`,`\bINSTR\b` | 6-digit cheque no. | MEDIUM |
+| Cash | `\bCASH\b`,`\bCDM\b`,`\bCASH DEP\b`,`\bSELF CASH\b`,`\bBRANCH CASH\b` | ATM ID or none | MEDIUM |
+| AEPS / Micro-ATM | `\bAEPS\b`,`\bAADHAAR PAY\b`,`\bMICRO ATM\b`,`\bBC AGENT\b`,`\bBANK MITRA\b`,`\bCSP\b` | Aadhaar-linked ref | HIGH |
+| ATM | `\bATM WDL\b`,`\bATM CASH\b`,`\bNFS ATM\b`,`\bVISA ATM\b`,`\bRUPAY ATM\b` | ATM ID | HIGH |
+| POS/EPOS | `\bPOS\b`,`\bEPOS\b`,`\bSWIPE\b`,`\bCARD SWIPE\b` | Card auth code | MEDIUM |
+| Internal/Self Transfer | `\bSELF\b`,`\bOWN ACCOUNT\b`,`\bINTERNAL TRANSFER\b` | none | LOW — confirm via account linkage |
+
+---
+
+## 2. Credit/Debit Detection
+*(unchanged from v1)* Primary: use statement's native Dr/Cr flag or signed amount. Fallback narration rule: `\bBY TRANSFER\b`/`\bRECEIVED FROM\b` = Credit; `\bTO TRANSFER\b`/`\bPAID TO\b` = Debit. **EXCLUDE:** bare `DR`/`CR` tokens outside the fixed indicator field (collides with `DR.` as a name title, e.g. "DR. SHARMA").
+
+---
+
+## 3. Entity Extraction Rules
+*(unchanged from v1)*
+
+| Entity | Regex/Logic | Notes |
+|---|---|---|
+| UPI VPA | `[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}` | Validate suffix against known PSP handle list |
+| IFSC | `^[A-Z]{4}0[A-Z0-9]{6}$` | 5th char always `0` |
+| Mobile number | `\b[6-9]\d{9}\b` | High FP risk — extract only from delimited field, never mid-digit-run |
+| RRN (UPI) | `\b\d{12}\b` near UPI token | Positional |
+| UTR (NEFT/RTGS) | `\b[A-Z]{4}[A-Z0-9]{11}\b` | |
+| GSTIN | `\b\d{2}[A-Z]{5}\d{4}[A-Z]{1}\d[Z]{1}[A-Z\d]{1}\b` | Distinguish from generic `GST`/`GSTIN` keyword category (Sec 5) |
+
+---
+
+## 4. Master Category & Narration Taxonomy
+
+Transcribed and coded from your provided keyword sheet. Each row = one classification chip. `Priority` governs match order when multiple categories could fire on the same narration (see Sec 6 — longer/more specific phrase always wins over shorter one).
+
+| Code | Category | Narration Variants | Priority |
+|---|---|---|---|
+| CAT-01 | UPI_APP | GOOGLEPAY, GPAY, G-PAY, GOOGLE PAY, PHONEPE, PHONE PE, PAYTM UPI, BHIM, BHIM UPI, AMAZONPAY\*, WHATSAPP PAY, CRED UPI, SUPERMONEY, MOBIKWIK, FREECHARGE, SLICE, JUPITER, FI MONEY | Medium |
+| CAT-02 | PAYMENT_GATEWAY | RAZORPAY, RAZORPAYX, CASHFREE\*, PAYU, PAYTM PG, CCAVENUE, BILLDESK, JUSPAY, EASEBUZZ, AIRPAY, PINELABS, ATOMTECH, OPEN MONEY | High |
+| CAT-03 | AEPS | AEPS, AADHAARPAY, NPCI AEPS, MICRO ATM, BC AGENT, BANK MITRA, CSP | High |
+| CAT-04 | ATM | ATM WDL, ATM CASH, CASH WDL, NFS ATM, VISA ATM, RUPAY ATM | High |
+| CAT-05 | MERCHANT_POS | POS, EPOS, SWIPE, MERCHANT POS, CARD SWIPE, VISA POS, MASTER POS, POS PURCHASE | Medium |
+| CAT-06 | ECOMMERCE | AMAZON\*, AMZN, FLIPKART, FKART, MYNTRA, AJIO, MEESHO, SHOPSY, SNAPDEAL, NYKAA, FIRSTCRY | Medium |
+| CAT-07 | FOOD_DELIVERY | SWIGGY\*, ZOMATO\*, BLINKIT, INSTAMART, ZEPTO, EATCLUB, DOMINOS, PIZZAHUT | Medium |
+| CAT-08 | MOBILITY | UBER\*, OLA\*, RAPIDO\*, BLUSMART, NAMMA YATRI | Medium |
+| CAT-09 | LOAN_APP | KREDITBEE, MONEYVIEW, CASHE, FIBE, EARLYSALARY, NAVI, LAZYPAY\*, MPOKKET, BRANCH, KISSHT, SNAPMINT, MONEYTAP, PAYSENSE, STASHFIN, TRUEBALANCE, CASHBEAN, DHANI, INDIALENDS, ZYPE, NIRA, FLEXSALARY, HOME CREDIT, AXIO, POONAWALLA FINCORP, RUPEEK, FINNABLE, PAYME INDIA | High |
+| CAT-10 | NBFC | BAJAJ FINANCE, TATA CAPITAL\*, L&T FINANCE, SHRIRAM FINANCE, MUTHOOT FINANCE, MANAPPURAM, CHOLAMANDALAM, MAHINDRA FINANCE, SUNDARAM FINANCE, HDB FINANCIAL SERVICES, ADITYA BIRLA FINANCE, PIRAMAL FINANCE, INDIABULLS HOUSING FINANCE, PNB HOUSING FINANCE, LIC HOUSING FINANCE, IIFL FINANCE, POONAWALLA FINCORP\*, HERO FINCORP, MUTHOOT FINCORP, IIFL HOME FINANCE, MAS FINANCIAL, NORTHERN ARC, VIVRITI CAPITAL, FEDBANK FINANCIAL, UGRO CAPITAL, FIVE STAR BUSINESS FINANCE, VASTU HOUSING FINANCE, AAVAS FINANCIERS, HOME FIRST FINANCE | High |
+| CAT-11 | SALARY | SALARY, SAL CREDIT, PAYROLL, WAGES, EMPLOYEE PAY, MONTHLY PAY, PAYSLIP | High — see Sec 10 (`SAL`/`PAY` alone are dangerous) |
+| CAT-12 | CHEQUE | CHQ, CHEQUE, CHQ DEP, CTS, CHEQUE RETURN, CHEQUE BOUNCE, RETURN CHQ | High |
+| CAT-13 | AUTO_DEBIT | NACH, ENACH, AUTO DEBIT, MANDATE, SI, STANDING INSTRUCTION, EMI, ECS, ACH | High — see Sec 10 (`NACH`/`SI` collisions) |
+| CAT-14 | GOVERNMENT_PAYMENT | GST PMT, GSTN, CBIC, INCOME TAX, TDS, TCS, ADVANCE TAX, SELF ASSESSMENT TAX, CUSTOM DUTY, EXCISE DUTY, PROFESSIONAL TAX, ROAD TAX, CHALLAN, OLTAS, EPFO, ESIC, PF WITHDRAWAL, PROVIDENT FUND, UAN, GRATUITY, NPS, CGHS, PASSPORT SEVA, RTO, VAHAN, SARATHI, E-COURT FEE, JUDICIAL STAMP, MUNICIPAL TAX, PROPERTY TAX, PAN, ITR REFUND, TAX REFUND, FORM 26AS | High |
+| CAT-15 | GST | GSTIN, GST REFUND, GSTR1, GSTR3B, GST COMPOSITION, GST LATE FEE, GST CESS, RCM, EWAY BILL, INPUT TAX, ITC, CGST, SGST, IGST, E-INVOICE | High |
+| CAT-16 | BROKER | ZERODHA, KITE, GROWW, UPSTOX, ANGELONE, ANGEL ONE, DHAN, PAYTM MONEY\*, ICICI DIRECT, KOTAK SEC, KOTAK SECURITIES, MOTILAL OSWAL, SHAREKHAN, 5PAISA, IIFL SECURITIES, HDFC SECURITIES, AXIS DIRECT, YES SECURITIES, EDELWEISS BROKING, RELIGARE BROKING, GEOJIT, INDIABULLS SECURITIES, SMC GLOBAL, ALICE BLUE, FYERS, TRADEJINI, JM FINANCIAL SECURITIES | High |
+| CAT-17 | MUTUAL_FUND | SIP, MF, HDFC MF, ICICI MF, SBI MF, NIPPON MF, UTI MF, ADITYA BIRLA SUN LIFE MF, KOTAK MF, AXIS MF, DSP MF, FRANKLIN TEMPLETON, MIRAE ASSET, PARAG PARIKH, PPFAS, QUANT MF, EDELWEISS MF, INVESCO MF, TATA MF, CANARA ROBECO, BARODA BNP PARIBAS MF, MAHINDRA MANULIFE, BANDHAN MF, IIFL MF, SUNDARAM MF, LIC MF, TRUST MF, WHITEOAK CAPITAL MF, NAVI MF, SAMCO MF, JM FINANCIAL MF, PGIM INDIA MF, ITI MF; also ELSS, NPS, PPF, SUKANYA SAMRIDDHI, KISAN VIKAS PATRA, NSC, SOVEREIGN GOLD BOND, RBI RETAIL DIRECT, G-SEC | Medium |
+| CAT-18 | INSURANCE | LIC, ICICI PRU, ICICI LOMBARD, HDFC LIFE, HDFC ERGO, MAX LIFE\*, MAX BUPA, SBI LIFE, SBI GENERAL, BAJAJ ALLIANZ, TATA AIA\*, TATA AIG, STAR HEALTH, NEW INDIA ASSURANCE, ORIENTAL INSURANCE, NATIONAL INSURANCE, UNITED INDIA INSURANCE, RELIANCE GENERAL, CHOLA MS, FUTURE GENERALI, KOTAK LIFE, PNB METLIFE, AVIVA LIFE, CANARA HSBC, EDELWEISS TOKIO, PRAMERICA LIFE, EXIDE LIFE, IFFCO TOKIO, BHARTI AXA, ROYAL SUNDARAM, LIBERTY GENERAL, MAGMA HDI, GO DIGIT\*, ACKO\*, NAVI GENERAL, INDIAFIRST LIFE, AEGON LIFE, SUD LIFE, POLICYBAZAAR\*, TURTLEMINT\* | High |
+| CAT-19 | CRYPTO | COINDCX, COINSWITCH, WAZIRX, GIOTTUS, MUDREX, BITBNS, BUYUCOIN, BINANCE, BYBIT, KUCOIN, OKX, MEXC, GATEIO | Critical |
+| CAT-20 | CRYPTO_P2P | P2P\*, BINANCE P2P, BUY CRYPTO, SELL CRYPTO, USDT, BTC, ETH, TRX | Critical — see Sec 10 (`P2P` collision) |
+| CAT-21 | BETTING | 1XBET, PARIMATCH, STAKE, LOTUS365, FAIRPLAY, BET365, WOLF777, DIAMOND EXCHANGE, SKYEXCH | Critical |
+| CAT-22 | CASH_DEPOSIT | CDM, CASH DEP, CASH DEPOSIT, SELF CASH, BRANCH CASH | High |
+| CAT-23 | FOREIGN_REMITTANCE | SWIFT, FOREX, WIRE, TT, REMIT, WESTERN UNION, MONEYGRAM, WISE, PAYONEER — **expanded keyword set in Sec 4.1** | High — see Sec 10 (`TT`, `WISE`, `RIA` collisions) |
+| CAT-24 | WALLET | PAYTM WALLET\*, MOBIKWIK, FREECHARGE, OLA MONEY\*, AMAZON PAY BALANCE\* | Medium |
+| CAT-25 | HIGH_RISK | USDT, CASHOUT, AGENT, COMMISSION, RENT ACCOUNT, PG SETTLEMENT, HAWALA, LOTTERY, GAMING | Critical — STR intelligence, always route to manual review regardless of other chips |
+| CAT-26 | RECHARGE | JIO, AIRTEL, VODAFONE, VI, IDEA, BSNL, TATAPLAY\*, DTH, MOBILE RECHARGE, FASTAG RECHARGE | Low |
+| CAT-27 | FASTAG | FASTAG, NHAI, IDFC FASTAG, ICICI FASTAG, PAYTM FASTAG\*, TOLL PAYMENT | Low |
+| CAT-28 | UTILITY | ELECTRICITY, BESCOM, TSSPDCL, APSPDCL, MSEB, WATER BILL, GAS BILL, PNG, LPG, BROADBAND, JIO FIBER, ACT FIBERNET | Low |
+| CAT-29 | BILL_PAYMENT | BBPS, BHARAT BILLPAY, BILL PAYMENT, CREDIT CARD BILL | Low |
+| CAT-30 | EDUCATION | SCHOOL FEES, COLLEGE FEES, TUITION, BYJU, UNACADEMY, VEDANTU, UPGRAD, COURSERA, UDEMY | Low |
+| CAT-31 | PG_SETTLEMENT | PG SETTLEMENT, RAZORPAY SETTLEMENT, CASHFREE SETTLEMENT, PAYU SETTLEMENT, PAYTM SETTLEMENT\*, JUSPAY SETTLEMENT, CCAVENUE SETTLEMENT | High |
+| CAT-32 | PAYOUT | PAYOUT, MERCHANT PAYOUT, SETTLEMENT PAYOUT, VENDOR PAYOUT | Medium |
+| CAT-33 | ECOMMERCE_SETTLEMENT | AMAZON SETTLEMENT\*, FLIPKART SETTLEMENT, MEESHO SETTLEMENT, AJIO PAYOUT, MYNTRA PAYOUT | High |
+| CAT-34 | SUBSCRIPTION | NETFLIX, AMAZON PRIME\*, HOTSTAR, SONYLIV, SPOTIFY, YOUTUBE PREMIUM, CHATGPT, OPENAI, GOOGLE ONE, ICLOUD | Low |
+| CAT-35 | CREDIT_CARD | CC PAYMENT, CARD PAYMENT, HDFC CARD, SBI CARD, ICICI CARD, AXIS CARD | Medium |
+| CAT-36 | CARD_SETTLEMENT | VISA\*, MASTERCARD\*, RUPAY\*, CARD SETTLEMENT, POS SETTLEMENT | Medium |
+| CAT-37 | WALLET_LOAD | WALLET LOAD, PAYTM LOAD\*, MOBIKWIK LOAD, FREECHARGE LOAD | Low |
+| CAT-38 | ESCROW | ESCROW, ESCROW ACCOUNT, NODAL ACCOUNT | High |
+| CAT-39 | GIG_ECONOMY | SWIGGY PAYOUT\*, ZOMATO PAYOUT\*, UBER PAYOUT\*, OLA PAYOUT\*, RAPIDO PAYOUT\*, PORTER PAYOUT, URBAN COMPANY PAYOUT | Medium |
+| CAT-40 | REFUND | REFUND, REVERSAL, CHARGEBACK, FAILED TXN, REVERSED | Medium |
+| CAT-41 | CASHBACK | CASHBACK, REWARD, INCENTIVE, BONUS | Low |
+| CAT-42 | INTEREST | INT CR, INTEREST, SAVINGS INTEREST, FD INTEREST, RD INTEREST | Low |
+| CAT-43 | FD | FD, FIXED DEPOSIT, TERM DEPOSIT, FD BOOKING, FD MATURITY | Medium |
+| CAT-44 | RD | RD, RECURRING DEPOSIT, RD INSTALLMENT | Medium |
+| CAT-45 | DEMAT | NSDL, CDSL, DEMAT, SECURITIES, BROKERAGE | Medium |
+| CAT-46 | DIVIDEND | DIVIDEND, INTERIM DIVIDEND, FINAL DIVIDEND | Low |
+| CAT-47 | RENT | RENT, HOUSE RENT, OFFICE RENT, LEASE RENT | Medium — see Sec 10 (`RENTOMOJO` collision) |
+| CAT-48 | REAL_ESTATE | REGISTRATION, STAMP DUTY, PROPERTY PAYMENT, BUILDER PAYMENT | Medium |
+| CAT-49 | TRAVEL | IRCTC, MAKEMYTRIP, YATRA, CLEARTRIP, GOIBIBO, INDIGO, AIR INDIA, AKASA | Low |
+| CAT-50 | HEALTHCARE | APOLLO, FORTIS, MAX HEALTHCARE\*, MEDANTA, PRACTO, PHARMEASY, TATA 1MG\* | Low |
+| CAT-51 | DONATION | DONATION, PM CARES, PMNRF, CM RELIEF FUND, TEMPLE TRUST, NGO, CHARITY, AKSHAYA PATRA, CRY, GIVE INDIA, GOONJ, SMILE FOUNDATION, HELPAGE INDIA, ISKCON, TTD TIRUPATI, SHIRDI SAI, VAISHNO DEVI SHRINE, GURUDWARA, WAQF BOARD, RED CROSS, ARMED FORCES FLAG DAY | Medium — see Sec 10 (`DON` substring) |
+| CAT-52 | GOVERNMENT_BENEFIT | SCHOLARSHIP, DBT, SUBSIDY, PM KISAN, MNREGA, GOVT BENEFIT | Low |
+| CAT-53 | SELF_TRANSFER | SELF, OWN ACCOUNT, ACCOUNT TRANSFER, INTERNAL TRANSFER, FUND TRANSFER | Low |
+| CAT-54 | FAILED_TRANSACTION | RETURN, REVERSAL, FAILED, REJECTED, BOUNCE, RETURN CHARGE | Medium |
+
+\* = flagged in Section 6 as appearing under more than one category — resolve via priority/specificity rule, not first-match.
+
+---
+
+### 4.1 CAT-23 Foreign Remittance — Expanded Keyword Set
+
+Split into four sub-groups so each can carry its own CONTEXT/exclusion logic rather than one flat list.
+
+**Global consumer remittance platforms**
+PAYPAL, WISE, TRANSFERWISE, XOOM, REMITLY, WORLDREMIT, RIA MONEY TRANSFER, WESTERN UNION, MONEYGRAM, SKRILL, REVOLUT, CURRENCYFAIR, OFX, XE MONEY TRANSFER, N26, PAYONEER
+
+**India-specific outward/inward remittance & forex houses**
+SBI EXPRESS REMIT, ICICI MONEY2INDIA, ICICI MONEY2WORLD, HDFC FOREXPLUS, INSTAREM, NIUM, BOOKMYFOREX, THOMAS COOK FOREX, WALL STREET FINANCE, CENTRUM FOREX, UAE EXCHANGE, AL ANSARI EXCHANGE, EMIRATES NBD, LULU EXCHANGE, MUTHOOT FOREX, WEIZMANN FOREX, EBIXCASH
+
+**Regulatory / documentary reference terms** (useful for TBML and structured cross-border flagging — these appear in narration/remarks fields of NRE/NRO/FCNR-linked transactions)
+FIRC, FEMA, LRS, LIBERALISED REMITTANCE, NOSTRO, VOSTRO, SWIFT MT103, ACU, EEFC, NRE, NRO, FCNR, INWARD REMITTANCE, OUTWARD REMITTANCE, PURPOSE CODE
+
+**Cross-border trade / business remittance**
+LETTER OF CREDIT, LC, BILL OF LADING, EXPORT PROCEEDS, IMPORT PAYMENT, CORRESPONDENT BANK, AD BANK (Authorised Dealer)
+
+**CONTEXT rule for this whole category:** Require presence of a foreign-currency code (USD/EUR/GBP/AED/SGD etc.), a SWIFT/BIC-format code, or one of the regulatory terms above before tagging HIGH confidence on brand-name matches alone — several of these brand names are short/common English words (see Sec 10).
+
+---
+
+### 4.2 Additional Categories (New — v2.1)
+
+| Code | Category | Narration Variants | Priority |
+|---|---|---|---|
+| CAT-55 | BNPL | SIMPL, ZESTMONEY, UNI CARDS, AMAZON PAY LATER\*, FLIPKART PAY LATER, OLA MONEY POSTPAID\*, LAZYPAY\* | Medium — cross-ref CAT-09 Loan App |
+| CAT-56 | NEOBANK | JUPITER\*, FI MONEY\*, NIYO, OPEN\*, FYP, RAZORPAYX\* | Medium — cross-ref CAT-01/CAT-02 |
+| CAT-57 | PAYROLL_HRMS | KEKA, GREYTHR, ZOHO PAYROLL, RAZORPAYX PAYROLL, ADP, RAMCO HR, DARWINBOX | High — strengthens CAT-11 Salary CONTEXT check (employer using one of these = strong salary signal even if narration lacks "SALARY") |
+| CAT-58 | SKILL_GAMING | WINZO, ZUPEE, MY11CIRCLE, GAMES24X7, JUNGLEE GAMES, LUDO KING, RUMMYCIRCLE | High — legally distinct from CAT-21 Betting (games of skill vs. games of chance under Indian law) but same behavioural risk profile; keep separate for regulatory reporting accuracy |
+| CAT-59 | REAL_ESTATE_PLATFORM | NOBROKER, HOUSING.COM, MAGICBRICKS, 99ACRES, NESTAWAY | Medium — feeds CAT-47 Rent context (brokerage/deposit vs. actual rent) |
+| CAT-60 | FOREX_TRAVEL_CARD | NIYO GLOBAL, BOOKMYFOREX PREPAID, THOMAS COOK BORDERLESS, MULTI CURRENCY CARD, ICICI FOREX CARD | Medium — cross-ref CAT-23 |
+| CAT-61 | CROSS_BORDER_ECOMMERCE | ALIEXPRESS, SHEIN, EBAY, ETSY, IHERB, WISH, ALIBABA | Medium |
+| CAT-62 | GIFT_CARD_PREPAID | QWIKCILVER, WOOHOO, AMAZON PAY GIFT CARD, FLIPKART GIFT CARD, VISTAPRINT VOUCHER | Low — watch for gift-card cash-out as a laundering vector (convert to CAT-25 HIGH_RISK if paired with rapid resale pattern) |
+| CAT-63 | MICROFINANCE_NBFC | BANDHAN BANK, UJJIVAN SFB, EQUITAS SFB, CREDITACCESS GRAMEEN, SPANDANA SPHOORTY, SATIN CREDITCARE | High — cross-ref CAT-10 NBFC |
+| CAT-64 | INSURANCE_AGGREGATOR | POLICYBAZAAR, ACKO, GO DIGIT, DIGIT INSURANCE, TURTLEMINT | Medium — cross-ref CAT-18 |
+| CAT-65 | FUEL_EV | IOCL, HPCL, BPCL, INDIAN OIL, SHELL, RELIANCE PETROL, TATA POWER EZ CHARGE, STATIQ, CHARGEPOINT | Low |
+| CAT-66 | WELLNESS_FITNESS | CULT.FIT, CULTFIT, HEALTHIFYME, GYMPIK | Low |
+| CAT-67 | INTL_SUBSCRIPTION | DISNEY+, DISNEY PLUS, APPLE MUSIC, ADOBE, MICROSOFT 365, LINKEDIN PREMIUM, CANVA | Low — cross-ref CAT-34, flag if billed in foreign currency (cross-ref CAT-23 CONTEXT) |
+| CAT-68 | PAYMENT_INFRA_B2B | SETU, M2P FINTECH, ZETA, DECENTRO, YAP | Medium — mostly appears in business/current-account narrations, rarely retail |
+| CAT-69 | POLITICAL_DONATION | BJP, INC, INDIAN NATIONAL CONGRESS, AAP, AAM AADMI PARTY, DMK, AIADMK, TMC, TRINAMOOL, SHIV SENA, NCP, JD(U), RJD, SAMAJWADI PARTY, BSP, CPI, CPI(M), TDP, YSRCP, BJD, JD(S), AIMIM, ELECTORAL BOND, ELECTORAL TRUST, PARTY FUND, POLITICAL FUND | Critical — compliance/ADR-reportable category; route to manual review regardless of amount, since electoral funding carries its own regulatory regime (see CONTEXT note below) |
+| CAT-70 | BUSINESS_PAYMENT | VENDOR PAYMENT, SUPPLIER PAYMENT, PURCHASE ORDER, INVOICE PAYMENT, B2B PAYMENT, WORKING CAPITAL, CASH CREDIT, OVERDRAFT, BANK GUARANTEE, CC LIMIT, TRADE CREDIT, CONTRACTOR PAYMENT, FREELANCE PAYMENT, CONSULTANCY FEE, PROFESSIONAL FEE, RETAINER | Medium — generic B2B bucket; low standalone signal, mainly useful for narrowing "Uncategorized" (Sec 9) on current/business accounts |
+
+\* = also flagged in Sec 5 — same brand appears elsewhere.
+
+**Note on CAT-69:** India's Electoral Bond scheme was struck down by the Supreme Court in February 2024, so bond-specific narration patterns will only appear in historical data; live political funding now flows through direct bank transfer, cheque, or electoral trusts. Worth confirming current reporting obligations (ADR/ECI disclosure thresholds) haven't shifted again since — this is a regulatory area, not a static keyword list, so review periodically rather than treating it as fixed.
+
+---
+
+## 5. Category Collision & Disambiguation Rules *(new — enrichment)*
+
+Several brand strings recur across categories. First-match keyword scanning will misclassify these. Apply in this order:
+
+1. **Longest-phrase-wins.** Always test multi-word phrases before their single-word substrings. `AMAZON PAY BALANCE` → CAT-24 (Wallet), checked before `AMAZON PAY` → CAT-01 (UPI App), checked before bare `AMAZON` → CAT-06 (Ecommerce).
+2. **Suffix/context disambiguation table** for the flagged brands:
+
+| Brand root | Variant | Correct category |
+|---|---|---|
+| AMAZON | `AMAZON` (bare, order-ID pattern) | CAT-06 Ecommerce |
+| | `AMAZON PAY` / `AMAZONPAY` (VPA suffix `@apl`) | CAT-01 UPI App |
+| | `AMAZON PAY BALANCE` | CAT-24 Wallet |
+| | `AMAZON PRIME` | CAT-34 Subscription |
+| | `AMAZON SETTLEMENT` | CAT-33 Ecommerce Settlement |
+| PAYTM | `PAYTM UPI` | CAT-01 UPI App |
+| | `PAYTM PG` | CAT-02 Payment Gateway |
+| | `PAYTM WALLET` | CAT-24 Wallet |
+| | `PAYTM MONEY` | CAT-16 Broker |
+| | `PAYTM FASTAG` | CAT-27 Fastag |
+| | `PAYTM LOAD` | CAT-37 Wallet Load |
+| | `PAYTM SETTLEMENT` | CAT-31 PG Settlement |
+| TATA | `TATA CAPITAL` | CAT-10 NBFC |
+| | `TATA AIA` | CAT-18 Insurance |
+| | `TATA 1MG` | CAT-50 Healthcare |
+| | `TATAPLAY` | CAT-26 Recharge (DTH) |
+| CASHFREE | always | CAT-02 Payment Gateway — never CAT-22 Cash Deposit even though it contains "CASH" |
+| SWIGGY / ZOMATO / UBER / OLA / RAPIDO | bare brand | CAT-07/08 (Food/Mobility spend) |
+| | brand + `PAYOUT` | CAT-39 Gig Economy (this is the driver/partner receiving money, not the customer spending) |
+| MAX | `MAX LIFE` | CAT-18 Insurance |
+| | `MAX HEALTHCARE` | CAT-50 Healthcare |
+| VISA / MASTERCARD / RUPAY | bare, in POS/card-swipe narration | CAT-05 Merchant POS |
+| | + `SETTLEMENT` | CAT-36 Card Settlement |
+| P2P | in crypto-exchange narration | CAT-20 Crypto P2P |
+| | in NBFC/lending-platform narration (e.g. peer-to-peer lending apps) | **not** CAT-20 — route to CAT-09 Loan App or leave uncategorized; require exchange-name co-occurrence for CAT-20 |
+| OPEN | `OPEN MONEY` (payment gateway narration) | CAT-02 Payment Gateway |
+| | bare `OPEN` (neobank narration, business-banking context) | CAT-56 Neobank — require full-word isolation; `OPEN` alone is far too short to trust without account-type context (business current account) |
+| RAZORPAYX | as a business-banking/neobank product narration | CAT-56 Neobank |
+| | `RAZORPAYX` in a payment-collection/settlement narration | CAT-02 Payment Gateway — disambiguate by transaction direction and counterparty type (merchant collection vs. business account activity) |
+| FI MONEY / JUPITER | as UPI-payment narration (VPA-style) | CAT-01 UPI App |
+| | as savings/investment-feature narration (FD booking, mutual fund via app) | Route to CAT-43/CAT-17 instead, using the app name only as source-channel metadata, not the category itself |
+| LAZYPAY | standard BNPL checkout narration | CAT-55 BNPL |
+| | (already listed under CAT-09 Loan App in original taxonomy) | Treat CAT-55 as the more specific/correct category going forward; keep CAT-09 mapping as legacy alias only |
+| AMAZON PAY LATER / OLA MONEY POSTPAID | | CAT-55 BNPL, not CAT-01/CAT-24 — "Pay Later"/"Postpaid" suffix always wins over the base brand's usual category |
+
+3. **Direction check as tiebreaker**: e.g. `SWIGGY` debit (customer paying) = Food Delivery spend (Sec 8 rollup); `SWIGGY PAYOUT` credit (partner receiving) = Gig Economy income (CAT-39). Same brand, opposite category, disambiguated by Dr/Cr.
+
+---
+
+## 10. Exclusion / False-Positive Layer *(v1 layer, extended with new collisions found in this taxonomy)*
+
+| Keyword rule | False positive example | Fix |
+|---|---|---|
+| `NACH` (CAT-13) | `RATNACHAUHAN`, `PANCHAL`, `KANCHAN` | `\bNACH\b` word boundary + require UMRN co-occurrence |
+| `SI` (CAT-13, Standing Instruction) | Extremely short — collides broadly (initials, abbreviations in narration) | Never match bare `SI`; require full `STANDING INSTRUCTION` phrase or UMRN presence |
+| `SAL` / `PAY` (CAT-11 Salary) | `SALIM`, `SALES`, `SALON`; `PAY` collides with `AMAZONPAY`, `WHATSAPP PAY`, `GOOGLEPAY` variants | Require full `SALARY`/`SAL CREDIT`/`PAYROLL` phrase, never bare `PAY` or `SAL` |
+| `DON` (CAT-51 Donation) | `DONGRE`, `DONALD` | Require full `DONATION` token |
+| `TT` (CAT-23 Remittance) | Extremely short, broad collision risk in free text | Require `SWIFT`/`FOREX`/`WIRE` co-occurrence before trusting bare `TT` |
+| `P2P` (CAT-20 Crypto P2P) | Peer-to-peer lending platforms, generic "P2P" mentions unrelated to crypto | Require known exchange name (Binance, WazirX, etc.) co-occurrence for CAT-20; otherwise leave unclassified rather than defaulting to Crypto |
+| `RENT` (CAT-47) | `RENTOMOJO` (furniture subscription, not housing rent) | Explicit override: `RENTOMOJO` → CAT-34 Subscription, checked before generic `RENT` |
+| `CASH` (CAT-04/22) | `CASHFREE` (Payment Gateway), `CASHBACK` (CAT-41) | Explicit brand overrides checked before generic `CASH` substring |
+| `TRUST` (CAT-51 Donation) | Corporate `INFRA TRUST` / REIT structures | Require registered-NGO-name list match or small-ticket individual-debit pattern |
+| `RIA` (CAT-23, Ria Money Transfer) | Extremely common Indian first/middle name (e.g. `RIA SHARMA` as a beneficiary name) | Never match bare `RIA`; require `RIA MONEY TRANSFER` full phrase or SWIFT/currency-code CONTEXT (Sec 4.1) |
+| `WISE` (CAT-23, Wise/TransferWise) | Common English word — "otherwise", "likewise", generic narration text, or a surname fragment | Require `\bWISE\b` isolated AND foreign-currency-code or SWIFT-format CONTEXT before firing; never trust in free-text remarks alone |
+| `OPEN` (CAT-56 Neobank) | Extremely common word in banking narrations (`ACCOUNT OPEN`, `OPENING BALANCE`) | Never match bare `OPEN`; require exact brand phrase or business-account CONTEXT — see Sec 5 disambiguation |
+| `TT` (CAT-23, telegraphic transfer) — *carried over, reinforced* | Any narration fragment | Same fix as before — require SWIFT/FOREX/WIRE co-occurrence; now also covered by the broader Sec 4.1 currency-code CONTEXT rule |
+| `LC` (CAT-23, Letter of Credit) | Very short — could collide with abbreviations elsewhere in narration | Require full `LETTER OF CREDIT` phrase or trade-finance CONTEXT (invoice/shipment reference) before trusting bare `LC` |
+| Political party acronyms (CAT-69: `AAP`, `NCP`, `BJD`, `JDU`, `JDS`, `TMC`, `CPI`) | 2–4 letter acronyms collide broadly — `AAP` is also a common Hindi word ("you"), `TMC` collides with unrelated business/account abbreviations | Require full beneficiary-name match against a maintained registered-party/electoral-trust name list rather than bare-acronym narration scan; never fire CAT-69 on acronym alone |
+| `OPEN MONEY` vs `OPEN` (Neobank) | see Sec 5 | Longest-phrase-wins resolves this — `OPEN MONEY` (2-word) checked before bare `OPEN` |
+| MULE-059 keyword scan | Any of the above keyword-level collisions, compounded — this rule scans narration for *all* high-risk terms at once | Route through the full Sec 10 suppression layer per-keyword before this rule contributes to composite score, not as a raw string-contains check |
+| EVID-015 Salary Funnel Exclusion | (already a built-in exclusion in your source — no fix needed) | Cross-referenced here: this is the same principle as the CAT-11 fix above, applied at the fund-flow evidence layer instead of the narration layer — worth confirming both use the same "resembles payroll" definition so they don't disagree with each other |
+
+**General principle carried forward:** every keyword rule stores `positive_pattern` / `context_pattern` / `suppression_list` as separate config fields (see v1 Sec 7.3), not a single regex — keeps false-positive fixes data-driven.
+
+---
