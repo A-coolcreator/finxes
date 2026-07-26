@@ -1,0 +1,52 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "ICICI BANK",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "MEGHA CHHAPRE",
+    "customer_id_or_crn": "UNKNOWN",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "MAKAN,NO -11 WARD NO -1 RAM,JANKI, MANDIR KE PAS,TAH-HARDA, HARDA MADHYAPRADESH - INDIA - 461228",
+    "joint_holders": "UNKNOWN"
+  },
+  "account_profile": {
+    "account_number": "818601501466",
+    "account_type": "SAVINGS",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "UNKNOWN",
+    "od_limit": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "UNKNOWN",
+    "micr_code": "UNKNOWN",
+    "branch_name": "ICICI BANK LIMITED,",
+    "branch_code": "UNKNOWN",
+    "branch_address": "UNKNOWN",
+    "branch_phone_number": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "December 12, 2025 - June 12, 2026",
+    "start_date": "December 12, 2025",
+    "end_date": "June 12, 2026",
+    "generated_at": "UNKNOWN"
+  },
+  "summary_snapshot": {
+    "opening_balance": "UNKNOWN",
+    "closing_balance": "UNKNOWN"
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

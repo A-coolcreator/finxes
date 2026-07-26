@@ -1,0 +1,24 @@
+---
+inclusion: manual
+---
+
+# Git & PR (on request only)
+
+Only commit when the user explicitly asks. Never update git config or run destructive git commands unless requested.
+
+## Commit workflow
+1. Run in parallel: `git status`, `git diff`, `git log -1 --format='%s'`.
+2. Stage relevant files only; never commit secrets (`.env`, credentials).
+3. Commit via HEREDOC message (1–2 sentences, focus on why).
+4. Verify with `git status` after commit.
+5. Do not amend unless user requested, HEAD is yours, and not pushed.
+6. Do not push unless explicitly asked.
+
+## Pull request workflow
+1. Run in parallel: `git status`, `git diff`, branch tracking check, `git log` + `git diff [base]...HEAD`.
+2. Push with `-u` if needed, then `gh pr create` with HEREDOC body.
+3. Return the PR URL.
+
+## Safety
+- No `--force`, `--no-verify`, or interactive git (`-i`) flags.
+- No empty commits.

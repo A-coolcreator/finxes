@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script src="src/utils/auth-guard.js"></script>
+  <title>Finexis OS | Digital Spend Analysis</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles/finexis-core.css" />
+  <script src="src/config/tailwind-theme.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    .text-xxs {
+      font-size: 10px;
+      line-height: 14px;
+    }
+
+    /* Donut chart built from CSS */
+    .donut-ring {
+      border-radius: 50%;
+      width: 160px;
+      height: 160px;
+      background: conic-gradient(#0E6E5E 0% 35%,
+          #0B5E50 35% 55%,
+          #10B981 55% 70%,
+          #DC2626 70% 85%,
+          #F59E0B 85% 100%);
+      position: relative;
+    }
+
+    .donut-hole {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90px;
+      height: 90px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Heatmap cells */
+    .heatmap-cell {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    /* Bar visual */
+    .spend-bar {
+      height: 6px;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+    }
+
+    /* Row hover */
+    .platform-row:hover {
+      background: rgba(14, 110, 94, 0.03);
+    }
+
+    .platform-row {
+      transition: background 0.15s;
+    }
+
+    .ledger-row:nth-child(even) {
+      background: #F8F9FA;
+    }
+
+    .ledger-row:hover {
+      background: rgba(14, 110, 94, 0.04);
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-body-md overflow-hidden">
+
+  <div class="app-shell flex h-screen w-full overflow-hidden">
+  <aside id="app-sidebar" class="app-sidebar"></aside>
+
+  <!-- Main Content Canvas -->
+  <main class="flex-1 flex flex-col h-screen overflow-hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="app-header flex justify-between items-center px-6 h-16 bg-surface border-b border-border-subtle shrink-0">
+      <div class="flex items-center gap-4">
+        <a id="header-back-btn" href="#"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border-subtle rounded-lg text-secondary hover:bg-surface-container-low transition-colors font-label-md text-[11px]">
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span> Back
+        </a>
+        <div class="h-4 w-[1px] bg-border-subtle"></div>
+        <div>
+          <nav class="flex items-center gap-1.5 text-secondary font-label-sm text-xxs uppercase mb-0.5">
+            <span>Dashboard</span>
+            <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+            <span class="text-primary font-bold">Digital Spend Analysis</span>
+          </nav>
+          <h2 id="case-title-badge" class="font-bold text-on-surface text-base tracking-tight">Digital Spending Profile
+          </h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 border border-border-subtle rounded-lg text-secondary hover:bg-surface-container-low font-label-md text-[11px] transition-colors">
+          <span class="material-symbols-outlined text-[16px]">filter_list</span> Category Filter
+        </button>
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-md text-[11px] hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh Intel
+        </button>
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 border border-border-subtle rounded-lg text-secondary hover:bg-surface-container-low font-label-md text-[11px] transition-colors">
+          <span class="material-symbols-outlined text-[16px]">file_download</span> Export
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <section class="flex-1 overflow-y-auto bg-background p-5 space-y-5">
+
+      <!-- Summary Stats Row -->
+      <div class="grid grid-cols-12 gap-4">
+
+        <!-- Total Transactions -->
+        <div
+          class="col-span-4 card-elevated p-5 rounded-lg">
+          <p class="font-label-sm text-label-sm text-secondary uppercase tracking-wider mb-3">Total Transactions</p>
+          <div class="flex items-baseline gap-2">
+            <span id="stat-total" class="text-3xl font-black text-primary tracking-tight">—</span>
+            <span class="text-status-success font-bold text-xs flex items-center gap-0.5">
+              <span class="material-symbols-outlined text-sm">trending_up</span> Live
+            </span>
+          </div>
+          <div class="mt-4 pt-4 border-t border-border-subtle flex justify-between">
+            <div class="text-center">
+              <p id="stat-gross" class="text-on-surface font-bold text-sm">—</p>
+              <p class="text-xxs text-secondary uppercase mt-0.5">Gross Value</p>
+            </div>
+            <div class="text-center">
+              <p id="stat-avg" class="text-on-surface font-bold text-sm">—</p>
+              <p class="text-xxs text-secondary uppercase mt-0.5">Avg Ticket</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spend Distribution Donut -->
+        <div class="col-span-8 card-elevated card-elevated--static p-5 rounded-lg">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Spend Distribution</p>
+              <p class="text-xxs text-outline mt-0.5">Category breakdown by volume</p>
+            </div>
+            <span class="material-symbols-outlined text-outline">pie_chart</span>
+          </div>
+          <div class="flex items-center gap-8">
+            <div class="donut-ring flex-shrink-0">
+              <div class="donut-hole">
+                <span class="font-bold text-xs text-secondary uppercase">Top</span>
+                <span class="font-black text-sm text-primary">UPI</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-x-6 gap-y-2 flex-1">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0"></div>
+                <span class="text-xs font-medium">UPI Transfers (35%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#0B5E50"></div>
+                <span class="text-xs font-medium">IMPS / NEFT (20%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-status-success flex-shrink-0"></div>
+                <span class="text-xs font-medium">Card / POS (15%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-status-critical flex-shrink-0"></div>
+                <span class="text-xs font-medium">Cash (15%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-status-warning flex-shrink-0"></div>
+                <span class="text-xs font-medium">Others (15%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Split Layout -->
+      <div class="grid grid-cols-12 gap-4">
+
+        <!-- LEFT: Platform Distribution List -->
+        <div
+          class="col-span-8 card-elevated card-elevated--static rounded-lg overflow-hidden flex flex-col">
+          <div class="px-5 py-3 border-b border-border-subtle flex justify-between items-center bg-surface-muted/50">
+            <div>
+              <h3 class="font-bold text-sm uppercase tracking-widest text-secondary">Platform Distribution</h3>
+              <p class="text-xxs text-outline mt-0.5">Spend categorized by merchant/platform</p>
+            </div>
+            <button class="text-xxs font-bold text-primary hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">download</span> Download CSV
+            </button>
+          </div>
+
+          <div class="divide-y divide-border-subtle overflow-y-auto max-h-[340px]" id="platform-list">
+
+            <!-- Gaming & Betting — HIGH RISK -->
+            <div class="platform-row px-5 py-3.5 flex items-center gap-4 border-l-4 border-status-critical">
+              <div
+                class="w-9 h-9 bg-error-container text-red-700 flex items-center justify-center rounded-lg flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">casino</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-sm text-on-surface">DREAM11 / MY11CIRCLE</h4>
+                  <span class="px-1.5 py-0.5 bg-red-100 text-red-700 text-xxs font-bold rounded">HIGH RISK</span>
+                </div>
+                <p class="text-xxs text-secondary uppercase mt-0.5">Gaming &amp; Betting</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="flex-1 bg-surface-container-high rounded-full h-1.5">
+                    <div class="spend-bar bg-status-critical" style="width:72%"></div>
+                  </div>
+                  <span class="text-xxs text-secondary font-medium w-8">72%</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm text-on-surface">₹1,85,000</p>
+                <p class="text-xxs text-secondary uppercase">14 Transactions</p>
+              </div>
+              <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+            </div>
+
+            <!-- UPI Transfers -->
+            <div class="platform-row px-5 py-3.5 flex items-center gap-4">
+              <div class="w-9 h-9 bg-blue-50 text-blue-600 flex items-center justify-center rounded-lg flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-sm text-on-surface">PHONEPE / GPAY / PAYTM</h4>
+                <p class="text-xxs text-secondary uppercase mt-0.5">UPI Transfers</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="flex-1 bg-surface-container-high rounded-full h-1.5">
+                    <div class="spend-bar bg-primary" style="width:55%"></div>
+                  </div>
+                  <span class="text-xxs text-secondary font-medium w-8">55%</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm text-on-surface">₹4,20,000</p>
+                <p class="text-xxs text-secondary uppercase">182 Transactions</p>
+              </div>
+              <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+            </div>
+
+            <!-- E-Commerce -->
+            <div class="platform-row px-5 py-3.5 flex items-center gap-4">
+              <div
+                class="w-9 h-9 bg-surface-container-high text-primary flex items-center justify-center rounded-lg flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-sm text-on-surface">AMAZON / FLIPKART / MEESHO</h4>
+                <p class="text-xxs text-secondary uppercase mt-0.5">E-Commerce</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="flex-1 bg-surface-container-high rounded-full h-1.5">
+                    <div class="spend-bar bg-primary" style="width:35%"></div>
+                  </div>
+                  <span class="text-xxs text-secondary font-medium w-8">35%</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm text-on-surface">₹45,000</p>
+                <p class="text-xxs text-secondary uppercase">12 Transactions</p>
+              </div>
+              <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+            </div>
+
+            <!-- Food Delivery -->
+            <div class="platform-row px-5 py-3.5 flex items-center gap-4">
+              <div
+                class="w-9 h-9 bg-orange-50 text-orange-600 flex items-center justify-center rounded-lg flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">fastfood</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-sm text-on-surface">SWIGGY / ZOMATO</h4>
+                <p class="text-xxs text-secondary uppercase mt-0.5">Food Delivery</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="flex-1 bg-surface-container-high rounded-full h-1.5">
+                    <div class="spend-bar bg-orange-400" style="width:28%"></div>
+                  </div>
+                  <span class="text-xxs text-secondary font-medium w-8">28%</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm text-on-surface">₹18,000</p>
+                <p class="text-xxs text-secondary uppercase">45 Transactions</p>
+              </div>
+              <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+            </div>
+
+            <!-- Travel -->
+            <div class="platform-row px-5 py-3.5 flex items-center gap-4">
+              <div class="w-9 h-9 bg-sky-50 text-sky-600 flex items-center justify-center rounded-lg flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">flight</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-sm text-on-surface">MAKEMYTRIP / INDIGO / OLA</h4>
+                <p class="text-xxs text-secondary uppercase mt-0.5">Travel &amp; Mobility</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="flex-1 bg-surface-container-high rounded-full h-1.5">
+                    <div class="spend-bar bg-sky-500" style="width:45%"></div>
+                  </div>
+                  <span class="text-xxs text-secondary font-medium w-8">45%</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm text-on-surface">₹92,500</p>
+                <p class="text-xxs text-secondary uppercase">3 Transactions</p>
+              </div>
+              <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+            </div>
+
+            <!-- BBPS Utility -->
+            <div class="platform-row px-5 py-3.5 flex items-center gap-4">
+              <div
+                class="w-9 h-9 bg-yellow-50 text-yellow-700 flex items-center justify-center rounded-lg flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">electrical_services</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-sm text-on-surface">BESCOM / AIRTEL / BSNL</h4>
+                <p class="text-xxs text-secondary uppercase mt-0.5">BBPS / Utilities</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="flex-1 bg-surface-container-high rounded-full h-1.5">
+                    <div class="spend-bar bg-yellow-500" style="width:18%"></div>
+                  </div>
+                  <span class="text-xxs text-secondary font-medium w-8">18%</span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm text-on-surface">₹12,400</p>
+                <p class="text-xxs text-secondary uppercase">6 Transactions</p>
+              </div>
+              <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+            </div>
+
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- Comprehensive Spend Ledger Modal -->
+      <div id="ledger-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden animate-in fade-in duration-200">
+        <div
+          class="card-elevated card-elevated--static rounded-xl overflow-hidden w-full max-w-4xl max-h-[85vh] flex flex-col mx-4 animate-in zoom-in-95 duration-200">
+          <div class="px-5 py-3.5 border-b border-border-subtle bg-surface-muted/50 flex items-center justify-between">
+            <div>
+              <h3 id="modal-category-title" class="font-bold text-sm text-on-surface">Spend Ledger</h3>
+              <p class="text-xxs text-secondary mt-0.5">Transactions categorized under this spending category</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-sm">search</span>
+                <input id="modal-ledger-search" type="text" placeholder="Search within this category..."
+                  class="pl-9 pr-4 py-1.5 bg-surface-container-low border border-border-subtle rounded text-xs w-60 focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
+              </div>
+              <button onclick="closeLedgerModal()"
+                class="p-1 hover:bg-surface-variant rounded-full text-secondary hover:text-on-surface transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto overflow-y-auto flex-1">
+            <table class="w-full text-left border-collapse">
+              <thead class="sticky top-0 z-10">
+                <tr class="bg-surface-muted border-b border-border-subtle">
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider">Date / Time</th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider font-semibold">
+                    Merchant / Description</th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider text-center">Category
+                  </th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider">Reference ID</th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider text-right">Amount (₹)
+                  </th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider text-center">Risk</th>
+                </tr>
+              </thead>
+              <tbody id="modal-ledger-tbody" class="divide-y divide-border-subtle">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="px-5 py-3 bg-surface-muted border-t border-border-subtle flex justify-between items-center">
+            <span id="modal-num-results" class="text-xxs font-medium text-secondary">Showing 0 of 0 results</span>
+            <button onclick="closeLedgerModal()"
+              class="px-4 py-1.5 bg-surface-variant hover:bg-surface-container-high rounded text-xs font-semibold text-on-surface transition-colors">Close</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+  </div>
+
+  <script type="module">
+    import { initSidebar } from "./src/interactions/sidebar.js";
+
+    const CATEGORY_MAP = {
+      "UPI_APP": {
+        name: "UPI Apps",
+        keywords: ["gpay", "phonepe", "paytm", "bhim", "amazonpay", "whatsapp pay", "cred uip", "supermoney", "mobikwik", "freecharge", "slicepay", "jupiter", "fi money"],
+        risk: "LOW",
+        icon: "account_balance_wallet"
+      },
+      "PAYMENT_GATEWAY": {
+        name: "Payment Gateways",
+        keywords: ["razorpay", "cashfree", "payu", "ccavenue", "billdesk", "juspay", "easebuzz", "airpay", "pinelabs", "atomtech"],
+        risk: "MEDIUM",
+        icon: "payments"
+      },
+      "AEPS": {
+        name: "AEPS Agent Banking",
+        keywords: ["aeps", "aadharpay", "aadhaar pay", "micro atm", "bc agent", "bank mitra", "csp", "customer service point"],
+        risk: "HIGH",
+        icon: "fingerprint"
+      },
+      "ATM": {
+        name: "ATM Cash Withdrawal",
+        keywords: ["atm wdl", "atm cash", "atm withdrawal", "cash wdl", "cash dispenser", "nfs atm"],
+        risk: "LOW",
+        icon: "atm"
+      },
+      "MERCHANT_POS": {
+        name: "Merchant POS Swipe",
+        keywords: ["pos", "epos", "swipe", "merchant pos", "card swipe", "pos purchase"],
+        risk: "LOW",
+        icon: "credit_card"
+      },
+      "ECOMMERCE": {
+        name: "E-Commerce",
+        keywords: ["amazon", "amzn", "flipkart", "fkart", "myntra", "ajio", "meesho", "shopsy", "snapdeal", "nykaa", "firstcry"],
+        risk: "LOW",
+        icon: "shopping_bag"
+      },
+      "FOOD_DELIVERY": {
+        name: "Food Delivery",
+        keywords: ["swiggy", "instamart", "zomato", "blinkit", "zepto", "eatclub", "dominos", "pizzahut"],
+        risk: "LOW",
+        icon: "fastfood"
+      },
+      "MOBILITY": {
+        name: "Mobility & Cabs",
+        keywords: ["uber", "ola", "rapido", "blusmart", "namma yatri"],
+        risk: "LOW",
+        icon: "local_taxi"
+      },
+      "LOAN_APP": {
+        name: "Loan Apps",
+        keywords: ["kreditbee", "moneyview", "cashe", "fibe", "earlysalary", "navi", "lazypay", "mpokket", "branch", "kissht", "snapmint", "stashfin"],
+        risk: "HIGH",
+        icon: "account_balance"
+      },
+      "NBFC": {
+        name: "NBFC Repayments",
+        keywords: ["bajaj finance", "tata capital", "l&t finance", "shriram finance", "muthoot", "manappuram", "cholamandalam", "hdfc credila", "mahindra finance", "piramal finance"],
+        risk: "LOW",
+        icon: "corporate_fare"
+      },
+      "SALARY": {
+        name: "Salary Credit",
+        keywords: ["salary", "sal", "payroll", "wages", "employee pay", "monthly pay", "payslip", "sal credit"],
+        risk: "LOW",
+        icon: "work"
+      },
+      "CHEQUE": {
+        name: "Cheque Clearing",
+        keywords: ["cheque", "chq", "clearing", "cts"],
+        risk: "LOW",
+        icon: "edit_document"
+      },
+      "AUTO_DEBIT": {
+        name: "Auto Debits",
+        keywords: ["nach", "ecs", "mandate", "standing instruction", "auto debit", "autopay"],
+        risk: "LOW",
+        icon: "autorenew"
+      },
+      "GOVERNMENT_PAYMENT": {
+        name: "Govt Payments",
+        keywords: ["govt", "tax", "challan", "income tax", "oltas", "mca", "epfo", "esic"],
+        risk: "LOW",
+        icon: "gavel"
+      },
+      "GST": {
+        name: "GST Tax Payment",
+        keywords: ["gst", "gstn", "goods and services"],
+        risk: "LOW",
+        icon: "receipt"
+      },
+      "BROKER": {
+        name: "Stock Broking",
+        keywords: ["zerodha", "groww", "upstox", "angel one", "5paisa", "paytm money", "icici direct", "hdfc securities", "kotak securities", "dhan"],
+        risk: "LOW",
+        icon: "trending_up"
+      },
+      "MUTUAL_FUND": {
+        name: "Mutual Funds",
+        keywords: ["mutual fund", "sip", "nippon", "sbi mf", "hdfc mf", "icici mf", "uti mf", "axis mf", "parag parikh"],
+        risk: "LOW",
+        icon: "savings"
+      },
+      "INSURANCE": {
+        name: "Insurance",
+        keywords: ["insurance", "lic", "hdfc ergo", "icici lombard", "bajaj allianz", "max life", "sbi life"],
+        risk: "LOW",
+        icon: "shield"
+      },
+      "CRYPTO": {
+        name: "Crypto Exchanges",
+        keywords: ["crypto", "binance", "wazirx", "coindcx", "coinswitch", "zebpay", "kucoin"],
+        risk: "HIGH",
+        icon: "currency_bitcoin"
+      },
+      "CRYPTO_P2P": {
+        name: "Crypto P2P",
+        keywords: ["p2p buy", "p2p sell", "usdt corridor", "crypto transfer"],
+        risk: "HIGH",
+        icon: "swap_horiz"
+      },
+      "BETTING": {
+        name: "Gaming & Betting",
+        keywords: ["betting", "dream11", "my11circle", "winzo", "mpl", "rummy", "stake", "parimatch", "1xbet", "lottery"],
+        risk: "HIGH",
+        icon: "casino"
+      },
+      "CASH_DEPOSIT": {
+        name: "Cash Deposit",
+        keywords: ["cash dep", "cash deposit", "cdm", "cash deposit machine"],
+        risk: "LOW",
+        icon: "download"
+      },
+      "FOREIGN_REMITTANCE": {
+        name: "Foreign Remittance",
+        keywords: ["wire transfer", "swift", "remit", "wise", "western union"],
+        risk: "MEDIUM",
+        icon: "language"
+      },
+      "WALLET": {
+        name: "Wallets",
+        keywords: ["wallet load", "paytm wallet", "mobikwik wallet", "phonepe wallet"],
+        risk: "MEDIUM",
+        icon: "wallet"
+      },
+      "RECHARGE": {
+        name: "Prepaid Recharge",
+        keywords: ["airtel", "jio", "vodafone", "idea", "bsnl", "dth", "dish tv", "tata play"],
+        risk: "LOW",
+        icon: "cell_tower"
+      },
+      "FASTAG": {
+        name: "FASTag Toll",
+        keywords: ["fastag", "toll", "nhai"],
+        risk: "LOW",
+        icon: "directions_car"
+      },
+      "UTILITY": {
+        name: "Utility Bills",
+        keywords: ["utility", "electricity", "water bill", "gas bill", "bbps"],
+        risk: "LOW",
+        icon: "bolt"
+      },
+      "BILL_PAYMENT": {
+        name: "Bill Payments",
+        keywords: ["bill payment", "telecom postpaid", "broadband"],
+        risk: "LOW",
+        icon: "payment"
+      },
+      "EDUCATION": {
+        name: "Education Fee",
+        keywords: ["education", "fee", "school", "college", "university", "udemy", "coursera"],
+        risk: "LOW",
+        icon: "school"
+      },
+      "TRAVEL": {
+        name: "Travel Booking",
+        keywords: ["makemytrip", "mmt", "goibibo", "redbus", "ixigo", "easemytrip", "yatra", "cleartrip", "irctc", "abhibus", "flight", "train"],
+        risk: "LOW",
+        icon: "flight"
+      },
+      "HEALTHCARE": {
+        name: "Healthcare & Med",
+        keywords: ["healthcare", "pharmacy", "apollo", "1mg", "pharmeasy", "hospital", "clinic"],
+        risk: "LOW",
+        icon: "medical_services"
+      },
+      "DONATION": {
+        name: "Devotional & Charity",
+        keywords: ["donation", "charity", "temple", "trust", "sri mandir", "devdham", "shemaroo bhakti", "astrosage", "tirumala"],
+        risk: "LOW",
+        icon: "volunteer_activism"
+      },
+      "SELF_TRANSFER": {
+        name: "Self Transfer",
+        keywords: ["self transfer", "own account", "transfer to self"],
+        risk: "LOW",
+        icon: "person"
+      },
+      "FAILED_TRANSACTION": {
+        name: "Failed / Reversed",
+        keywords: ["failed", "returned", "reversal", "refund", "cashback", "insufficient"],
+        risk: "LOW",
+        icon: "cancel"
+      }
+    };
+
+    function classifyTransaction(desc) {
+      const descLower = String(desc).toLowerCase();
+      for (const [key, catInfo] of Object.entries(CATEGORY_MAP)) {
+        for (const keyword of catInfo.keywords) {
+          if (descLower.includes(keyword)) {
+            return { key, ...catInfo };
+          }
+        }
+      }
+      if (descLower.includes("cash") || descLower.includes("self") || descLower.includes("wdl")) {
+        return { key: "ATM", name: "ATM Withdrawal", risk: "LOW", icon: "atm" };
+      }
+      if (descLower.includes("imps") || descLower.includes("neft") || descLower.includes("rtgs") || descLower.includes("transfer")) {
+        return { key: "BANK_TRANSFER", name: "Bank Transfer", risk: "LOW", icon: "account_balance" };
+      }
+      return { key: "OTHERS", name: "Others", risk: "LOW", icon: "help" };
+    }
+
+    initSidebar();
+
+    // Read URL params for case context
+    const params = new URLSearchParams(window.location.search);
+    const caseId = params.get('caseId') || params.get('id');
+
+    if (caseId) {
+      document.getElementById('header-back-btn').href = `case-dashboard.html?id=${caseId}`;
+
+      // Load case data for title badge
+      try {
+        const { caseService } = await import('./src/services/caseService.js');
+        const caseData = await caseService.getCaseById(caseId);
+        if (caseData) {
+          document.getElementById('case-title-badge').textContent = `Digital Spending Profile: ${caseData.caseNumber} — ${caseData.title}`;
+        }
+
+        // Load transactions to compute stats
+        const txns = await caseService.getTransactions(caseId);
+        if (Array.isArray(txns) && txns.length > 0) {
+          const total = txns.length;
+          const gross = txns.reduce((s, t) => s + (t.amount || 0), 0);
+          const avg = gross / total;
+          const fmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v);
+          document.getElementById('stat-total').textContent = total.toLocaleString();
+          document.getElementById('stat-gross').textContent = fmt(gross);
+          document.getElementById('stat-avg').textContent = fmt(avg);
+
+          // Process & classify transactions
+          const debits = txns.filter(t => t.type === 'debit');
+          const totalDebit = debits.reduce((s, t) => s + (t.amount || 0), 0);
+
+          const aggregated = {};
+          debits.forEach(t => {
+            const cat = classifyTransaction(t.description);
+            if (!aggregated[cat.key]) {
+              aggregated[cat.key] = {
+                key: cat.key,
+                name: cat.name,
+                risk: cat.risk,
+                icon: cat.icon,
+                totalAmount: 0,
+                count: 0
+              };
+            }
+            aggregated[cat.key].totalAmount += (t.amount || 0);
+            aggregated[cat.key].count += 1;
+          });
+
+          const sortedCategories = Object.values(aggregated).sort((a, b) => b.totalAmount - a.totalAmount);
+
+          // Render Platform Distribution List
+          const platformList = document.getElementById("platform-list");
+          if (platformList) {
+            platformList.innerHTML = sortedCategories.map(catData => {
+              const pct = totalDebit > 0 ? (catData.totalAmount / totalDebit) * 100 : 0;
+              const formattedAmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(catData.totalAmount);
+
+              const riskBadge = catData.risk === "HIGH"
+                ? `<span class="px-1.5 py-0.5 bg-red-100 text-red-700 text-xxs font-bold rounded">HIGH RISK</span>`
+                : catData.risk === "MEDIUM"
+                  ? `<span class="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xxs font-bold rounded">MEDIUM RISK</span>`
+                  : `<span class="px-1.5 py-0.5 bg-green-100 text-green-700 text-xxs font-bold rounded">LOW RISK</span>`;
+
+              const barColorClass = catData.risk === "HIGH" ? "bg-status-critical" : "bg-primary";
+              const borderLeftClass = catData.risk === "HIGH" ? "border-l-4 border-status-critical" : "";
+
+              return `
+                <div class="platform-row px-5 py-3.5 flex items-center gap-4 ${borderLeftClass} cursor-pointer hover:bg-surface-container-low transition-colors"
+                     onclick="openLedgerModal('${catData.key}', '${catData.name.replace(/'/g, "\\'")}')">
+                  <div class="w-9 h-9 bg-surface-container-high text-primary flex items-center justify-center rounded-lg flex-shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">${catData.icon}</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <h4 class="font-bold text-sm text-on-surface">${catData.name}</h4>
+                      ${riskBadge}
+                    </div>
+                    <p class="text-xxs text-secondary uppercase mt-0.5">${catData.key.replace(/_/g, " ")}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                      <div class="flex-1 bg-surface-container-high rounded-full h-1.5">
+                        <div class="spend-bar ${barColorClass}" style="width:${pct.toFixed(0)}%"></div>
+                      </div>
+                      <span class="text-xxs text-secondary font-medium w-8">${pct.toFixed(0)}%</span>
+                    </div>
+                  </div>
+                  <div class="text-right flex-shrink-0">
+                    <p class="font-bold text-sm text-on-surface">${formattedAmt}</p>
+                    <p class="text-xxs text-secondary uppercase">${catData.count} Transactions</p>
+                  </div>
+                  <span class="material-symbols-outlined text-outline text-sm">chevron_right</span>
+                </div>
+              `;
+            }).join("");
+          }
+
+          // Render Spend Distribution Donut Chart (conic-gradient & legend)
+          const PALETTE = ["#0E6E5E", "#0B5E50", "#10B981", "#DC2626", "#F59E0B", "#3B82F6", "#8B5CF6", "#EC4899", "#06B6D4"];
+          const topCategories = sortedCategories.slice(0, 4);
+          const otherAmount = sortedCategories.slice(4).reduce((s, c) => s + c.totalAmount, 0);
+          if (otherAmount > 0) {
+            topCategories.push({
+              key: "OTHERS",
+              name: "Others",
+              totalAmount: otherAmount
+            });
+          }
+
+          const formatShortINR = (val) => {
+            if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+            if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
+            return `₹${val.toFixed(0)}`;
+          };
+
+          let currentAngle = 0;
+          const gradientSlices = [];
+          const legendItems = [];
+
+          topCategories.forEach((cat, idx) => {
+            const pct = totalDebit > 0 ? (cat.totalAmount / totalDebit) * 100 : 0;
+            if (pct <= 0) return;
+            const nextAngle = currentAngle + pct;
+            const color = PALETTE[idx % PALETTE.length];
+            gradientSlices.push(`${color} ${currentAngle.toFixed(1)}% ${nextAngle.toFixed(1)}%`);
+
+            legendItems.push(`
+              <div class="flex items-center gap-2 min-w-0 cursor-pointer hover:text-primary transition-colors"
+                   onclick="openLedgerModal('${cat.key}', '${cat.name.replace(/'/g, "\\'")}')">
+                <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color}"></div>
+                <span class="text-[11px] font-semibold text-on-surface truncate" title="${cat.name} - ${formatShortINR(cat.totalAmount)}">${cat.name.split(" ")[0]} - ${formatShortINR(cat.totalAmount)} (${pct.toFixed(0)}%)</span>
+              </div>
+            `);
+
+            currentAngle = nextAngle;
+          });
+
+          const donutRing = document.querySelector(".donut-ring");
+          if (donutRing) {
+            donutRing.style.background = gradientSlices.length > 0
+              ? `conic-gradient(${gradientSlices.join(", ")})`
+              : "#cbd5e1";
+
+            const topCat = topCategories[0];
+            if (topCat) {
+              const topPct = totalDebit > 0 ? (topCat.totalAmount / totalDebit) * 100 : 0;
+              donutRing.querySelector(".donut-hole").innerHTML = `
+                <span class="font-bold text-[8px] text-secondary uppercase tracking-wider">Top: ${topCat.name.split(" ")[0]}</span>
+                <span class="font-black text-xs text-primary">${formatShortINR(topCat.totalAmount)}</span>
+                <span class="font-bold text-[9px] text-secondary">(${topPct.toFixed(0)}%)</span>
+              `;
+            }
+          }
+          const legendContainer = document.querySelector(".donut-ring").nextElementSibling;
+          if (legendContainer) {
+            legendContainer.innerHTML = legendItems.join("");
+          }
+
+          // Save loaded transactions globally for modal filtering
+          window.allTransactionsLoaded = txns;
+
+          window.openLedgerModal = (catKey, catName) => {
+            const modal = document.getElementById("ledger-modal");
+            if (!modal) return;
+
+            document.getElementById("modal-category-title").textContent = `Spend Ledger - ${catName}`;
+
+            // Filter transactions matching this category
+            const filtered = window.allTransactionsLoaded.filter(t => {
+              const cat = classifyTransaction(t.description);
+              return cat.key === catKey;
+            });
+
+            // Populate table body
+            const tbody = document.getElementById("modal-ledger-tbody");
+            if (tbody) {
+              tbody.innerHTML = filtered.map(t => {
+                const tDate = t.date ? new Date(t.date) : new Date();
+                const dateStr = !isNaN(tDate.getTime())
+                  ? tDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                  : t.date || '—';
+                const timeStr = !isNaN(tDate.getTime())
+                  ? tDate.toLocaleTimeString('en-US', { hour12: false })
+                  : '—';
+
+                const cat = classifyTransaction(t.description);
+                const formattedAmt = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(t.amount || 0);
+                const amountColor = t.type === 'debit' ? 'text-status-critical' : 'text-status-success';
+
+                const riskIcon = cat.risk === 'HIGH'
+                  ? `<span class="material-symbols-outlined text-status-critical text-sm" style="font-variation-settings:'FILL' 1">warning</span>`
+                  : cat.risk === 'MEDIUM'
+                    ? `<span class="material-symbols-outlined text-status-warning text-sm">info</span>`
+                    : `<span class="material-symbols-outlined text-status-success text-sm">check_circle</span>`;
+
+                const categoryBadge = cat.risk === 'HIGH'
+                  ? `<span class="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded uppercase">${cat.name}</span>`
+                  : `<span class="px-2 py-0.5 bg-surface-container-highest text-[10px] font-bold rounded uppercase">${cat.name}</span>`;
+
+                return `
+                  <tr class="ledger-row">
+                    <td class="px-5 py-3.5">
+                      <div class="font-bold text-xs">${dateStr}</div>
+                      <div class="text-xxs text-secondary">${timeStr}</div>
+                    </td>
+                    <td class="px-5 py-3.5">
+                      <div class="font-bold text-xs truncate max-w-md" title="${t.description}">${t.description}</div>
+                      <div class="text-xxs text-secondary">${t.flow || ''} / ${t.type || ''}</div>
+                    </td>
+                    <td class="px-5 py-3.5 text-center">
+                      ${categoryBadge}
+                    </td>
+                    <td class="px-5 py-3.5 font-mono text-xxs text-secondary">${t.chqNo || t.id.substring(3, 12)}</td>
+                    <td class="px-5 py-3.5 text-right font-bold text-xs ${amountColor}">${formattedAmt}</td>
+                    <td class="px-5 py-3.5 text-center">
+                      ${riskIcon}
+                    </td>
+                  </tr>
+                `;
+              }).join("");
+
+              const numIndicator = document.getElementById("modal-num-results");
+              if (numIndicator) {
+                numIndicator.textContent = `Showing ${filtered.length} of ${filtered.length} results`;
+              }
+            }
+
+            modal.classList.remove("hidden");
+          };
+
+          window.closeLedgerModal = () => {
+            const modal = document.getElementById("ledger-modal");
+            if (modal) {
+              modal.classList.add("hidden");
+            }
+            const searchInput = document.getElementById('modal-ledger-search');
+            if (searchInput) searchInput.value = "";
+          };
+        }
+      } catch (e) {
+        console.warn('Could not load case data:', e);
+        document.getElementById('stat-total').textContent = '—';
+      }
+    }
+
+    // Generate heatmap
+    const heatmap = document.getElementById('heatmap-grid');
+    if (heatmap) {
+      const intensities = [0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1, 0.8, 0.4, 0.2, 0.1, 0.3, 0.6, 0.9, 1, 0.8, 0.5, 0.3, 0.2, 0.1, 0.3, 0.7, 0.9, 1, 0.8, 0.6, 0.4, 0.2];
+      heatmap.innerHTML = intensities.map(i => {
+        const alpha = Math.round(i * 255).toString(16).padStart(2, '0');
+        return `<div class="heatmap-cell" style="background:rgba(159, 242, 230, ${i});"></div>`;
+      }).join('');
+    }
+
+    // Ledger search filter
+    document.getElementById('modal-ledger-search')?.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('#modal-ledger-tbody tr').forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+
+    document.getElementById("ledger-modal")?.addEventListener("click", (e) => {
+      if (e.target.id === "ledger-modal") {
+        window.closeLedgerModal();
+      }
+    });
+  </script>
+</body>
+
+</html>

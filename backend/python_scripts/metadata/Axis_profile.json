@@ -1,0 +1,48 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "AXIS BANK",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "ADITYA CHANDIL",
+    "customer_id_or_crn": "959058859",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "XXXXXXXXXX8590",
+    "pan_number": "CQBPC6412R",
+    "mobile_number": "XXXXXX7647",
+    "email": "ADXXXXR8@GMAIL.COM",
+    "address_raw": "BUNGLOW NO-60 TYPE-C PHASE-01 B SAGE MILE STONE KALIYASOAT HOSHANGBAD ROAD HUZUR BHOPAL MADHYA PRADESH-INDIA 462047"
+  },
+  "account_profile": {
+    "account_number": "924010001522132",
+    "account_type": "EASYACCESS SAVINGS ACCOUNT",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "Registered"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "UTIB0002510",
+    "micr_code": "462211013",
+    "branch_name": "UNKNOWN",
+    "branch_code": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "22-06-2026 to 24-06-2026",
+    "start_date": "22-06-2026",
+    "end_date": "24-06-2026",
+    "generated_at": "UNKNOWN"
+  },
+  "summary_snapshot": {
+    "opening_balance": 17837.4,
+    "closing_balance": 17897.4
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

@@ -1,0 +1,124 @@
+<!doctype html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script src="src/utils/auth-guard.js"></script>
+  <title>Finexis OS - Archives</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles/finexis-core.css" />
+  <script src="src/config/tailwind-theme.js"></script>
+</head>
+
+<body class="bg-paper text-ink font-body-md antialiased overflow-hidden">
+  <div class="app-shell flex h-screen w-full overflow-hidden">
+  <aside id="app-sidebar" class="app-sidebar"></aside>
+
+  <main class="flex-1 flex flex-col h-screen overflow-hidden">
+    <header
+      class="flex justify-between items-center w-full h-16 px-gutter border-b border-border-subtle dark:border-outline bg-surface dark:bg-background">
+      <div class="flex items-center gap-8">
+        <nav class="hidden md:flex gap-6">
+          <a class="text-on-surface-variant dark:text-secondary-fixed-dim hover:text-primary text-label-sm font-bold uppercase tracking-wider transition-all"
+            href="case-manager.html">Reports</a>
+          <a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 text-label-sm font-bold uppercase tracking-wider"
+            href="archives.html">Archives</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative w-64 group">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+          <input id="archive-search"
+            class="w-full h-10 pl-10 pr-4 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm focus:outline-none focus:border-primary transition-all"
+            placeholder="Search archived cases..." type="text" />
+        </div>
+        <div class="flex items-center gap-2 ml-2">
+          <button
+            class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors text-on-surface-variant"><span
+              class="material-symbols-outlined">call</span></button>
+          <button
+            class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors text-on-surface-variant"><span
+              class="material-symbols-outlined"
+              style="font-variation-settings: &quot;FILL&quot; 1">account_circle</span></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-auto custom-scrollbar bg-background p-gutter">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h2 class="text-headline-lg font-headline-lg text-on-surface">Archives</h2>
+          <p class="text-text-body font-body-md mt-1">Archived investigations are stored in SQLite and can be restored
+            from here.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="card-elevated p-5 rounded flex flex-col gap-1">
+          <span class="text-label-sm text-secondary font-bold uppercase tracking-widest">Archived Cases</span>
+          <div class="flex items-center justify-between">
+            <span id="archived-case-count" class="text-headline-md font-bold text-on-surface">0</span>
+            <span class="material-symbols-outlined text-secondary opacity-50">folder_open</span>
+          </div>
+        </div>
+        <div class="card-elevated p-5 rounded flex flex-col gap-1">
+          <span class="text-label-sm text-secondary font-bold uppercase tracking-widest">Latest Archive</span>
+          <div id="latest-archive-label" class="text-body-sm text-on-surface font-bold">Loading...</div>
+        </div>
+        <div class="card-elevated p-5 rounded flex flex-col gap-1">
+          <span class="text-label-sm text-secondary font-bold uppercase tracking-widest">Restorable</span>
+          <div class="flex items-center justify-between">
+            <span id="restorable-count" class="text-headline-md font-bold text-primary">0</span>
+            <span class="material-symbols-outlined text-primary opacity-50">restore</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-elevated card-elevated--static rounded overflow-hidden">
+        <div class="p-4 border-b border-border-subtle flex justify-between items-center bg-surface-muted">
+          <div class="text-label-sm text-secondary font-bold uppercase tracking-widest">Archived Case List</div>
+          <div class="text-label-sm text-secondary">Managed via SQLite backend</div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-muted border-b border-border-subtle">
+                <th class="px-6 py-4 text-label-sm font-bold uppercase tracking-widest text-secondary w-32">Case No.
+                </th>
+                <th class="px-6 py-4 text-label-sm font-bold uppercase tracking-widest text-secondary">Title / Reference
+                </th>
+                <th class="px-6 py-4 text-label-sm font-bold uppercase tracking-widest text-secondary">Archived On</th>
+                <th class="px-6 py-4 text-label-sm font-bold uppercase tracking-widest text-secondary">Status</th>
+                <th class="px-6 py-4 text-label-sm font-bold uppercase tracking-widest text-secondary w-44"></th>
+              </tr>
+            </thead>
+            <tbody id="archives-table-body" class="divide-y divide-border-subtle">
+              <tr id="archives-empty-row">
+                <td colspan="5" class="px-6 py-10 text-center text-body-sm text-secondary">No archived cases yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+  </div>
+
+  <script type="module">
+    import { attachArchivesPageInteractions } from "./src/interactions/archives.js";
+    import { initSidebar } from "./src/interactions/sidebar.js";
+
+    initSidebar();
+    attachArchivesPageInteractions();
+  </script>
+</body>
+
+</html>

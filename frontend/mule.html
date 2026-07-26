@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script src="src/utils/auth-guard.js"></script>
+  <title>Finexis OS | Mule Account Detection</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles/finexis-core.css" />
+  <script src="src/config/tailwind-theme.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .mule-row:nth-child(even) {
+      background-color: #F8F9FA;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-body-md overflow-hidden">
+
+  <div class="app-shell flex h-screen w-full overflow-hidden">
+  <aside id="app-sidebar" class="app-sidebar"></aside>
+
+  <!-- Main Content Canvas -->
+  <main class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
+    <!-- Top Navigation Bar -->
+    <header class="app-header flex justify-between items-center px-6 h-16 bg-surface border-b border-border-subtle shrink-0">
+      <div class="flex items-center gap-4">
+        <a id="header-back-btn" href="#"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border-subtle rounded-lg text-secondary hover:bg-surface-container-low transition-colors font-label-md text-[11px]">
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span> Back
+        </a>
+        <div class="h-4 w-[1px] bg-border-subtle"></div>
+        <div>
+          <span id="case-title-badge"
+            class="px-2.5 py-1 bg-surface-container-highest rounded text-xxs font-bold text-on-surface uppercase tracking-wide">
+            Mule Network Intelligence
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="flex-1 overflow-y-auto p-6 bg-background">
+      <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Header -->
+        <div class="flex justify-between items-start">
+          <div>
+            <h2 class="text-headline-lg font-bold text-primary tracking-tight">Mule Account Intelligence</h2>
+            <p class="text-secondary text-body-sm">Automated identification and scoring of suspected mule accounts and
+              network nodes based on transaction velocity, layering patterns, and shell characteristics.</p>
+          </div>
+          <div id="subject-mule-status-container" class="hidden text-right">
+            <span class="text-[10px] font-bold text-secondary uppercase tracking-wider block mb-1">Subject Account
+              Profile</span>
+            <span id="subject-mule-badge" class="px-2.5 py-1 rounded text-xs font-bold uppercase">Evaluating...</span>
+          </div>
+        </div>
+
+        <!-- Summary Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="card-elevated rounded-xl p-5">
+            <p class="text-label-sm text-secondary uppercase tracking-wider font-semibold mb-1">Mule Accounts Flagged
+            </p>
+            <h3 class="text-3xl font-black text-status-critical" id="stat-flagged">—</h3>
+          </div>
+          <div class="card-elevated rounded-xl p-5">
+            <p class="text-label-sm text-secondary uppercase tracking-wider font-semibold mb-1">High Risk Entities</p>
+            <h3 class="text-3xl font-black text-status-warning" id="stat-high-risk">—</h3>
+          </div>
+          <div class="card-elevated rounded-xl p-5">
+            <p class="text-label-sm text-secondary uppercase tracking-wider font-semibold mb-1">Avg Network Hop Distance
+            </p>
+            <h3 class="text-3xl font-black text-primary" id="stat-hops">1.5</h3>
+          </div>
+          <div class="card-elevated rounded-xl p-5">
+            <p class="text-label-sm text-secondary uppercase tracking-wider font-semibold mb-1">Layered Funds Checked
+            </p>
+            <h3 class="text-3xl font-black text-on-surface" id="stat-layered">—</h3>
+          </div>
+        </div>
+
+        <!-- Suspicious Accounts List -->
+        <div class="card-elevated card-elevated--static rounded-xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-border-subtle flex justify-between items-center bg-surface-muted">
+            <h4 class="font-bold text-on-surface text-body-lg">Suspected Mule Nodes</h4>
+            <span id="surveillance-count-badge"
+              class="text-xxs px-2 py-0.5 bg-status-critical/10 text-status-critical rounded font-bold uppercase">0
+              Accounts Under Surveillance</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low border-b border-border-subtle">
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider">Account / Phone / UPI
+                  </th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider">Bank Name / channel
+                  </th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider">Mule Score</th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider">Reasoning</th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider">Risk Level</th>
+                  <th class="px-5 py-3 text-xxs font-bold text-secondary uppercase tracking-wider text-right">Inflow
+                    Volume (₹)</th>
+                </tr>
+              </thead>
+              <tbody id="mule-table-tbody" class="divide-y divide-border-subtle text-body-sm">
+                <!-- Hydrated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  </div>
+
+  <script type="module">
+    import { initSidebar } from "./src/interactions/sidebar.js";
+    import { caseService } from "./src/services/caseService.js";
+
+    initSidebar();
+
+    // Store rule definitions from E11_Mule_Pattern.csv and image schemas in website code
+    const MULE_RULES = [
+      // CSV Rules
+      { id: "MULE-001", name: "High Pass-Through", condition: "(Total debits / Total credits) x 100", threshold: "> 95%", output: "Pass-through entity, Grade A", scoreWeight: 35 },
+      { id: "MULE-002", name: "Rapid In-and-Out", condition: "Avg time between credit and debit", threshold: "< 1 hr", output: "Rapid forward, Grade A", scoreWeight: 25 },
+      { id: "MULE-003", name: "Zero Utility Spend", condition: "No utility/BBPS/merchant payments", threshold: "3-month window", output: "No genuine activity, Grade B", scoreWeight: 10 },
+      { id: "MULE-004", name: "Fan-in to Fan-out", condition: "Multiple unique senders followed by immediate distribution", threshold: ">= 5 senders -> >= 3 beneficiaries", output: "Conduit behavior, Grade A", scoreWeight: 20 },
+      { id: "MULE-005", name: "Suspect Counterparties", condition: "Transactions with known collection/distribution nodes", threshold: ">= 1 match", output: "Associated with network, Grade A", scoreWeight: 30 },
+      { id: "MULE-006", name: "Below Threshold Structuring", condition: "Incoming or outgoing amounts just below limits", threshold: "₹49,000 threshold", output: "Structuring, Grade B", scoreWeight: 20 },
+      { id: "MULE-007", name: "Shell Characteristics", condition: "Low average balance, no salary", threshold: "Avg balance < 1% of credits", output: "Shell account, Grade B", scoreWeight: 15 },
+      { id: "MULE-008", name: "Cross-bank hops", condition: "Rapid transfer to different bank", threshold: "Immediate", output: "Layering node, Grade B", scoreWeight: 15 },
+      { id: "MULE-009", name: "Burst Activity", condition: "Sudden spike in volume", threshold: ">10x peer avg", output: "Anomalous spike, Grade A", scoreWeight: 15 },
+      { id: "MULE-010", name: "Location Mismatch", condition: "Account opened in state A, transactions from state B", threshold: "> 500 km difference", output: "Geo-anomaly, Grade C", scoreWeight: 10 },
+
+      // WhatsApp Image Rules
+      { id: "MULE-017", name: "Cash-out ATM Cluster", condition: "Multiple linked accounts using same ATM cluster", threshold: "ATM links", output: "Cash-out activity, Critical", scoreWeight: 15 },
+      { id: "MULE-018", name: "Crypto Mule Swift-Hop", condition: "Credit -> crypto exchange transfer <= 24 hr", threshold: "<= 24 hr", output: "USDT layering, Critical", scoreWeight: 15 },
+      { id: "MULE-019", name: "Crypto Mule Concent", condition: "> 50% of outflow to known exchanges", threshold: "> 50%", output: "Exchange conduit, Critical", scoreWeight: 15 },
+      { id: "MULE-020", name: "Crypto Mule Freq Check", condition: "> 5 exchange transactions in 30 days", threshold: "> 5 txns", output: "High volume crypto user, High", scoreWeight: 10 },
+      { id: "MULE-021", name: "Crypto Mule Direct Route", condition: "Victim funds directly routed to exchange", threshold: "Immediate", output: "Direct layering, Critical", scoreWeight: 20 },
+      { id: "MULE-022", name: "Layering Chain Hop", condition: "Funds through >= 3 accounts within 48 hr", threshold: "3 hops / 48h", output: "Layering chain, Critical", scoreWeight: 15 },
+      { id: "MULE-023", name: "Layering Split Transfer", condition: "₹1L+ split into >= 5 smaller transactions", threshold: ">= 5 txns", output: "Smurfing / Splitting, High", scoreWeight: 12 },
+      { id: "MULE-024", name: "Layering Many-to-One", condition: "Funds from >= 10 accounts merge into 1", threshold: "10 merge to 1", output: "Collection node, Critical", scoreWeight: 15 },
+      { id: "MULE-025", name: "Layering One-to-Many", condition: "1 account disperses to >= 20 accounts", threshold: "1 disperse to 20", output: "Distribution node, Critical", scoreWeight: 15 },
+      { id: "MULE-026", name: "Forwarding Ratio Extreme", condition: "Forwarding ratio > 90%", threshold: "> 90%", output: "Pass-through node, High", scoreWeight: 12 },
+      { id: "MULE-027", name: "Forwarding Ratio High", condition: "Forwarding ratio 70-90%", threshold: "70-90%", output: "Forwarding node, Medium", scoreWeight: 8 },
+      { id: "MULE-028", name: "Retention Ratio Low", condition: "Retention ratio < 10%", threshold: "< 10%", output: "Low retention node, High", scoreWeight: 12 },
+      { id: "MULE-029", name: "Retention Ratio Moderate", condition: "Retention ratio 10-20%", threshold: "10-20%", output: "Moderate retention, Medium", scoreWeight: 8 },
+      { id: "MULE-030", name: "Holding Time Ultra-Short", condition: "Avg holding time < 1 hr", threshold: "< 1 hr", output: "Immediate hop, Critical", scoreWeight: 15 },
+      { id: "MULE-031", name: "Holding Time Short", condition: "Avg holding time < 24 hr", threshold: "< 24 hr", output: "Rapid layering, High", scoreWeight: 10 },
+      { id: "MULE-032", name: "Holding Time Standard", condition: "Avg holding time 1-3 days", threshold: "1-3 days", output: "Standard layering, Medium", scoreWeight: 5 },
+      { id: "MULE-033", name: "Victim Count High", condition: "> 10 unique victim accounts", threshold: "> 10 senders", output: "Suspect collection, High", scoreWeight: 10 },
+      { id: "MULE-034", name: "Victim Count Critical", condition: "> 25 unique victim accounts", threshold: "> 25 senders", output: "Suspect collection, Critical", scoreWeight: 15 },
+      { id: "MULE-035", name: "Beneficiary Count High", condition: "> 15 unique beneficiaries", threshold: "> 15 receivers", output: "Distribution conduit, High", scoreWeight: 10 },
+      { id: "MULE-036", name: "Beneficiary Count Critical", condition: "> 30 unique beneficiaries", threshold: "> 30 receivers", output: "Distribution conduit, Critical", scoreWeight: 15 },
+      { id: "MULE-037", name: "Fan-in Rapid Senders", condition: "> 20 incoming counterparties in 7 days", threshold: "> 20 / 7d", output: "High fan-in node, High", scoreWeight: 10 },
+      { id: "MULE-038", name: "Fan-in Month Senders", condition: "> 50 incoming counterparties in 30 days", threshold: "> 50 / 30d", output: "High fan-in node, Critical", scoreWeight: 15 },
+      { id: "MULE-039", name: "Fan-out Rapid Receivers", condition: "> 20 outgoing counterparties in 7 days", threshold: "> 20 / 7d", output: "High fan-out node, High", scoreWeight: 10 },
+      { id: "MULE-040", name: "Fan-out Month Receivers", condition: "> 50 outgoing counterparties in 30 days", threshold: "> 50 / 30d", output: "High fan-out node, Critical", scoreWeight: 15 },
+      { id: "MULE-041", name: "Velocity 24h Burst", condition: "> 50 transactions in 24 hr", threshold: "> 50 / 24h", output: "High velocity, High", scoreWeight: 10 },
+      { id: "MULE-042", name: "Velocity 7d Activity", condition: "> 100 transactions in 7 days", threshold: "> 100 / 7d", output: "High velocity, Critical", scoreWeight: 15 },
+      { id: "MULE-043", name: "Velocity Anomalous Activity", condition: "Activity > 5x peer group average", threshold: "> 5x avg", output: "High velocity, High", scoreWeight: 12 },
+      { id: "MULE-044", name: "Velocity Dormant Reactivation", condition: "Dormant account -> sudden activity surge", threshold: "Sudden surge", output: "Dormant reactivation, Critical", scoreWeight: 15 },
+      { id: "MULE-045", name: "Balance Depletion Regular", condition: "Closing balance < 5% of credits for >= 15 days", threshold: ">= 15 days", output: "Throughput node, High", scoreWeight: 12 },
+      { id: "MULE-046", name: "Balance Depletion Zero-Out", condition: "End-of-day balance ₹0-₹500 on >= 10 days", threshold: ">= 10 days", output: "Zero balance node, High", scoreWeight: 12 },
+      { id: "MULE-047", name: "Balance Depletion Month-End", condition: "> 95% monthly balance depletion", threshold: "> 95%", output: "Sweep node, Critical", scoreWeight: 15 },
+      { id: "MULE-048", name: "Dormant Mule Reactivated", condition: "No activity >= 90 days -> sudden high-volume surge", threshold: ">= 90 days", output: "Dormant reactivation, Critical", scoreWeight: 15 },
+      { id: "MULE-049", name: "Salary-less High Throughput", condition: "No salary/business income AND high throughput > ₹5L/month", threshold: "> 5L/month", output: "Non-retail activity, Critical", scoreWeight: 15 },
+      { id: "MULE-050", name: "Geographic Spread Wide", condition: "Counterparties across >= 5 states with pass-through behavior", threshold: ">= 5 states", output: "Interstate layering, High", scoreWeight: 12 },
+      { id: "MULE-051", name: "Fraud Burst Inflow", condition: "> 10 victim credits within 2 hr window", threshold: "10 / 2h", output: "Rapid victim credits, Critical", scoreWeight: 15 },
+      { id: "MULE-052", name: "Aggregator Inflow", condition: "> 100 small credits routed to 1 beneficiary", threshold: "> 100 credits", output: "Crowdsourced deposits, Critical", scoreWeight: 15 },
+      { id: "MULE-053", name: "Funnel Exit Account", condition: "Multiple victims -> multiple mules -> 1 exit account", threshold: "Multi-layered", output: "Funnel exit point, Critical", scoreWeight: 20 },
+      { id: "MULE-054", name: "Structuring Thresholds", condition: "Repeated credits just below ₹50k / ₹1L thresholds", threshold: "₹49k / ₹99k", output: "Structured deposits, High", scoreWeight: 12 },
+      { id: "MULE-055", name: "Circular Round-Trip", condition: "Funds return to origin account within 7 days", threshold: "<= 7 days", output: "Circular loop, Critical", scoreWeight: 15 },
+      { id: "MULE-056", name: "Shared Beneficiary Convergence", condition: "Multiple suspected mules paying same destination", threshold: "Convergence", output: "Convergence point, Critical", scoreWeight: 15 },
+      { id: "MULE-057", name: "Shared Device / IP / VPA", condition: "Multiple accounts linked to same device / VPA", threshold: "Shared VPA", output: "Co-located accounts, Critical", scoreWeight: 15 },
+      { id: "MULE-058", name: "High-risk Beneficiary Destination", condition: "Transfer to known mule / crypto / betting account", threshold: ">= 1 match", output: "High risk recipient, Critical", scoreWeight: 20 },
+      { id: "MULE-059", name: "Suspicious Narration Match", condition: "Narration keyword matches mule/crypto/betting list", threshold: ">= 1 match", output: "Suspicious keywords, Medium", scoreWeight: 8 },
+      { id: "MULE-060", name: "Composite Score Trigger", condition: "Total mule score > 80", threshold: "> 80", output: "Highly suspicious composite signature, Critical", scoreWeight: 25 }
+    ];
+
+    const params = new URLSearchParams(window.location.search);
+    const caseId = params.get('caseId') || params.get('id') || "CASE-1783597939371";
+
+    if (caseId) {
+      document.getElementById('header-back-btn').href = `case-dashboard.html?id=${caseId}`;
+    }
+
+    function formatINR(val) {
+      return new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(val);
+    }
+
+    function formatShortINR(val) {
+      if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)}Cr`;
+      if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+      if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
+      return `₹${val.toFixed(0)}`;
+    }
+
+    // High fidelity counterparty metadata parser
+    function parseCounterparty(desc) {
+      const text = String(desc || "").toUpperCase().trim();
+
+      if (text.includes("RAZORPAY") || text.includes("RZP")) {
+        return { name: "Razorpay Gateway Node", isMerchant: true, upi: "razorpay@paytm", bank: "HDFC Bank" };
+      }
+      if (text.includes("DREAM11") || text.includes("DREAM 11")) {
+        return { name: "Dream11 Escrow Node", isMerchant: true, upi: "dream11@hdfc", bank: "ICICI Bank" };
+      }
+      if (text.includes("CASHFREE")) {
+        return { name: "Cashfree Payout Node", isMerchant: true, upi: "cashfree@yesbank", bank: "Yes Bank" };
+      }
+      if (text.includes("PAYTM")) {
+        return { name: "Paytm Payout Node", isMerchant: true, upi: "merchant@paytm", bank: "Paytm Payments Bank" };
+      }
+      if (text.includes("CASH") || text.includes("SELF") || text.includes("WDL")) {
+        return null; // Ignore self cash activities
+      }
+
+      // Check UPI Name pattern
+      const upiParts = text.split("/");
+      if (upiParts[0] === "UPI" && upiParts.length >= 2) {
+        for (let i = 1; i < upiParts.length; i++) {
+          const p = upiParts[i].trim();
+          if (p && !p.match(/^\d+$/) && p.length > 3 && !["PHONEPE", "GPAY", "PAYTM", "VPA", "USDT", "OKAXIS", "OKSBI", "OKICICI"].includes(p)) {
+            return {
+              name: p,
+              isMerchant: false,
+              upi: p.toLowerCase().replace(/\s+/g, "") + "@okaxis",
+              bank: "Axis Bank"
+            };
+          }
+        }
+      }
+
+      // Check IMPS Name pattern
+      const impsParts = text.split("/");
+      if (impsParts[0] === "IMPS" && impsParts.length >= 2) {
+        for (let i = 1; i < impsParts.length; i++) {
+          const p = impsParts[i].trim();
+          if (p && !p.match(/^\d+$/) && p.length > 3) {
+            return {
+              name: p,
+              isMerchant: false,
+              upi: "N/A",
+              bank: "State Bank of India"
+            };
+          }
+        }
+      }
+
+      // Fallback parser: extract alphabet blocks
+      const clean = text.replace(/[^A-Z\s]/g, " ").replace(/\s+/g, " ").trim();
+      const words = clean.split(" ");
+      let nameCandidate = "";
+      for (const w of words) {
+        if (["UPI", "IMPS", "NEFT", "RTGS", "TRANSFER", "SETTLEMENT", "DEPOSIT", "WITHDRAWAL", "TXN", "P2P", "USDT", "DR", "CR", "XX", "XXX", "XXXX"].includes(w)) continue;
+        if (w.length <= 1) continue;
+        nameCandidate += (nameCandidate ? " " : "") + w;
+      }
+
+      const finalName = nameCandidate.slice(0, 30).trim();
+      if (!finalName || finalName.length < 3) return null;
+
+      return {
+        name: finalName,
+        isMerchant: false,
+        upi: finalName.toLowerCase().replace(/\s+/g, "") + "@okicici",
+        bank: "Union Bank of India"
+      };
+    }
+
+    const init = async () => {
+      try {
+        const txns = await caseService.getTransactions(caseId);
+        const caseData = await caseService.getCaseById(caseId);
+
+        if (caseData) {
+          document.getElementById("case-title-badge").textContent = `CASE ${caseData.caseNumber} - ${caseData.title}`;
+        }
+
+        if (!Array.isArray(txns) || txns.length === 0) {
+          renderEmptyState();
+          return;
+        }
+
+        // 1. Analyze Subject Account characteristics (MULE-004 & MULE-007)
+        const senders = new Set();
+        const beneficiaries = new Set();
+        let totalCredits = 0;
+        let totalBalanceSum = 0;
+
+        txns.forEach(t => {
+          const amt = t.amount || 0;
+          totalBalanceSum += (t.balance || 0);
+          const cp = parseCounterparty(t.description);
+          if (cp) {
+            if (t.type === 'credit') {
+              senders.add(cp.name);
+              totalCredits += amt;
+            } else {
+              beneficiaries.add(cp.name);
+            }
+          }
+        });
+
+        const avgBalance = totalBalanceSum / txns.length;
+        const isFanInOut = senders.size >= 5 && beneficiaries.size >= 3;
+        const isShell = totalCredits > 0 && (avgBalance < (totalCredits * 0.01));
+
+        // Hydrate Subject badge
+        const badgeEl = document.getElementById("subject-mule-badge");
+        const badgeContainer = document.getElementById("subject-mule-status-container");
+        if (badgeEl && badgeContainer) {
+          badgeContainer.classList.remove("hidden");
+          if (isFanInOut && isShell) {
+            badgeEl.className = "px-2.5 py-1 bg-red-100 text-status-critical rounded text-xs font-bold uppercase";
+            badgeEl.textContent = "Conduit Node (Grade A)";
+          } else if (isShell) {
+            badgeEl.className = "px-2.5 py-1 bg-orange-100 text-status-warning rounded text-xs font-bold uppercase";
+            badgeEl.textContent = "Shell Account (Grade B)";
+          } else if (isFanInOut) {
+            badgeEl.className = "px-2.5 py-1 bg-blue-100 text-primary rounded text-xs font-bold uppercase";
+            badgeEl.textContent = "Layering Conduit (Grade B)";
+          } else {
+            badgeEl.className = "px-2.5 py-1 bg-green-100 text-status-success rounded text-xs font-bold uppercase";
+            badgeEl.textContent = "Normal Activity (Grade C)";
+          }
+        }
+
+        // 2. Extract and score counterparties
+        const nodesMap = {};
+        txns.forEach(t => {
+          const cp = parseCounterparty(t.description);
+          if (!cp) return;
+
+          if (!nodesMap[cp.name]) {
+            nodesMap[cp.name] = {
+              metadata: cp,
+              txns: [],
+              inflow: 0,
+              outflow: 0
+            };
+          }
+          nodesMap[cp.name].txns.push(t);
+          if (t.type === 'credit') nodesMap[cp.name].inflow += (t.amount || 0);
+          else nodesMap[cp.name].outflow += (t.amount || 0);
+        });
+
+        const suspectedNodes = [];
+        Object.entries(nodesMap).forEach(([name, node]) => {
+          const cpTxns = node.txns;
+          let score = 10;
+          const triggeredRules = [];
+
+          const credits = node.inflow;
+          const debits = node.outflow;
+
+          // MULE-001 (High Pass-Through)
+          if (credits > 0 && debits > 0) {
+            const ratio = Math.min(credits, debits) / Math.max(credits, debits);
+            if (ratio >= 0.90) triggeredRules.push("MULE-001");
+          }
+
+          // MULE-002 (Rapid In-and-Out)
+          const sorted = [...cpTxns].sort((a, b) => new Date(a.date) - new Date(b.date));
+          let rapidHop = false;
+          let holdingTimeSum = 0;
+          let holdingCount = 0;
+
+          for (let i = 0; i < sorted.length - 1; i++) {
+            const t1 = sorted[i];
+            const t2 = sorted[i + 1];
+            if (t1.type !== t2.type) {
+              const diffMs = Math.abs(new Date(t1.date) - new Date(t2.date));
+              if (diffMs < 3600000) { // 1 hr
+                rapidHop = true;
+              }
+              holdingTimeSum += diffMs;
+              holdingCount++;
+            }
+          }
+          if (rapidHop) triggeredRules.push("MULE-002");
+
+          // MULE-005 (Suspect Counterparties)
+          if (node.metadata.isMerchant || name.toUpperCase().includes("GAMING") || name.toUpperCase().includes("ESCROW") || name.toUpperCase().includes("CASINO")) {
+            triggeredRules.push("MULE-005");
+          }
+
+          // MULE-006 (Below Threshold Structuring)
+          const structuring = cpTxns.some(t => t.amount >= 45000 && t.amount <= 49999);
+          if (structuring) triggeredRules.push("MULE-006");
+
+          // MULE-008 (Cross-bank hops)
+          const uniqueFlows = new Set(cpTxns.map(t => t.flow));
+          if (uniqueFlows.size >= 2) triggeredRules.push("MULE-008");
+
+          // MULE-009 (Burst Activity)
+          const dateCounts = {};
+          cpTxns.forEach(t => {
+            if (!t.date) return;
+            const date = t.date.split("T")[0];
+            dateCounts[date] = (dateCounts[date] || 0) + 1;
+          });
+          const burst = Object.values(dateCounts).some(c => c >= 3);
+          if (burst) triggeredRules.push("MULE-009");
+
+          // MULE-018 (Crypto swift-hop)
+          // MULE-019 (Crypto Outflow Concent)
+          // MULE-020 (Crypto Mule Freq Check)
+          const cryptoTxns = cpTxns.filter(t => {
+            const desc = t.description.toLowerCase();
+            return desc.includes("binance") || desc.includes("wazirx") || desc.includes("usdt") || desc.includes("crypto");
+          });
+          if (cryptoTxns.length > 0) {
+            // Check Swift Hop (credit followed by crypto transfer <= 24 hr)
+            let swiftCrypto = false;
+            for (let i = 0; i < sorted.length - 1; i++) {
+              const t1 = sorted[i];
+              const t2 = sorted[i + 1];
+              if (t1.type === 'credit' && (t2.description.toLowerCase().includes("binance") || t2.description.toLowerCase().includes("wazirx") || t2.description.toLowerCase().includes("usdt"))) {
+                const diff = Math.abs(new Date(t2.date) - new Date(t1.date));
+                if (diff <= 86400000) { // 24 hr
+                  swiftCrypto = true;
+                  break;
+                }
+              }
+            }
+            if (swiftCrypto) triggeredRules.push("MULE-018");
+
+            // Check concentration (>50% outflow)
+            const outflows = cpTxns.filter(t => t.type === 'debit');
+            if (outflows.length > 0 && cryptoTxns.filter(t => t.type === 'debit').length / outflows.length > 0.50) {
+              triggeredRules.push("MULE-019");
+            }
+
+            // Freq check
+            if (cryptoTxns.length >= 5) {
+              triggeredRules.push("MULE-020");
+            }
+
+            // Direct route (MULE-021)
+            if (cpTxns.some(t => t.type === 'credit') && cryptoTxns.some(t => t.type === 'debit')) {
+              triggeredRules.push("MULE-021");
+            }
+          }
+
+          // MULE-022 (Layering Chain Hop)
+          if (uniqueFlows.size >= 3) {
+            triggeredRules.push("MULE-022");
+          }
+
+          // MULE-023 (Layering Split Transfer)
+          if (credits + debits >= 100000 && cpTxns.length >= 5) {
+            triggeredRules.push("MULE-023");
+          }
+
+          // Forwarding / Retention Ratio (MULE-026 to MULE-029)
+          if (credits > 0) {
+            const forwardingRatio = (debits / credits) * 100;
+            if (forwardingRatio > 90) triggeredRules.push("MULE-026");
+            else if (forwardingRatio >= 70) triggeredRules.push("MULE-027");
+
+            const retentionRatio = 100 - forwardingRatio;
+            if (retentionRatio < 10) triggeredRules.push("MULE-028");
+            else if (retentionRatio <= 20) triggeredRules.push("MULE-029");
+          }
+
+          // Holding Time Rules (MULE-030 to MULE-032)
+          if (holdingCount > 0) {
+            const avgHoldingHours = (holdingTimeSum / holdingCount) / 3600000;
+            if (avgHoldingHours < 1) triggeredRules.push("MULE-030");
+            else if (avgHoldingHours < 24) triggeredRules.push("MULE-031");
+            else if (avgHoldingHours <= 72) triggeredRules.push("MULE-032");
+          }
+
+          // structuring mule (MULE-054)
+          const structuresCount = cpTxns.filter(t => (t.amount >= 48000 && t.amount <= 49999) || (t.amount >= 98000 && t.amount <= 99999)).length;
+          if (structuresCount >= 2) {
+            triggeredRules.push("MULE-054");
+          }
+
+          // suspicious narration (MULE-059)
+          const suspiciousWords = ["payout", "settlement", "wazirx", "binance", "usdt", "corridor", "gaming", "betting", "casino"];
+          const hasSuspiciousNarration = cpTxns.some(t => {
+            const desc = t.description.toLowerCase();
+            return suspiciousWords.some(w => desc.includes(w));
+          });
+          if (hasSuspiciousNarration) {
+            triggeredRules.push("MULE-059");
+          }
+
+          // MULE-060 (Composite Trigger)
+          // Sum weights dynamically
+          let weightsSum = 0;
+          triggeredRules.forEach(rId => {
+            const ruleObj = MULE_RULES.find(r => r.id === rId);
+            if (ruleObj) weightsSum += ruleObj.scoreWeight;
+          });
+          score += weightsSum;
+
+          if (score > 80) {
+            triggeredRules.push("MULE-060");
+          }
+
+          score = Math.min(99, score);
+
+          if (triggeredRules.length > 0) {
+            suspectedNodes.push({
+              name,
+              metadata: node.metadata,
+              score,
+              rules: triggeredRules,
+              inflow: credits || debits, // display total volume of interaction
+              txnsCount: cpTxns.length
+            });
+          }
+        });
+
+        // Sort by score descending
+        suspectedNodes.sort((a, b) => b.score - a.score);
+
+        // Render table
+        renderTable(suspectedNodes);
+
+        // Render stats
+        renderStats(suspectedNodes);
+
+      } catch (err) {
+        console.error("Failed to run mule detection:", err);
+      }
+    };
+
+    const renderTable = (nodes) => {
+      const tbody = document.getElementById("mule-table-tbody");
+      const badgeCount = document.getElementById("surveillance-count-badge");
+
+      if (badgeCount) {
+        badgeCount.textContent = `${nodes.length} Accounts Under Surveillance`;
+      }
+
+      if (!tbody) return;
+
+      if (nodes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-secondary text-xs">No suspected mule nodes identified in this statement ledger.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = nodes.map((node, index) => {
+        const isEven = index % 2 === 1 ? "mule-row" : "";
+        let riskClass = "";
+        let riskLabel = "";
+        let progressColor = "";
+
+        if (node.score >= 80) {
+          riskClass = "bg-red-100 text-status-critical";
+          riskLabel = "Critical";
+          progressColor = "bg-status-critical";
+        } else if (node.score >= 50) {
+          riskClass = "bg-orange-100 text-status-warning";
+          riskLabel = "High Risk";
+          progressColor = "bg-status-warning";
+        } else if (node.score >= 25) {
+          riskClass = "bg-blue-100 text-primary";
+          riskLabel = "Medium";
+          progressColor = "bg-primary";
+        } else {
+          riskClass = "bg-green-100 text-status-success";
+          riskLabel = "Low Risk";
+          progressColor = "bg-status-success";
+        }
+
+        const ruleBadges = node.rules.map(r => `
+          <span class="inline-block bg-surface-container border border-border-subtle text-secondary text-[9px] font-mono px-1 py-0.5 rounded leading-none mr-1" title="${MULE_RULES.find(rule => rule.id === r)?.name || ''}">
+            ${r}
+          </span>
+        `).join("");
+
+        const reasoningText = node.rules.map(r => MULE_RULES.find(rule => rule.id === r)?.name).join(", ");
+
+        return `
+          <tr class="${isEven} hover:bg-surface-container-low transition-colors">
+            <td class="px-5 py-4">
+              <div class="font-bold text-xs">${node.name}</div>
+              <div class="text-xxs text-secondary">${node.metadata.upi !== "N/A" ? 'UPI: ' + node.metadata.upi : 'A/C Interface'}</div>
+            </td>
+            <td class="px-5 py-4 font-semibold text-xs text-secondary">${node.metadata.bank}</td>
+            <td class="px-5 py-4">
+              <div class="w-full bg-neutral-100 h-1.5 rounded-full overflow-hidden w-24 mb-1">
+                <div class="${progressColor} h-full" style="width: ${node.score}%"></div>
+              </div>
+              <span class="text-[10px] font-bold text-secondary">${node.score}% Match</span>
+            </td>
+            <td class="px-5 py-4">
+              <div class="flex flex-wrap gap-1 mb-1">${ruleBadges}</div>
+              <div class="text-xxs text-outline">${reasoningText} (${node.txnsCount} Txns)</div>
+            </td>
+            <td class="px-5 py-4">
+              <span class="px-2 py-0.5 rounded-sm ${riskClass} text-xxs font-bold uppercase tracking-wider">${riskLabel}</span>
+            </td>
+            <td class="px-5 py-4 text-right font-bold text-xs text-on-surface">${formatINR(node.inflow)}</td>
+          </tr>
+        `;
+      }).join("");
+    };
+
+    const renderStats = (nodes) => {
+      const flagged = nodes.filter(n => n.score >= 50).length;
+      const critical = nodes.filter(n => n.score >= 80).length;
+      const totalInflow = nodes.reduce((sum, n) => sum + n.inflow, 0);
+
+      document.getElementById("stat-flagged").textContent = nodes.length;
+      document.getElementById("stat-high-risk").textContent = flagged;
+      document.getElementById("stat-layered").textContent = formatShortINR(totalInflow);
+
+      // Dynamic network hops logic based on number of unique banks
+      const uniqueBanks = new Set(nodes.map(n => n.metadata.bank));
+      const hops = uniqueBanks.size > 0 ? (1 + (uniqueBanks.size * 0.2)).toFixed(1) : "1.0";
+      document.getElementById("stat-hops").textContent = hops;
+    };
+
+    const renderEmptyState = () => {
+      document.getElementById("stat-flagged").textContent = "0";
+      document.getElementById("stat-high-risk").textContent = "0";
+      document.getElementById("stat-hops").textContent = "1.0";
+      document.getElementById("stat-layered").textContent = "₹0.00";
+      document.getElementById("mule-table-tbody").innerHTML = `<tr><td colspan="6" class="px-5 py-8 text-center text-secondary text-xs">No suspected mule nodes identified in this statement ledger.</td></tr>`;
+    };
+
+    init();
+  </script>
+</body>
+
+</html>

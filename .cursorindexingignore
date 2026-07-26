@@ -1,0 +1,14 @@
+external_csvs/
+python_scripts/csv/
+python_scripts/pdfs/
+python_scripts/metadata/
+metadata/
+csv/
+mule and fund flow rules/images/
+finexis_auth/
+backend/data/
+**/*.sqlite*
+**/*.jpeg
+**/*.jpg
+**/*.png
+**/*.xlsx

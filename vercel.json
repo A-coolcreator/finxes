@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run build --prefix finexis_ui_updated",
+  "outputDirectory": "finexis_ui_updated/dist",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

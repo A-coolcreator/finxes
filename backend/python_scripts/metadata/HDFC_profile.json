@@ -1,0 +1,52 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "HDFC BANK",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "DIGAMBER SAHU",
+    "customer_id_or_crn": "177839838",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "ss2612387@gmail.com",
+    "address_raw": "YOGENDRA KUMAR SAHU HOUSE NUMBER 139 WARD NUMBER,11 BAZAR MOHALLA VILLAGE SAMNAPUR POST OFFICE SAMNAPUR MAL. 481778 MADHYA PRADESH INDIA",
+    "joint_holders": "UNKNOWN"
+  },
+  "account_profile": {
+    "account_number": "50200093206905",
+    "account_type": "BIZ LITE PLUS ACCOUNT(1481)",
+    "account_status": "Regular",
+    "currency": "INR",
+    "nominee_registered": "Registered",
+    "od_limit": 0.0
+  },
+  "routing_identifiers": {
+    "ifsc_code": "HDFC0003561",
+    "micr_code": "481240301",
+    "branch_name": "DINDORI MP",
+    "branch_code": "3561",
+    "branch_address": "HDFC BANK LTD OPPOSITE JAIN PETROL PUMP, MAINROAD,DIST-DINDORI, DINDORI 481880 MADHYA PRADESH",
+    "branch_phone_number": "18002600/18001600"
+  },
+  "statement_details": {
+    "period_raw": "01/04/2025 to 31/03/2026",
+    "start_date": "01/04/2025",
+    "end_date": "31/03/2026",
+    "generated_at": "UNKNOWN"
+  },
+  "summary_snapshot": {
+    "opening_balance": "UNKNOWN",
+    "closing_balance": 1.0
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

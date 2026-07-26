@@ -1,0 +1,52 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "STATE BANK OF INDIA",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "SRI SIVASAI ENTERPRISES",
+    "customer_id_or_crn": "72090618979",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "",
+    "joint_holders": "UNKNOWN"
+  },
+  "account_profile": {
+    "account_number": "62205225772",
+    "account_type": "CA-SILVER-PUB-OTH-ALL-INR",
+    "account_status": "OPEN",
+    "currency": "INR",
+    "nominee_registered": "Registered",
+    "od_limit": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "SBIN0021050",
+    "micr_code": "520002073",
+    "branch_name": "GAYATRI NAGAR,VIJAYAWADA",
+    "branch_code": "21050",
+    "branch_address": "GAYATRI NAGAR,VIJAYAWADA D NO. 59-13-4, I ST FLOOR, NEAR BABU STATEMENT OF ACCOUNT TEXTILES, GANTASALAVARI STREET, GAYATRI Pin Code : 520008 SRI SIVASAI ENTERPRISES",
+    "branch_phone_number": "9247500970"
+  },
+  "statement_details": {
+    "period_raw": "01-01-2025 to 31-01-2026",
+    "start_date": "01-01-2025",
+    "end_date": "31-01-2026",
+    "generated_at": "31-01-2026 12:44:03"
+  },
+  "summary_snapshot": {
+    "opening_balance": "UNKNOWN",
+    "closing_balance": 97184.0
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

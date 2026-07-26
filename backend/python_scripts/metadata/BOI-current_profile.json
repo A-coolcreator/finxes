@@ -1,0 +1,48 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "BANK OF INDIA",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "MS SHAHNAWAZ ALI",
+    "customer_id_or_crn": "CD657852",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "GUWAHATI-781037, ASSAM, INDIA"
+  },
+  "account_profile": {
+    "account_number": "500920110000546",
+    "account_type": "CURRENT- GENERAL",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "Registered"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "BKID0005009",
+    "micr_code": "781013005",
+    "branch_name": "KHANAPARA",
+    "branch_code": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "17-02-2026 to 24-02-2026",
+    "start_date": "17-02-2026",
+    "end_date": "24-02-2026",
+    "generated_at": "24-02-2026"
+  },
+  "summary_snapshot": {
+    "opening_balance": 191.12,
+    "closing_balance": 0.0
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "AU SMALL FINANCE BANK",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "Lakshit Verma",
+    "customer_id_or_crn": "28923753",
+    "customer_type": "Individual - Full KYC",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "55 B Khushi Nivas Sarvanand Nagar, Bholaram Ustad Marg, Meera Garden Indore - 452014, Madhya Pradesh - India"
+  },
+  "account_profile": {
+    "account_number": "2301247848487972",
+    "account_type": "AU Digital Savings Account",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "Not Registered"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "AUBL0002478",
+    "micr_code": "UNKNOWN",
+    "branch_name": "Indore Jawahar Marg",
+    "branch_code": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "01 Apr 2025 to 31 Mar 2026",
+    "start_date": "01 Apr 2025",
+    "end_date": "31 Mar 2026",
+    "generated_at": "15 Jun 2026"
+  },
+  "summary_snapshot": {
+    "opening_balance": 6993.4,
+    "closing_balance": 265.05
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

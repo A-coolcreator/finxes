@@ -1,0 +1,41 @@
+# Dependency & Build Caches
+node_modules
+**/node_modules
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production Build Output
+dist
+**/dist
+build
+**/build
+
+# Python Bytecode & Virtual Environments
+__pycache__
+*.py[cod]
+*$py.class
+venv
+.venv
+env
+
+# Logs & Temporary Uploads
+*.log
+backend/backend.log
+backend/uploads/
+backend/metadata/*.json
+backend/csv/*.csv
+
+# Version Control & IDE Files
+.git
+.gitignore
+.dockerignore
+.vscode
+.idea
+.cursor
+.cursorignore
+.cursorindexingignore
+.agents
+.vercel
+README.md

@@ -1,0 +1,5 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+KERALA_LOTTERY,LOTTERY,Kerala State Lottery,"Kerala State Lotteries (Dept. of Finance, Govt. of Kerala)","KERALA LOTTERY, KL LOTTERY",LOTTERY_PAYMENT
+SIKKIM_LOTTERY,LOTTERY,Sikkim Lottery,"Directorate of State Lotteries, Govt. of Sikkim",SIKKIM LOTTERY,LOTTERY_PAYMENT
+NAGALAND_LOTTERY,LOTTERY,Nagaland Lottery,Directorate of Nagaland State Lotteries,"NAGALAND LOTTERY, DEAR LOTTERY",LOTTERY_PAYMENT
+BHUTAN_LOTTERY,LOTTERY,Bhutan Lottery (Resellers),,BHUTAN LOTTERY,LOTTERY_PAYMENT

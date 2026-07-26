@@ -1,0 +1,52 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "KOTAK MAHINDRA BANK",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "Lakshit Verma",
+    "customer_id_or_crn": "xxxxxx732",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "Hn. 46 - A Saket Nagar Jhalawa, Saket Nagar, Hariyali Marriage Garden, Jhalawar - 326001, Rajasthan - India",
+    "joint_holders": "UNKNOWN"
+  },
+  "account_profile": {
+    "account_number": "6845143070",
+    "account_type": "Savings",
+    "account_status": "Active",
+    "currency": "INR",
+    "nominee_registered": "Not Registered",
+    "od_limit": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "KKBK0003708",
+    "micr_code": "326485202",
+    "branch_name": "Jhalrapatan (m)",
+    "branch_code": "UNKNOWN",
+    "branch_address": "UNKNOWN",
+    "branch_phone_number": "9672972343"
+  },
+  "statement_details": {
+    "period_raw": "01 Apr 2025 to 31 Mar 2026",
+    "start_date": "01 Apr 2025",
+    "end_date": "31 Mar 2026",
+    "generated_at": "12 Jun 2026"
+  },
+  "summary_snapshot": {
+    "opening_balance": 324.96,
+    "closing_balance": 16.96
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

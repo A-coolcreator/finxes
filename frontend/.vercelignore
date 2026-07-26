@@ -1,0 +1,11 @@
+api/
+api_legacy/
+python_scripts/
+backend/
+metadata/
+csv/
+.git/
+.venv/
+node_modules/
+requirements.txt
+requirements_local.txt

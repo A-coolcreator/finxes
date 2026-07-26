@@ -1,0 +1,10 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+AMAZON,ECOMMERCE,Amazon,Amazon Seller Services Private Limited,"AMAZON, AMZN",DIGITAL_PAYMENT
+FLIPKART,ECOMMERCE,Flipkart,Flipkart Internet Private Limited,"FLIPKART, FKART",DIGITAL_PAYMENT
+MYNTRA,ECOMMERCE,Myntra,Myntra Designs Private Limited,MYNTRA,DIGITAL_PAYMENT
+AJIO,ECOMMERCE,AJIO,Reliance Retail Limited,AJIO,DIGITAL_PAYMENT
+MEESHO,ECOMMERCE,Meesho,Fashnear Technologies Private Limited,MEESHO,DIGITAL_PAYMENT
+SHOPSY,ECOMMERCE,Shopsy,,SHOPSY,DIGITAL_PAYMENT
+SNAPDEAL,ECOMMERCE,Snapdeal,Jasper Infotech Private Limited,SNAPDEAL,DIGITAL_PAYMENT
+NYKAA,ECOMMERCE,Nykaa,FSN E-Commerce Ventures Limited,NYKAA,DIGITAL_PAYMENT
+FIRSTCRY,ECOMMERCE,FirstCry,Brainbees Solutions Limited,FIRSTCRY,DIGITAL_PAYMENT

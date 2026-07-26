@@ -1,0 +1,4 @@
+﻿# Frontend-only focus — backend hidden from agent (still on disk; use @Files manually if needed)
+backend/
+
+**/.env

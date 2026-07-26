@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <script src="src/utils/auth-guard.js"></script>
+  <title>Finexis OS | Crypto Intelligence</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link rel="stylesheet" href="styles/finexis-core.css" />
+  <script src="src/config/tailwind-theme.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet">
+  <!-- Tailwind Configuration -->
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+
+    .risk-row-even {
+      background-color: #F8F9FA;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+
+<body class="bg-paper text-ink overflow-hidden">
+  <div class="app-shell flex h-screen w-full overflow-hidden">
+  <aside id="app-sidebar" class="app-sidebar"></aside>
+  <div class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
+  <!-- TopAppBar Shell -->
+  <header class="app-header flex justify-between items-center px-6 h-16 bg-surface border-b border-border-subtle shrink-0">
+    <div class="flex items-center gap-8">
+      <h2 class="text-headline-lg font-headline-lg font-black text-primary">Finexis OS</h2>
+      <nav class="hidden md:flex items-center gap-6">
+        <a class="text-on-surface-variant text-label-sm font-label-sm hover:text-primary transition-all"
+          href="#">Directives</a>
+        <a class="text-primary border-b-2 border-primary pb-1 text-label-sm font-label-sm font-bold"
+          href="#">Reports</a>
+        <a class="text-on-surface-variant text-label-sm font-label-sm hover:text-primary transition-all"
+          href="#">Archives</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="relative hidden sm:block">
+        <span
+          class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+        <input
+          class="pl-10 pr-4 py-1.5 bg-surface-container-low border border-border-subtle rounded text-body-sm w-64 focus:outline-none focus:ring-1 focus:ring-primary"
+          placeholder="Search Intel..." type="text">
+      </div>
+      <button
+        class="bg-primary text-white px-4 py-2 rounded text-label-sm font-bold uppercase tracking-wide hover:opacity-90">
+        Export Intelligence
+      </button>
+      <div class="flex items-center gap-2 ml-2">
+        <button class="p-1.5 text-secondary hover:text-primary"><span
+            class="material-symbols-outlined">help</span></button>
+        <button class="p-1.5 text-secondary hover:text-primary"><span
+            class="material-symbols-outlined">account_circle</span></button>
+      </div>
+    </div>
+  </header>
+  <!-- Main Content Canvas -->
+  <main class="flex-1 overflow-y-auto p-6 bg-paper">
+    <div class="max-w-7xl mx-auto">
+    <!-- Dashboard Header -->
+    <div class="flex justify-between items-end mb-8">
+      <div>
+        <h3 class="text-headline-md font-headline-md text-on-surface mb-1">Crypto Intelligence Hub</h3>
+        <p class="text-body-md font-body-md text-secondary">Analyzing on/off-ramp corridors and exchange exposure for
+          Entity: <span id="case-entity-name" class="font-bold text-on-surface">ALPH_V_992</span></p>
+      </div>
+      <div class="flex gap-2">
+        <div class="flex bg-surface-container border border-border-subtle rounded p-1">
+          <button class="px-3 py-1 bg-white shadow-sm rounded text-label-sm font-bold">24H</button>
+          <button class="px-3 py-1 text-label-sm text-secondary hover:text-on-surface">7D</button>
+          <button class="px-3 py-1 text-label-sm text-secondary hover:text-on-surface">30D</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Metrics Bento -->
+    <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-4">
+      <div class="card-elevated p-6 rounded relative overflow-hidden group">
+        <div class="absolute right-0 top-0 opacity-5 group-hover:opacity-10 transition-opacity">
+          <span class="material-symbols-outlined text-[80px]"
+            style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+        </div>
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <span class="material-symbols-outlined text-[18px]">trending_up</span>
+          <span class="text-label-md font-label-md uppercase tracking-wider">Total On-Ramp</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h4 id="metric-onramp" class="text-headline-lg font-headline-lg text-on-surface">—</h4>
+          <span id="metric-onramp-trend" class="text-status-success text-label-sm font-bold font-mono">LIVE</span>
+        </div>
+        <p class="text-body-sm text-secondary mt-2">Verified INR to USDT conversions</p>
+      </div>
+      <div class="card-elevated p-6 rounded relative overflow-hidden group">
+        <div class="absolute right-0 top-0 opacity-5 group-hover:opacity-10 transition-opacity">
+          <span class="material-symbols-outlined text-[80px]" style="font-variation-settings: 'FILL' 1;">logout</span>
+        </div>
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <span class="material-symbols-outlined text-[18px]">trending_down</span>
+          <span class="text-label-md font-label-md uppercase tracking-wider">Total Off-Ramp</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h4 id="metric-offramp" class="text-headline-lg font-headline-lg text-on-surface">—</h4>
+          <span id="metric-offramp-trend" class="text-status-critical text-label-sm font-bold font-mono">LIVE</span>
+        </div>
+        <p class="text-body-sm text-secondary mt-2">P2P and Merchant withdrawals</p>
+      </div>
+      <div class="card-elevated p-6 rounded relative overflow-hidden group">
+        <div class="absolute right-0 top-0 opacity-5 group-hover:opacity-10 transition-opacity">
+          <span class="material-symbols-outlined text-[80px]" style="font-variation-settings: 'FILL' 1;">radar</span>
+        </div>
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <span class="material-symbols-outlined text-[18px]">visibility</span>
+          <span class="text-label-md font-label-md uppercase tracking-wider">Net Crypto Exposure</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h4 id="metric-exposure" class="text-headline-lg font-headline-lg text-primary">—</h4>
+          <span id="metric-exposure-trend" class="text-secondary text-label-sm font-mono">STABLE</span>
+        </div>
+        <p class="text-body-sm text-secondary mt-2">Current estimated held assets</p>
+      </div>
+      <div class="card-elevated p-6 rounded relative overflow-hidden group">
+        <div class="absolute right-0 top-0 opacity-5 group-hover:opacity-10 transition-opacity">
+          <span class="material-symbols-outlined text-[80px]"
+            style="font-variation-settings: 'FILL' 1;">person_search</span>
+        </div>
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <span class="material-symbols-outlined text-[18px]">warning</span>
+          <span class="text-label-md font-label-md uppercase tracking-wider">P2P Volume</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h4 id="metric-p2p" class="text-headline-lg font-headline-lg text-status-warning">—</h4>
+          <span
+            class="bg-orange-100 text-status-warning px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase">Unregulated</span>
+        </div>
+        <p class="text-body-sm text-secondary mt-2">High-risk peer-to-peer transfers</p>
+      </div>
+    </div>
+
+    <!-- Timeline & Activity Chart -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div class="lg:col-span-2 card-elevated card-elevated--static rounded p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h5 class="text-headline-sm font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">analytics</span>
+            Volume Timeline (INR)
+          </h5>
+          <div class="flex gap-4">
+            <div class="flex items-center gap-1.5">
+              <div class="w-3 h-3 bg-primary rounded-sm"></div>
+              <span class="text-label-sm">On-Ramp</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-3 h-3 bg-secondary rounded-sm opacity-50"></div>
+              <span class="text-label-sm">Off-Ramp</span>
+            </div>
+          </div>
+        </div>
+        <div id="volume-timeline-container"
+          class="h-64 relative flex items-end justify-between gap-2 border-l border-b border-border-subtle pb-2 pl-2">
+          <!-- Dynamic chart bars injected here -->
+          <div class="w-full h-full flex items-center justify-center text-secondary text-xs">Loading timeline metrics...
+          </div>
+        </div>
+      </div>
+
+      <div class="card-elevated rounded p-6 flex flex-col justify-between">
+        <div>
+          <h5 class="text-label-md font-label-md uppercase tracking-wider text-secondary mb-4">Exchange Exposure</h5>
+          <div id="exchange-exposure-container" class="space-y-4">
+            <!-- Rendered dynamically -->
+            <div class="text-secondary text-xs py-4 text-center">Loading exchange metrics...</div>
+          </div>
+        </div>
+        <div class="mt-8 p-4 bg-surface-container-low rounded border border-dashed border-outline-variant">
+          <p id="exposure-summary-text" class="text-label-sm text-secondary">Analyzing virtual asset patterns on the
+            blockchain corridor.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- High Density Data Table -->
+    <div class="card-elevated card-elevated--static rounded overflow-hidden">
+      <div class="px-6 py-4 border-b border-border-subtle flex justify-between items-center bg-surface-muted">
+        <div class="flex items-center gap-6">
+          <h5 id="table-tab-log"
+            class="text-sm font-bold cursor-pointer border-b-2 border-primary pb-1 text-primary uppercase tracking-wider">
+            Detailed Transaction Log</h5>
+          <h5 id="table-tab-registry"
+            class="text-sm font-bold text-secondary hover:text-primary cursor-pointer pb-1 uppercase tracking-wider">
+            FIU-Registered VDA SPs</h5>
+        </div>
+        <div class="flex gap-3 items-center">
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-secondary text-sm">search</span>
+            <input id="table-search"
+              class="pl-8 pr-3 py-1 bg-surface-container-low border border-border-subtle rounded text-xs w-48 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              placeholder="Search transactions..." type="text">
+          </div>
+          <button id="download-btn" class="p-1.5 hover:bg-surface-container rounded transition-colors"
+            title="Export as CSV">
+            <span class="material-symbols-outlined text-secondary">download</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 1: Transaction Log Container -->
+      <div id="log-table-container" class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left">
+          <thead class="bg-surface-container-low border-b border-border-subtle">
+            <tr>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Date / Time</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider font-semibold">
+                Description</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-center">
+                Exchange / Entity</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider">DR / CR</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-right">
+                Amount (₹)</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Reference ID
+              </th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-center">Risk
+                Flag</th>
+            </tr>
+          </thead>
+          <tbody id="log-table-tbody" class="divide-y divide-border-subtle">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab 2: FIU VDA SP Registry Container -->
+      <div id="registry-table-container" class="overflow-x-auto custom-scrollbar hidden">
+        <table class="w-full text-left">
+          <thead class="bg-surface-container-low border-b border-border-subtle">
+            <tr>
+              <th
+                class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider w-20 text-center">
+                S. No</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider font-semibold">
+                Trade Name / Product</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider">Reporting Entity
+                (RE) Name</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-center">FIU
+                Status</th>
+              <th class="px-6 py-3 text-label-sm font-label-sm text-secondary uppercase tracking-wider text-center">Case
+                Exposure</th>
+            </tr>
+          </thead>
+          <tbody id="registry-table-tbody" class="divide-y divide-border-subtle">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="px-6 py-4 border-t border-border-subtle flex justify-between items-center bg-surface-muted">
+        <div class="flex items-center gap-4">
+          <span id="table-num-results" class="text-label-sm text-secondary">Showing 0 of 0 transactions</span>
+        </div>
+        <div id="table-pagination" class="flex gap-1">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+  </div>
+  </div>
+  <!-- Global Floating Help FAB -->
+  <button
+    class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50">
+    <span class="material-symbols-outlined text-[28px]">support_agent</span>
+  </button>
+  <script type="module">
+    import { initSidebar } from "./src/interactions/sidebar.js";
+    import { caseService } from "./src/services/caseService.js";
+
+    initSidebar();
+
+    const VDA_REGISTRY = [
+      { sNo: 1, reName: "Neblio Technologies Private Limited", tradeName: "Coin DCX" },
+      { sNo: 2, reName: "ANQ Digital Finserv Private Limited", tradeName: "ANQ Finance" },
+      { sNo: 3, reName: "Unocoin Technologies Pvt Ltd", tradeName: "Unocoin" },
+      { sNo: 4, reName: "Buyhatke Internet Private Limited", tradeName: "Onramp" },
+      { sNo: 5, reName: "Giottus Technologies Pvt Ltd", tradeName: "Giottus" },
+      { sNo: 6, reName: "Bitbns Internet Private Limited", tradeName: "Bitbns" },
+      { sNo: 7, reName: "Awlencan Innovations India Limited", tradeName: "Zebpay" },
+      { sNo: 8, reName: "Zanmai Labs Pvt Ltd", tradeName: "WazirX" },
+      { sNo: 9, reName: "Bitcipher Labs LLP", tradeName: "Coinswitch" },
+      { sNo: 10, reName: "Nextgendev Solutions Private Limited", tradeName: "CoinswitchX" },
+      { sNo: 11, reName: "RPFAS Technologies Pvt Ltd", tradeName: "Mudrex" },
+      { sNo: 12, reName: "IBLOCK Technologies Pvt Ltd", tradeName: "Buyucoin" },
+      { sNo: 13, reName: "WOLLFISH Labs Pvt Ltd", tradeName: "Coindhan" },
+      { sNo: 14, reName: "Rario Digital Private Limited", tradeName: "Rario" },
+      { sNo: 15, reName: "Angelic Infotech Pvt Ltd", tradeName: "Suncrypto" },
+      { sNo: 16, reName: "Carretx Technologies Pvt Ltd", tradeName: "Carret" },
+      { sNo: 17, reName: "Ante Multimedia Pvt Ltd", tradeName: "-" },
+      { sNo: 18, reName: "ABHIBHA Technologies Pvt Ltd", tradeName: "Onmeta" },
+      { sNo: 19, reName: "Smartliving Digital Technologies Pvt Ltd", tradeName: "Cryptosmartlife" },
+      { sNo: 20, reName: "UCY Technology Pvt Ltd", tradeName: "Pyor" },
+      { sNo: 21, reName: "Digital Collectibles Pte Ltd", tradeName: "Rario" },
+      { sNo: 22, reName: "Veeratva Technologies Pvt Ltd", tradeName: "Vair" },
+      { sNo: 23, reName: "Transak Technology India Pvt Ltd", tradeName: "Transak" },
+      { sNo: 24, reName: "REMIZO Technologies India Pvt Ltd", tradeName: "Getbit" },
+      { sNo: 25, reName: "FIN GENIE Tech Pvt Ltd", tradeName: "Bytex" },
+      { sNo: 26, reName: "ARDOUR labs Pvt Ltd", tradeName: "-" },
+      { sNo: 27, reName: "Inocyx Technologies Pvt Ltd", tradeName: "Inocyx" },
+      { sNo: 28, reName: "Metatoken Technologies Pvt Ltd", tradeName: "Fanztar" },
+      { sNo: 29, reName: "Excellium Technologies Pvt Ltd", tradeName: "Delta Exchange" },
+      { sNo: 30, reName: "Rovi91 Innovations Pvt Ltd", tradeName: "-" },
+      { sNo: 31, reName: "Longreen India Pvt Ltd", tradeName: "Bitbse.com" },
+      { sNo: 32, reName: "Flitpay Pvt Ltd", tradeName: "Flitpay" },
+      { sNo: 33, reName: "Fincrypt LLP", tradeName: "Stable Pay" },
+      { sNo: 34, reName: "Arthbit Pvt Ltd", tradeName: "ArthBit" },
+      { sNo: 35, reName: "Pagarpay India Pvt Ltd", tradeName: "Density Exchange" },
+      { sNo: 36, reName: "Lightningnodes Technologies Pvt Ltd", tradeName: "pi42" },
+      { sNo: 37, reName: "Kooz Advisors and Technologies Pvt Ltd", tradeName: "KoinBX" },
+      { sNo: 38, reName: "Mindless Pandora Tech Solutions Pvt Ltd", tradeName: "-" },
+      { sNo: 39, reName: "FanzCraze Technologies Inc", tradeName: "-" },
+      { sNo: 40, reName: "SUBHX Infotech (OPC) Pvt Ltd", tradeName: "BIT24HR" },
+      { sNo: 41, reName: "Peken Global Ltd", tradeName: "KuCoin" },
+      { sNo: 42, reName: "ALSD Technologies Pvt Ltd", tradeName: "Alpyne" },
+      { sNo: 43, reName: "Damsol Pvt Ltd", tradeName: "Square" },
+      { sNo: 44, reName: "First Answer India Technologies Pvt Ltd", tradeName: "Liminal" },
+      { sNo: 45, reName: "Eclipton Technologies Pvt Ltd", tradeName: "Eclipton" },
+      { sNo: 46, reName: "Blockoville OU", tradeName: "Blockoville" },
+      { sNo: 47, reName: "Binance International Limited", tradeName: "Binance" }
+    ];
+
+    let allCryptoTxns = [];
+    let currentTab = "log"; // "log" | "registry"
+    let searchQuery = "";
+    let currentPage = 1;
+    const pageSize = 10;
+
+    // Helper functions
+    function formatINR(val) {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    }
+
+    function formatShortINR(val) {
+      if (val >= 10000000) return `₹ ${(val / 10000000).toFixed(2)} Cr`;
+      if (val >= 100000) return `₹ ${(val / 100000).toFixed(1)} L`;
+      if (val >= 1000) return `₹ ${(val / 1000).toFixed(1)} K`;
+      return `₹ ${val.toFixed(0)}`;
+    }
+
+    function classifyTransaction(desc) {
+      const descLower = String(desc || "").toLowerCase();
+
+      // Check specific registered exchanges
+      for (const vda of VDA_REGISTRY) {
+        const trade = vda.tradeName.toLowerCase();
+        const re = vda.reName.toLowerCase();
+        if (trade !== "-" && descLower.includes(trade)) {
+          return { key: vda.tradeName, ...vda };
+        }
+        if (descLower.includes(re)) {
+          return { key: vda.tradeName !== "-" ? vda.tradeName : vda.reName, ...vda };
+        }
+      }
+
+      // Check generic keywords
+      if (descLower.includes("usdt") || descLower.includes("binance") || descLower.includes("wazirx")) {
+        if (descLower.includes("binance")) {
+          return { key: "Binance", reName: "Binance International Limited", tradeName: "Binance" };
+        }
+        if (descLower.includes("wazirx")) {
+          return { key: "WazirX", reName: "Zanmai Labs Pvt Ltd", tradeName: "WazirX" };
+        }
+        return { key: "Unknown (P2P)", reName: "Unregistered peer-to-peer corridor", tradeName: "P2P" };
+      }
+
+      return null;
+    }
+
+    const init = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const caseId = params.get("caseId") || params.get("id") || "CASE-1783597939371";
+
+      try {
+        // 1. Fetch Case info
+        const caseData = await caseService.getCaseById(caseId);
+        if (caseData) {
+          const titleBadge = document.getElementById("case-title-badge");
+          if (titleBadge) {
+            titleBadge.textContent = `CASE ${caseData.caseNumber} - ${caseData.title}`;
+          }
+          const entityName = document.getElementById("case-entity-name");
+          if (entityName) {
+            entityName.textContent = caseData.title;
+          }
+        }
+
+        // 2. Fetch Transactions
+        const txns = await caseService.getTransactions(caseId);
+        if (Array.isArray(txns)) {
+          // Filter for crypto transactions
+          allCryptoTxns = txns.filter(t => {
+            const cat = (t.category || "").toLowerCase();
+            if (cat === "crypto") return true;
+            return classifyTransaction(t.description) !== null;
+          });
+        }
+
+        renderDashboard();
+      } catch (err) {
+        console.error("Failed to load crypto data:", err);
+      }
+    };
+
+    const renderDashboard = () => {
+      // 1. Render Metrics Bento
+      const onRamp = allCryptoTxns.filter(t => t.type === 'debit').reduce((sum, t) => sum + (t.amount || 0), 0);
+      const offRamp = allCryptoTxns.filter(t => t.type === 'credit').reduce((sum, t) => sum + (t.amount || 0), 0);
+      const netExposure = Math.max(0, onRamp - offRamp);
+      const p2pVolume = allCryptoTxns.filter(t => (t.description || "").toLowerCase().includes("p2p")).reduce((sum, t) => sum + (t.amount || 0), 0);
+
+      document.getElementById("metric-onramp").textContent = formatShortINR(onRamp);
+      document.getElementById("metric-offramp").textContent = formatShortINR(offRamp);
+      document.getElementById("metric-exposure").textContent = formatShortINR(netExposure);
+      document.getElementById("metric-p2p").textContent = formatShortINR(p2pVolume);
+
+      // 2. Render Timeline Chart
+      const timelineContainer = document.getElementById("volume-timeline-container");
+      if (timelineContainer) {
+        // Group by date
+        const grouped = {};
+        allCryptoTxns.forEach(t => {
+          if (!t.date) return;
+          const dateKey = t.date.split("T")[0]; // YYYY-MM-DD
+          if (!grouped[dateKey]) {
+            grouped[dateKey] = { debits: 0, credits: 0 };
+          }
+          if (t.type === 'debit') grouped[dateKey].debits += (t.amount || 0);
+          else grouped[dateKey].credits += (t.amount || 0);
+        });
+
+        const sortedDates = Object.keys(grouped).sort().slice(-7); // Last 7 active dates
+        if (sortedDates.length > 0) {
+          const maxVal = Math.max(...sortedDates.map(d => Math.max(grouped[d].debits, grouped[d].credits)));
+          timelineContainer.innerHTML = sortedDates.map(date => {
+            const data = grouped[date];
+            const pctOn = maxVal > 0 ? (data.debits / maxVal) * 100 : 0;
+            const pctOff = maxVal > 0 ? (data.credits / maxVal) * 100 : 0;
+            const label = new Date(date).toLocaleDateString('en-US', { day: '2-digit', month: 'short' }).toUpperCase();
+
+            return `
+            <div class="flex-1 flex flex-col items-center gap-1 group h-full justify-end">
+              <div class="w-full flex items-end justify-center gap-1 h-48">
+                <div class="bg-primary w-2.5 rounded-t-sm transition-all group-hover:opacity-80" style="height: ${pctOn}%" title="On-Ramp: ${formatINR(data.debits)}"></div>
+                <div class="bg-secondary opacity-30 w-2.5 rounded-t-sm transition-all group-hover:opacity-60" style="height: ${pctOff}%" title="Off-Ramp: ${formatINR(data.credits)}"></div>
+              </div>
+              <span class="text-[9px] font-mono text-secondary mt-1">${label}</span>
+            </div>
+          `;
+          }).join("");
+        } else {
+          timelineContainer.innerHTML = `<div class="w-full h-full flex items-center justify-center text-secondary text-xs">No active VDA timeline corridors detected.</div>`;
+        }
+      }
+
+      // 3. Render Exchange Exposure
+      const exposureContainer = document.getElementById("exchange-exposure-container");
+      if (exposureContainer) {
+        const exchangeMap = {};
+        allCryptoTxns.forEach(t => {
+          const match = classifyTransaction(t.description);
+          const name = match ? match.key : "Unknown (P2P)";
+          if (!exchangeMap[name]) exchangeMap[name] = 0;
+          exchangeMap[name] += (t.amount || 0);
+        });
+
+        const totalVolume = Object.values(exchangeMap).reduce((s, v) => s + v, 0);
+        const sortedExchanges = Object.entries(exchangeMap).sort((a, b) => b[1] - a[1]);
+
+        if (sortedExchanges.length > 0) {
+          exposureContainer.innerHTML = sortedExchanges.map(([name, vol]) => {
+            const pct = totalVolume > 0 ? (vol / totalVolume) * 100 : 0;
+            const isHigh = name === "Unknown (P2P)" || name === "Binance" || name === "KuCoin";
+            const progressColor = isHigh ? "bg-status-warning" : "bg-primary";
+
+            return `
+            <div class="space-y-1">
+              <div class="flex justify-between text-body-sm font-semibold">
+                <span>${name}</span>
+                <span>${pct.toFixed(0)}% (${formatShortINR(vol)})</span>
+              </div>
+              <div class="w-full bg-surface-container rounded-full h-2">
+                <div class="${progressColor} h-2 rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+          }).join("");
+
+          // Highlight summary note based on top exchange
+          const topExchange = sortedExchanges[0][0];
+          const summaryEl = document.getElementById("exposure-summary-text");
+          if (summaryEl) {
+            if (topExchange === "Unknown (P2P)" || topExchange === "Binance") {
+              summaryEl.innerHTML = `High volume exposure on <span class="font-bold text-on-surface">${topExchange}</span> corridor detected outside domestic KYC systems. Proceed with directive <span class="mono text-primary font-bold">CRYP-004</span>.`;
+            } else {
+              summaryEl.innerHTML = `Primary VDA exposure identified via <span class="font-bold text-on-surface">${topExchange}</span>. Normal compliance audit protocol recommended.`;
+            }
+          }
+        } else {
+          exposureContainer.innerHTML = `<div class="text-secondary text-xs py-4 text-center">No active VDA exchange transactions in statement.</div>`;
+          const summaryEl = document.getElementById("exposure-summary-text");
+          if (summaryEl) summaryEl.textContent = "No compliance flags active. Corridors are clear.";
+        }
+      }
+
+      // 4. Render Table Logs
+      renderTable();
+    };
+
+    const renderTable = () => {
+      const q = searchQuery.toLowerCase();
+
+      // Pagination & result counts
+      const paginationContainer = document.getElementById("table-pagination");
+      const numResultsContainer = document.getElementById("table-num-results");
+
+      if (currentTab === "log") {
+        // Show Log Table, Hide Registry Table
+        document.getElementById("log-table-container").classList.remove("hidden");
+        document.getElementById("registry-table-container").classList.add("hidden");
+
+        // Filtered Log Transactions
+        const filtered = allCryptoTxns.filter(t => {
+          const desc = (t.description || "").toLowerCase();
+          const ref = (t.chqNo || t.id).toLowerCase();
+          const match = classifyTransaction(t.description);
+          const exch = match ? match.key.toLowerCase() : "unknown";
+          return desc.includes(q) || ref.includes(q) || exch.includes(q);
+        });
+
+        const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        const startIdx = (currentPage - 1) * pageSize;
+        const paginated = filtered.slice(startIdx, startIdx + pageSize);
+
+        const tbody = document.getElementById("log-table-tbody");
+        if (tbody) {
+          if (paginated.length > 0) {
+            tbody.innerHTML = paginated.map((t, index) => {
+              const isEven = index % 2 === 1 ? "risk-row-even" : "";
+              const matched = classifyTransaction(t.description);
+              const exchangeName = matched ? matched.key : "Unknown (P2P)";
+              const amountColor = t.type === 'debit' ? 'text-status-critical' : 'text-status-success';
+              const riskClass = (t.amount || 0) > 50000 ? "bg-red-100 text-status-critical" : "bg-orange-100 text-status-warning";
+              const riskLabel = (t.amount || 0) > 50000 ? "Critical" : "High";
+
+              return `
+              <tr class="${isEven} hover:bg-surface-container-low transition-colors">
+                <td class="px-6 py-4 text-body-sm font-mono">${t.date ? t.date.substring(0, 19).replace("T", " ") : "—"}</td>
+                <td class="px-6 py-4 text-body-sm">
+                  <div class="font-semibold">${t.description}</div>
+                  <div class="text-[10px] text-secondary uppercase">${t.flow || "USDT CORRIDOR"}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-body-sm font-semibold">${exchangeName}</div>
+                  <span class="bg-surface-container text-secondary px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">${matched && matched.tradeName !== "-" ? "Registered" : "P2P"}</span>
+                </td>
+                <td class="px-6 py-4 text-body-sm ${amountColor} font-bold">${t.type.toUpperCase() === "DEBIT" ? "DR" : "CR"}</td>
+                <td class="px-6 py-4 text-body-sm font-mono text-right">${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(t.amount || 0)}</td>
+                <td class="px-6 py-4 text-body-sm font-mono">${t.chqNo || t.id.substring(3, 12)}</td>
+                <td class="px-6 py-4">
+                  <span class="${riskClass} px-2 py-0.5 rounded-sm text-label-sm font-bold uppercase w-fit">${riskLabel}</span>
+                </td>
+              </tr>
+            `;
+            }).join("");
+          } else {
+            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-secondary text-xs">No matching VDA transactions found in case ledger.</td></tr>`;
+          }
+        }
+
+        numResultsContainer.textContent = `Showing ${paginated.length} of ${filtered.length} transactions`;
+
+        // Render Pagination Buttons
+        renderPagination(totalPages);
+
+      } else {
+        // Show Registry Table, Hide Log Table
+        document.getElementById("registry-table-container").classList.remove("hidden");
+        document.getElementById("log-table-container").classList.add("hidden");
+
+        // Filtered Registry
+        const filtered = VDA_REGISTRY.filter(vda => {
+          const trade = vda.tradeName.toLowerCase();
+          const re = vda.reName.toLowerCase();
+          return trade.includes(q) || re.includes(q);
+        });
+
+        const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        const startIdx = (currentPage - 1) * pageSize;
+        const paginated = filtered.slice(startIdx, startIdx + pageSize);
+
+        const tbody = document.getElementById("registry-table-tbody");
+        if (tbody) {
+          tbody.innerHTML = paginated.map((vda, index) => {
+            const isEven = index % 2 === 1 ? "risk-row-even" : "";
+
+            // Check if case statement has active exposure to this exchange
+            const matchingTxns = allCryptoTxns.filter(t => {
+              const descLower = (t.description || "").toLowerCase();
+              const trade = vda.tradeName.toLowerCase();
+              const re = vda.reName.toLowerCase();
+              return (trade !== "-" && descLower.includes(trade)) || descLower.includes(re);
+            });
+            const totalVol = matchingTxns.reduce((s, t) => s + (t.amount || 0), 0);
+            const hasExposure = matchingTxns.length > 0;
+
+            const exposureBadge = hasExposure
+              ? `<span class="bg-red-100 text-status-critical px-2 py-0.5 rounded-sm text-label-sm font-bold uppercase">Active (₹ ${formatShortINR(totalVol)})</span>`
+              : `<span class="bg-neutral-100 text-secondary px-2 py-0.5 rounded-sm text-label-sm font-bold uppercase">No Exposure</span>`;
+
+            const statusBadge = vda.tradeName === "Binance" || vda.tradeName === "KuCoin"
+              ? `<span class="border border-amber-300 bg-amber-50 text-status-warning px-2 py-0.5 rounded text-[10px] font-bold uppercase">Registered (Show Cause)</span>`
+              : `<span class="border border-border-subtle bg-primary/5 text-primary px-2 py-0.5 rounded text-[10px] font-bold uppercase">FIU Registered</span>`;
+
+            return `
+            <tr class="${isEven} hover:bg-surface-container-low transition-colors">
+              <td class="px-6 py-4 text-body-sm font-mono text-center">${vda.sNo}</td>
+              <td class="px-6 py-4 text-body-sm font-semibold">${vda.tradeName !== "-" ? vda.tradeName : "VDA Service"}</td>
+              <td class="px-6 py-4 text-body-sm">${vda.reName}</td>
+              <td class="px-6 py-4 text-center">${statusBadge}</td>
+              <td class="px-6 py-4 text-center">${exposureBadge}</td>
+            </tr>
+          `;
+          }).join("");
+        }
+
+        numResultsContainer.textContent = `Showing ${paginated.length} of ${filtered.length} Reporting Entities`;
+
+        // Render Pagination Buttons
+        renderPagination(totalPages);
+      }
+    };
+
+    const renderPagination = (totalPages) => {
+      const container = document.getElementById("table-pagination");
+      if (!container) return;
+
+      let html = "";
+      if (currentPage > 1) {
+        html += `<button class="w-8 h-8 flex items-center justify-center rounded border border-border-subtle hover:bg-surface-container-low transition-colors pagination-prev"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>`;
+      }
+
+      for (let i = 1; i <= totalPages; i++) {
+        const activeClass = i === currentPage
+          ? "border-primary bg-primary text-white font-bold"
+          : "border-border-subtle hover:bg-surface-container-low text-secondary";
+        html += `<button class="w-8 h-8 flex items-center justify-center rounded border text-label-sm page-btn ${activeClass}" data-page="${i}">${i}</button>`;
+      }
+
+      if (currentPage < totalPages) {
+        html += `<button class="w-8 h-8 flex items-center justify-center rounded border border-border-subtle hover:bg-surface-container-low transition-colors pagination-next"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>`;
+      }
+
+      container.innerHTML = html;
+
+      // Attach listeners
+      container.querySelectorAll(".page-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentPage = parseInt(btn.getAttribute("data-page"));
+          renderTable();
+        });
+      });
+
+      container.querySelector(".pagination-prev")?.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable();
+        }
+      });
+
+      container.querySelector(".pagination-next")?.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable();
+        }
+      });
+    };
+
+    // Setup tab logic
+    document.getElementById("table-tab-log")?.addEventListener("click", (e) => {
+      currentTab = "log";
+      currentPage = 1;
+      document.getElementById("table-tab-log").className = "text-sm font-bold cursor-pointer border-b-2 border-primary pb-1 text-primary uppercase tracking-wider";
+      document.getElementById("table-tab-registry").className = "text-sm font-bold text-secondary hover:text-primary cursor-pointer pb-1 uppercase tracking-wider";
+      document.getElementById("table-search").placeholder = "Search transactions...";
+      renderTable();
+    });
+
+    document.getElementById("table-tab-registry")?.addEventListener("click", (e) => {
+      currentTab = "registry";
+      currentPage = 1;
+      document.getElementById("table-tab-registry").className = "text-sm font-bold cursor-pointer border-b-2 border-primary pb-1 text-primary uppercase tracking-wider";
+      document.getElementById("table-tab-log").className = "text-sm font-bold text-secondary hover:text-primary cursor-pointer pb-1 uppercase tracking-wider";
+      document.getElementById("table-search").placeholder = "Search registered entities...";
+      renderTable();
+    });
+
+    document.getElementById("table-search")?.addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      currentPage = 1;
+      renderTable();
+    });
+
+    // Load dashboard
+    init();
+  </script>
+</body>
+
+</html>

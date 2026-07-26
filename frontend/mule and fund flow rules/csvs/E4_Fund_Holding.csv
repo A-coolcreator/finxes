@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Holding time,Output
+FF-031,Forwarded <5 min,Credit -> next debit,< 5 min,"Instant pass-through, Grade B"
+FF-032,Forwarded <15 min,Credit -> next debit,< 15 min,"Near-instant forward, Grade B"
+FF-033,Forwarded <30 min,Credit -> next debit,< 30 min,"Rapid forward, Grade B"
+FF-034,Forwarded <1 hr,Credit -> next debit,< 1 hr,"Same-hour forward, Grade C"
+FF-035,Forwarded <3 hr,Credit -> next debit,< 3 hr,"Short-hold forward, Grade C"
+FF-036,Forwarded <24 hr,Credit -> next debit,< 24 hr,"Same-day forward, Grade C"
+FF-037,Retained >1 day,No debit after credit,> 1 day,"Stored layer, Grade C"
+FF-038,Retained >3 days,No debit after credit,> 3 days,"Short retention, Grade C"
+FF-039,Retained >7 days,No debit after credit,> 7 days,"Weekly retention, Grade D"
+FF-040,Retained >30 days,No debit after credit,> 30 days,"Long-term layer, Grade D"

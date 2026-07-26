@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Tolerance,Output
+FF-011,Transfer within 1 min,Debit in A -> Credit in B,<= 1 min,"Holding time: <1 min, Grade B"
+FF-012,Transfer within 5 min,Debit in A -> Credit in B,<= 5 min,"Holding time: <5 min, Grade B"
+FF-013,Transfer within 15 min,Debit in A -> Credit in B,<= 15 min,"Holding time: <15 min, Grade B"
+FF-014,Transfer within 30 min,Debit in A -> Credit in B,<= 30 min,"Holding time: <30 min, Grade B"
+FF-015,Transfer within 1 hr,Debit in A -> Credit in B,<= 60 min,"Probable fund link, Grade B"
+FF-016,Transfer within 3 hr,Debit in A -> Credit in B,<= 3 hr,"Probable fund link, Grade B"
+FF-017,Transfer within 6 hr,Debit in A -> Credit in B,<= 6 hr,"Likely fund trail, Grade C"
+FF-018,Transfer within 12 hr,Debit in A -> Credit in B,<= 12 hr,"Likely fund trail, Grade C"
+FF-019,Transfer within 24 hr,Debit in A -> Credit in B,<= 24 hr,"Same-day trail, Grade C"
+FF-020,Transfer within 48 hr,Debit in A -> Credit in B,<= 48 hr,"Next-day trail, Grade C"

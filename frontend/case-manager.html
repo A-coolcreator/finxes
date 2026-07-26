@@ -1,0 +1,820 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="src/utils/auth-guard.js"></script>
+    <title>Finexis OS — Case Manager</title>
+    <meta
+      name="description"
+      content="Finexis OS case manager — manage and track high-priority financial investigations."
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Blueprint fonts: Fraunces + Inter + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/finexis-core.css" />
+    <script src="src/config/tailwind-theme.js"></script>
+    <style>
+      body {
+        font-family: "Inter", ui-sans-serif, sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .sidebar-brand {
+        font-family: "Fraunces", ui-serif, Georgia, serif;
+      }
+      .stat-num {
+        font-family: "Fraunces", ui-serif, Georgia, serif;
+        font-size: 30px;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--ink);
+      }
+      .section-head {
+        font-family: "Fraunces", ui-serif, Georgia, serif;
+      }
+      .filter-input-cm {
+        height: 38px;
+        padding: 0 12px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: var(--ink);
+        outline: none;
+        transition: border-color 150ms ease;
+      }
+      .filter-input-cm:focus {
+        border-color: var(--f-500);
+        box-shadow: 0 0 0 3px rgba(14, 110, 94, 0.1);
+      }
+      .case-row {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .case-row:hover {
+        background: var(--f-50) !important;
+        transform: translateX(4px); /* Subtle shift for animation */
+        border-left-color: var(--f-500); /* Highlight marker */
+        cursor: pointer;
+      }
+
+      .case-row td {
+        transition: background 0.2s ease;
+      }
+    </style>
+  </head>
+
+  <body
+    class="overflow-hidden"
+    style="background: var(--paper); color: var(--ink)"
+  >
+    <div class="app-shell flex h-screen w-full overflow-hidden">
+    <aside id="app-sidebar" class="app-sidebar"></aside>
+    <!-- ══ Main Content Area ══ -->
+    <main
+      class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden"
+    >
+      <!-- Blueprint header bar -->
+      <header
+        class="flex justify-between items-center shrink-0"
+        style="
+          height: 56px;
+          padding: 0 24px;
+          background: var(--surface);
+          border-bottom: 1px solid var(--line);
+        "
+      >
+        <div class="flex items-center gap-6">
+          <nav class="flex gap-1">
+            <a
+              class="eyebrow"
+              style="
+                font-size: 9.5px;
+                padding: 4px 10px;
+                background: var(--f-500);
+                color: #fff;
+                border-color: var(--f-600);
+              "
+              href="#"
+              >Reports</a
+            >
+            <a
+              style="
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--ink-muted);
+                padding: 4px 10px;
+                border-radius: var(--radius-sm);
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                text-decoration: none;
+                transition: color 150ms ease;
+              "
+              href="archives.html"
+              onmouseover="this.style.color = 'var(--ink)'"
+              onmouseout="this.style.color = 'var(--ink-muted)'"
+              >Archives</a
+            >
+          </nav>
+        </div>
+        <div class="flex items-center gap-3">
+          <button
+            style="
+              width: 36px;
+              height: 36px;
+              border-radius: var(--radius-full);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: transparent;
+              border: 1px solid var(--line);
+              cursor: pointer;
+              color: var(--ink-muted);
+              transition: background 150ms;
+            "
+            onmouseover="this.style.background = 'var(--paper)'"
+            onmouseout="this.style.background = 'transparent'"
+          >
+            <span class="material-symbols-outlined" style="font-size: 18px"
+              >call</span
+            >
+          </button>
+          <button
+            style="
+              width: 36px;
+              height: 36px;
+              border-radius: var(--radius-full);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: transparent;
+              border: 1px solid var(--line);
+              cursor: pointer;
+              color: var(--ink-muted);
+              transition: background 150ms;
+            "
+            onmouseover="this.style.background = 'var(--paper)'"
+            onmouseout="this.style.background = 'transparent'"
+          >
+            <span
+              class="material-symbols-outlined"
+              style="
+                font-size: 18px;
+                font-variation-settings: &quot;FILL&quot; 1;
+              "
+              >account_circle</span
+            >
+          </button>
+        </div>
+      </header>
+      <!-- Dynamic Content Canvas -->
+      <div
+        class="flex-1 overflow-auto custom-scrollbar"
+        style="background: var(--paper); padding: 24px"
+      >
+        <!-- Page Title & Create Action -->
+        <div class="flex justify-between items-end" style="margin-bottom: 24px">
+          <div>
+            <h2
+              class="section-head"
+              style="
+                font-size: 32px;
+                font-weight: 600;
+                color: var(--ink);
+                line-height: 1.1;
+              "
+            >
+              Case Manager
+            </h2>
+            <p
+              style="font-size: 14px; color: var(--ink-muted); margin-top: 6px"
+            >
+              Manage and track high-priority financial investigations across the
+              network.
+            </p>
+          </div>
+          <button
+            id="create-case-btn"
+            class="btn-primary"
+            style="padding: 11px 22px; font-size: 13px"
+          >
+            <span class="material-symbols-outlined" style="font-size: 16px"
+              >assignment_add</span
+            >
+            Create Case
+          </button>
+        </div>
+        <!-- Quick Stats Bar (blueprint stat cards with Fraunces numbers) -->
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+          "
+        >
+          <div
+            style="
+              background: var(--surface);
+              border: 1px solid var(--line);
+              border-radius: var(--radius-lg);
+              padding: 18px 20px;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              box-shadow: var(--shadow-card);
+              transition:
+                box-shadow 200ms ease,
+                border-color 200ms ease;
+            "
+            class="stat-card-cm"
+          >
+            <div class="flex justify-between items-start">
+              <p
+                style="
+                  font-size: 10px;
+                  font-weight: 700;
+                  color: var(--ink-faint);
+                  text-transform: uppercase;
+                  letter-spacing: 0.16em;
+                "
+              >
+                Total Cases
+              </p>
+              <div class="icon-sm">
+                <span
+                  class="material-symbols-outlined"
+                  style="font-size: 16px; color: var(--f-500)"
+                  >folder_open</span
+                >
+              </div>
+            </div>
+            <p id="stat-total-cases" class="stat-num">0</p>
+            <p
+              style="font-size: 11px; color: var(--ink-faint); font-weight: 500"
+            >
+              all investigations
+            </p>
+          </div>
+          <div
+            style="
+              background: var(--surface);
+              border: 1px solid var(--line);
+              border-radius: var(--radius-lg);
+              padding: 18px 20px;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              box-shadow: var(--shadow-card);
+              transition:
+                box-shadow 200ms ease,
+                border-color 200ms ease;
+            "
+            class="stat-card-cm"
+          >
+            <div class="flex justify-between items-start">
+              <p
+                style="
+                  font-size: 10px;
+                  font-weight: 700;
+                  color: var(--ink-faint);
+                  text-transform: uppercase;
+                  letter-spacing: 0.16em;
+                "
+              >
+                Active
+              </p>
+              <div class="icon-sm">
+                <span
+                  class="material-symbols-outlined"
+                  style="font-size: 16px; color: var(--amber-500)"
+                  >pending_actions</span
+                >
+              </div>
+            </div>
+            <p
+              id="stat-active-cases"
+              class="stat-num"
+              style="color: var(--amber-600)"
+            >
+              0
+            </p>
+            <p
+              style="font-size: 11px; color: var(--amber-600); font-weight: 600"
+            >
+              ongoing cases
+            </p>
+          </div>
+          <div
+            style="
+              background: var(--surface);
+              border: 1px solid var(--line);
+              border-radius: var(--radius-lg);
+              padding: 18px 20px;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              box-shadow: var(--shadow-card);
+              transition:
+                box-shadow 200ms ease,
+                border-color 200ms ease;
+            "
+            class="stat-card-cm"
+          >
+            <div class="flex justify-between items-start">
+              <p
+                style="
+                  font-size: 10px;
+                  font-weight: 700;
+                  color: var(--ink-faint);
+                  text-transform: uppercase;
+                  letter-spacing: 0.16em;
+                "
+              >
+                Archive
+              </p>
+              <div class="icon-sm">
+                <span
+                  class="material-symbols-outlined"
+                  style="font-size: 16px; color: var(--f-500)"
+                  >data_exploration</span
+                >
+              </div>
+            </div>
+            <p id="stat-archive-cases" class="stat-num">0</p>
+            <p
+              style="font-size: 11px; color: var(--ink-faint); font-weight: 500"
+            >
+              closed investigations
+            </p>
+          </div>
+        </div>
+        <style>
+          .stat-card-cm:hover {
+            box-shadow: var(--shadow-card-hover);
+            border-color: var(--f-100) !important;
+          }
+        </style>
+        <!-- Data Table Section -->
+        <div
+          style="
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+          "
+        >
+          <!-- Table Controls -->
+          <div
+            style="
+              padding: 12px 16px;
+              border-bottom: 1px solid var(--line);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background: var(--paper);
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 10px">
+              <!-- Search -->
+              <div style="position: relative">
+                <span
+                  class="material-symbols-outlined"
+                  style="
+                    position: absolute;
+                    left: 9px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    font-size: 16px;
+                    color: var(--ink-faint);
+                  "
+                  >search</span
+                >
+                <input
+                  id="case-search"
+                  class="filter-input-cm"
+                  style="width: 280px; padding-left: 32px"
+                  placeholder="Search cases…"
+                  type="text"
+                />
+              </div>
+              <select
+                id="status-filter"
+                class="filter-input-cm"
+                style="width: 160px"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="ACTIVE">Active</option>
+                <option value="CLOSED">Closed</option>
+                <option value="CRITICAL">Critical</option>
+              </select>
+              <select
+                id="date-filter"
+                class="filter-input-cm"
+                style="width: 160px"
+              >
+                <option value="ALL">Any Time</option>
+                <option value="24H">Last 24 Hours</option>
+                <option value="7D">Last Week</option>
+                <option value="30D">Last 30 Days</option>
+                <option value="6M">Last 6 Months</option>
+                <option value="1Y">Last Year</option>
+              </select>
+            </div>
+            <div
+              id="table-showing-count"
+              style="font-size: 11px; color: var(--ink-faint); font-weight: 500"
+            >
+              Showing
+              <span style="color: var(--ink); font-weight: 700">0</span>
+              investigations
+            </div>
+          </div>
+          <!-- Table Content -->
+          <div class="overflow-x-auto">
+            <table
+              style="width: 100%; text-align: left; border-collapse: collapse"
+            >
+              <thead>
+                <tr
+                  style="
+                    background: var(--paper);
+                    border-bottom: 1px solid var(--line);
+                  "
+                >
+                  <th class="table-th" style="width: 120px">Case No.</th>
+                  <th class="table-th">Title / Reference</th>
+                  <th class="table-th">Status</th>
+                  <th class="table-th" style="text-align: center">Triggers</th>
+                  <th class="table-th">Last Updated</th>
+                  <th class="table-th" style="width: 40px"></th>
+                </tr>
+              </thead>
+              <tbody
+                id="case-table-body"
+                style="
+                  font-size: 13px;
+                  font-family: &quot;Inter&quot;, sans-serif;
+                "
+              >
+                <!-- Dynamically populated from SQLite database -->
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination Footer -->
+          <div
+            style="
+              padding: 10px 16px;
+              border-top: 1px solid var(--line);
+              background: var(--paper);
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="font-size: 11px; color: var(--ink-faint)"
+                >Rows per page:</span
+              >
+              <select
+                style="
+                  background: transparent;
+                  border: none;
+                  font-size: 11px;
+                  font-weight: 700;
+                  color: var(--ink);
+                  cursor: pointer;
+                  outline: none;
+                "
+              >
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px">
+              <button class="page-btn-tx" disabled>
+                <span class="material-symbols-outlined" style="font-size: 16px"
+                  >chevron_left</span
+                >
+              </button>
+              <span
+                id="pagination-text"
+                style="
+                  font-size: 11px;
+                  font-weight: 700;
+                  color: var(--ink);
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                "
+                >Page 1 of 1</span
+              >
+              <button class="page-btn-tx">
+                <span class="material-symbols-outlined" style="font-size: 16px"
+                  >chevron_right</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    </div>
+    <!-- Create Case Modal -->
+    <div
+      id="create-case-modal"
+      class="fixed inset-0 z-[120] hidden items-start justify-center bg-black/50 backdrop-blur-sm px-4 py-6 overflow-y-auto"
+    >
+      <div
+        class="w-full max-w-2xl card-elevated rounded-xl border border-border-subtle overflow-y-auto max-h-fit my-auto"
+      >
+        <div
+          class="flex items-start justify-between gap-4 px-6 py-5 border-b border-border-subtle bg-surface-muted"
+        >
+          <div>
+            <h3
+              class="text-headline-md font-headline-md font-bold text-on-surface"
+            >
+              Create Case
+            </h3>
+            <p class="text-text-body text-body-sm mt-1">
+              Add a new investigation record to the case manager.
+            </p>
+          </div>
+          <button
+            id="create-case-close"
+            class="w-10 h-10 rounded-full flex items-center justify-center text-secondary hover:bg-surface-container transition-colors"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form id="create-case-form" class="px-6 py-6 space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="flex flex-col gap-2">
+              <span
+                class="text-label-sm font-bold uppercase tracking-widest text-secondary"
+                >Case Number</span
+              >
+              <input
+                id="case-number"
+                name="caseNumber"
+                type="text"
+                required
+                class="h-12 px-4 rounded-lg border border-border-subtle bg-surface text-on-surface focus:outline-none focus:border-primary"
+                placeholder="FX-2026-001"
+              />
+            </label>
+
+            <label class="flex flex-col gap-2">
+              <span
+                class="text-label-sm font-bold uppercase tracking-widest text-secondary"
+                >Status</span
+              >
+              <select
+                id="case-status"
+                name="status"
+                required
+                class="h-12 px-4 rounded-lg border border-border-subtle bg-surface text-on-surface focus:outline-none focus:border-primary"
+              >
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="ACTIVE" selected>ACTIVE</option>
+                <option value="CLOSED">CLOSED</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="flex flex-col gap-2">
+            <span
+              class="text-label-sm font-bold uppercase tracking-widest text-secondary"
+              >Title</span
+            >
+            <input
+              id="case-title"
+              name="title"
+              type="text"
+              required
+              class="h-12 px-4 rounded-lg border border-border-subtle bg-surface text-on-surface focus:outline-none focus:border-primary"
+              placeholder="Case title"
+            />
+          </label>
+
+          <label class="flex flex-col gap-2">
+            <span
+              class="text-label-sm font-bold uppercase tracking-widest text-secondary"
+              >Subtitle
+              <span class="normal-case font-normal tracking-normal"
+                >(optional)</span
+              ></span
+            >
+            <textarea
+              id="case-subtitle"
+              name="subtitle"
+              rows="3"
+              class="px-4 py-3 rounded-lg border border-border-subtle bg-surface text-on-surface focus:outline-none focus:border-primary resize-none"
+              placeholder="Short supporting description"
+            ></textarea>
+          </label>
+
+          <div class="flex flex-col gap-3" id="suspects-container">
+            <div
+              class="suspect-entry flex flex-col gap-3 p-4 rounded-lg border border-border-subtle bg-surface-container-lowest"
+            >
+              <div class="flex justify-between items-center">
+                <span
+                  class="text-label-sm font-bold uppercase tracking-widest text-secondary suspect-number"
+                  >Suspect 1</span
+                >
+              </div>
+              <input
+                type="text"
+                name="suspectName"
+                required
+                placeholder="Suspect Name (e.g. Lakshit Verma)"
+                class="h-10 px-3 rounded-lg border border-border-subtle bg-surface text-on-surface text-sm focus:outline-none focus:border-primary"
+              />
+              <input
+                type="file"
+                name="suspectFiles"
+                multiple
+                accept=".pdf"
+                class="px-3 py-2 text-sm rounded-lg border border-border-subtle bg-surface text-on-surface focus:outline-none focus:border-primary"
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            id="add-suspect-btn"
+            class="flex items-center gap-1.5 text-primary font-bold text-sm hover:underline w-fit"
+          >
+            <span class="material-symbols-outlined text-[18px]"
+              >add_circle</span
+            >
+            Add Another Suspect
+          </button>
+
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              id="create-case-cancel"
+              class="px-5 py-3 rounded-lg border border-border-subtle text-secondary font-bold hover:bg-surface-container transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-3 rounded-lg bg-primary text-on-primary font-bold hover:brightness-110 transition-all active:scale-95"
+            >
+              Create Case
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Parsing Loading Overlay -->
+    <div
+      id="parsing-loading-overlay"
+      class="fixed inset-0 z-[200] hidden flex-col items-center justify-center bg-black/75 backdrop-blur-md transition-all duration-300"
+    >
+      <div
+        class="w-full max-w-md bg-neutral-900 border border-neutral-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center text-center"
+      >
+        <!-- Animated spinner -->
+        <div class="relative w-20 h-20 mb-6">
+          <div
+            class="absolute inset-0 rounded-full border-4 border-primary/20"
+          ></div>
+          <div
+            class="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"
+          ></div>
+          <div
+            class="absolute inset-4 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center"
+          >
+            <span
+              class="material-symbols-outlined text-primary text-3xl animate-pulse"
+              >analytics</span
+            >
+          </div>
+        </div>
+
+        <h3 class="text-xl font-bold text-neutral-100 mb-2">
+          Analyzing Statements
+        </h3>
+        <p id="loading-status-text" class="text-sm text-neutral-400 mb-6">
+          Uploading statement PDF files...
+        </p>
+
+        <!-- Progress Bar Container -->
+        <div
+          class="w-full bg-neutral-800 h-2 rounded-full overflow-hidden mb-2 relative"
+        >
+          <div
+            id="loading-progress-bar"
+            class="bg-primary h-full w-[5%] transition-all duration-300 ease-out shadow-[0_0_12px_rgba(59,130,246,0.5)]"
+          ></div>
+        </div>
+        <span
+          id="loading-progress-percent"
+          class="text-xs font-mono text-primary font-bold"
+          >5% Complete</span
+        >
+      </div>
+    </div>
+
+    <!-- Parsing Success Popup -->
+    <div
+      id="parsing-success-modal"
+      class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/60 backdrop-blur-sm px-4 transition-all duration-300"
+    >
+      <div
+        class="w-full max-w-md bg-neutral-900 border border-neutral-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center text-center"
+      >
+        <!-- Success Icon with bounce animation -->
+        <div
+          class="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 text-green-500 flex items-center justify-center mb-5 scale-95 animate-pulse"
+        >
+          <span class="material-symbols-outlined text-4xl">check_circle</span>
+        </div>
+
+        <h3 class="text-xl font-bold text-neutral-100 mb-2">
+          Case Created Successfully
+        </h3>
+        <p id="success-modal-description" class="text-sm text-neutral-400 mb-6">
+          Your bank statements have been parsed locally. Extracted transactions
+          have been stored in the SQLite database.
+        </p>
+
+        <button
+          id="success-modal-ok-btn"
+          class="w-full h-12 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold transition-all duration-150 active:scale-95"
+        >
+          Awesome, view cases
+        </button>
+      </div>
+    </div>
+    <!-- Custom Delete Confirmation Modal -->
+    <div
+      id="delete-case-modal"
+      class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4 transition-all duration-300"
+    >
+      <div
+        class="w-full max-w-md card-elevated p-8 rounded-xl flex flex-col items-center text-center"
+      >
+        <!-- Warning Icon -->
+        <div
+          class="w-16 h-16 rounded-full bg-status-critical/10 border border-status-critical/30 text-status-critical flex items-center justify-center mb-5 animate-pulse"
+        >
+          <span class="material-symbols-outlined text-4xl">warning</span>
+        </div>
+
+        <h3 class="text-xl font-bold text-on-surface mb-2">Delete Case</h3>
+        <p
+          id="delete-case-modal-desc"
+          class="text-sm text-on-surface-variant mb-6"
+        >
+          Are you sure you want to permanently delete this case? All associated
+          target entities, statements, and transaction records will be
+          permanently removed.
+        </p>
+
+        <div class="flex items-center gap-3 w-full">
+          <button
+            id="delete-case-cancel-btn"
+            type="button"
+            class="flex-1 h-12 rounded-lg border border-border-subtle hover:bg-surface-container text-secondary font-bold transition-all duration-150 active:scale-95"
+          >
+            Cancel
+          </button>
+          <button
+            id="delete-case-confirm-btn"
+            type="button"
+            class="flex-1 h-12 rounded-lg bg-status-critical text-on-status-critical font-bold transition-all duration-150 active:scale-95 hover:brightness-110 shadow-[0_0_12px_rgba(239,68,68,0.15)]"
+          >
+            Delete Case
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Micro-interactions Script -->
+    <script type="module">
+      import { attachCaseManagerInteractions } from "./src/interactions/case-manager.js?v=4";
+      import { initSidebar } from "./src/interactions/sidebar.js";
+
+      initSidebar();
+      attachCaseManagerInteractions();
+    </script>
+  </body>
+</html>

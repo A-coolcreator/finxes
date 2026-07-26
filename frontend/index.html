@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <script>
+        window.location.href = "/";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinExis Statement Profile Extractor</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(240 3.7% 15.9%)",
+                        input: "hsl(240 3.7% 15.9%)",
+                        ring: "hsl(240 4.9% 83.9%)",
+                        background: "hsl(240 10% 3.9%)",
+                        foreground: "hsl(0 0% 98%)",
+                        primary: {
+                            DEFAULT: "hsl(0 0% 98%)",
+                            foreground: "hsl(240 5.9% 10%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(240 3.7% 15.9%)",
+                            foreground: "hsl(0 0% 98%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 62.8% 30.6%)",
+                            foreground: "hsl(0 0% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(240 3.7% 15.9%)",
+                            foreground: "hsl(240 5% 64.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(240 3.7% 15.9%)",
+                            foreground: "hsl(0 0% 98%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(240 10% 3.9%)",
+                            foreground: "hsl(0 0% 98%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(240 10% 6%)",
+                            foreground: "hsl(0 0% 98%)",
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Outfit Font & JetBrains Mono -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: hsl(240 10% 3.9%);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="text-foreground min-h-screen flex flex-col antialiased">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-foreground text-background p-2 rounded-lg flex items-center justify-center">
+                    <i data-lucide="zap" class="w-5 h-5"></i>
+                </div>
+                <span
+                    class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-neutral-50 to-neutral-400 bg-clip-text text-transparent">FinExis
+                    Extractor</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span
+                    class="text-xs text-muted-foreground bg-secondary px-3 py-1 rounded-full border border-border flex items-center gap-1.5 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Python Server Mode
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
+
+        <!-- Left Column: Controls & Tips -->
+        <div class="w-full md:w-80 flex flex-col space-y-6 shrink-0">
+            <!-- Upload Card -->
+            <div class="bg-card border border-border rounded-xl p-6 shadow-xl relative overflow-hidden">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <i data-lucide="upload" class="w-4 h-4"></i> Upload File
+                </h2>
+                <div id="dropzone"
+                    class="border-2 border-dashed border-border hover:border-neutral-500 transition-colors duration-200 rounded-lg p-6 text-center cursor-pointer bg-neutral-900/40 relative">
+                    <input type="file" id="fileInput" accept=".pdf" class="hidden">
+                    <div class="space-y-3">
+                        <div class="p-3 bg-neutral-800 rounded-full w-fit mx-auto text-muted-foreground dropzone-icon">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-sm font-medium">Drag & drop your PDF statement here</div>
+                        <div class="text-xs text-muted-foreground">Runs python scripts directly</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology Card -->
+            <div class="bg-card border border-border rounded-xl p-6 shadow-xl">
+                <h2
+                    class="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-4 h-4"></i> Methodology
+                </h2>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <div class="font-semibold text-neutral-200">Column Separation</div>
+                        <div class="text-muted-foreground text-xs mt-1">Keeps user details strictly separated from bank branch addresses.</div>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-neutral-200">Smart Bank Matching</div>
+                        <div class="text-muted-foreground text-xs mt-1">Identifies the correct bank using official branch codes to avoid keyword confusion.</div>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-neutral-200">Targeted Parsing</div>
+                        <div class="text-muted-foreground text-xs mt-1">Focuses extraction searches strictly on the top section to skip layout noise.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Results Dashboard -->
+        <div class="flex-grow flex flex-col space-y-6">
+
+            <!-- Welcome Empty State -->
+            <div id="empty-state"
+                class="bg-card border border-border rounded-xl p-12 text-center shadow-xl flex flex-col items-center justify-center flex-grow min-h-[300px]">
+                <div class="p-4 bg-neutral-900 rounded-full border border-border mb-6">
+                    <i data-lucide="sparkles" class="w-8 h-8 text-neutral-400"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">No Statement Loaded</h3>
+                <p class="text-sm text-muted-foreground max-w-sm mx-auto mb-6">Upload a bank or UPI statement to run
+                    Python parsers and isolate profile details and transactional records.</p>
+            </div>
+
+            <!-- Progress Loader Overlay -->
+            <div id="progress-state"
+                class="hidden bg-card border border-border rounded-xl p-12 text-center shadow-xl flex flex-col items-center justify-center flex-grow min-h-[300px]">
+                <div class="w-full max-w-md space-y-6">
+                    <!-- Rotating spinner -->
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-foreground mx-auto">
+                    </div>
+                    <div class="space-y-2">
+                        <div class="text-lg font-bold" id="progress-step">Uploading statement PDF...</div>
+                        <div class="text-xs text-muted-foreground" id="progress-percent">0% Completed</div>
+                    </div>
+                    <!-- progress bar -->
+                    <div class="w-full bg-secondary h-1.5 rounded-full overflow-hidden border border-border">
+                        <div id="progress-bar-fill" class="bg-foreground h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Results (Hidden by default) -->
+            <div id="dashboard-results" class="hidden space-y-6">
+
+                <!-- Overview Header Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-card border border-border rounded-xl p-6 shadow">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Detected
+                            Institution</div>
+                        <div class="text-xl font-extrabold mt-1 text-white" id="out-inst">UNKNOWN</div>
+                    </div>
+                    <div class="bg-card border border-border rounded-xl p-6 shadow">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account Holder
+                            Name</div>
+                        <div class="text-xl font-extrabold mt-1 text-white" id="out-name">UNKNOWN</div>
+                    </div>
+                    <div class="bg-card border border-border rounded-xl p-6 shadow">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account Number
+                        </div>
+                        <div class="text-xl font-extrabold mt-1 text-white" id="out-acct">UNKNOWN</div>
+                    </div>
+                </div>
+
+                <!-- Tab Headers -->
+                <div class="border-b border-border flex space-x-6">
+                    <button id="btn-tab-profile"
+                        class="pb-3 text-sm font-semibold border-b-2 border-foreground text-foreground transition-all duration-150">Profile
+                        Schema</button>
+                    <button id="btn-tab-ledger"
+                        class="pb-3 text-sm font-semibold border-b-2 border-transparent text-muted-foreground hover:text-foreground transition-all duration-150">Transaction
+                        Ledger</button>
+                    <button id="btn-tab-json"
+                        class="pb-3 text-sm font-semibold border-b-2 border-transparent text-muted-foreground hover:text-foreground transition-all duration-150">Raw
+                        JSON</button>
+                </div>
+
+                <!-- Tab Content: Profile Schema -->
+                <div id="tab-profile-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Box 1: Account Holder -->
+                    <div class="bg-card border border-border rounded-xl p-6 shadow space-y-4">
+                        <h3 class="text-md font-bold border-b border-border pb-2 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4 text-muted-foreground"></i> Account Holder
+                        </h3>
+                        <table class="w-full text-sm">
+                            <tbody class="divide-y divide-border/40">
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Name</td>
+                                    <td class="py-2 font-medium text-right" id="val-name">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Customer ID / CRN</td>
+                                    <td class="py-2 font-medium text-right" id="val-cid">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Mobile Number</td>
+                                    <td class="py-2 font-medium text-right" id="val-mobile">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Email ID</td>
+                                    <td class="py-2 font-medium text-right" id="val-email">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Pan Number</td>
+                                    <td class="py-2 font-medium text-right" id="val-pan">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Joint Holders</td>
+                                    <td class="py-2 font-medium text-right" id="val-joint">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Raw Address</td>
+                                    <td class="py-2 text-xs text-muted-foreground text-right max-w-[200px] break-words"
+                                        id="val-address">UNKNOWN</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Box 2: Account Profile & Routing -->
+                    <div class="bg-card border border-border rounded-xl p-6 shadow space-y-4">
+                        <h3 class="text-md font-bold border-b border-border pb-2 flex items-center gap-2">
+                            <i data-lucide="credit-card" class="w-4 h-4 text-muted-foreground"></i> Profile & Routing
+                        </h3>
+                        <table class="w-full text-sm">
+                            <tbody class="divide-y divide-border/40">
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Account Number</td>
+                                    <td class="py-2 font-medium text-right" id="val-acct">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Account Type</td>
+                                    <td class="py-2 font-medium text-right" id="val-type">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">IFSC Code</td>
+                                    <td class="py-2 font-medium text-right" id="val-ifsc">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">MICR Code</td>
+                                    <td class="py-2 font-medium text-right" id="val-micr">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Branch Name</td>
+                                    <td class="py-2 font-medium text-right" id="val-branch-name">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Branch Code</td>
+                                    <td class="py-2 font-medium text-right" id="val-branch-code">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Statement Period</td>
+                                    <td class="py-2 font-medium text-right" id="val-period">UNKNOWN</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 text-muted-foreground">Nominee Registry</td>
+                                    <td class="py-2 font-medium text-right" id="val-nominee">UNKNOWN</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- UPI Statistics Block (Rendered if platform is UPI) -->
+                    <div id="box-upi-stats"
+                        class="hidden md:col-span-2 bg-card border border-border rounded-xl p-6 shadow space-y-4">
+                        <h3 class="text-md font-bold border-b border-border pb-2 flex items-center gap-2">
+                            <i data-lucide="smartphone" class="w-4 h-4 text-muted-foreground"></i> UPI Summary Details
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-xs text-muted-foreground uppercase font-semibold">Total Sent</div>
+                                <div class="text-lg font-bold mt-1 text-white" id="val-upi-sent">UNKNOWN</div>
+                            </div>
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-xs text-muted-foreground uppercase font-semibold">Total Received</div>
+                                <div class="text-lg font-bold mt-1 text-white" id="val-upi-recv">UNKNOWN</div>
+                            </div>
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-xs text-muted-foreground uppercase font-semibold">Transaction Count
+                                </div>
+                                <div class="text-lg font-bold mt-1 text-white" id="val-upi-count">UNKNOWN</div>
+                            </div>
+                            <div class="p-4 bg-secondary rounded-lg">
+                                <div class="text-xs text-muted-foreground uppercase font-semibold">Wallet Balance</div>
+                                <div class="text-lg font-bold mt-1 text-white" id="val-upi-wallet">UNKNOWN</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Transaction Ledger (Shadcn style table) -->
+                <div id="tab-ledger-content"
+                    class="hidden bg-card border border-border rounded-xl p-6 shadow space-y-4">
+                    <div
+                        class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-4">
+                        <div class="space-y-1">
+                            <h3 class="text-lg font-bold flex items-center gap-2">
+                                <i data-lucide="list-ordered" class="w-5 h-5 text-muted-foreground"></i> Transaction
+                                Record List
+                            </h3>
+                            <p class="text-xs text-muted-foreground" id="ledger-count-label">Loading records...</p>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <div class="relative flex-grow sm:flex-grow-0">
+                                <i data-lucide="search"
+                                    class="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground"></i>
+                                <input type="text" id="tx-search-input" placeholder="Search narration..."
+                                    class="bg-secondary border border-border text-sm rounded-lg pl-9 pr-4 py-2 w-full sm:w-64 focus:outline-none focus:border-neutral-500">
+                            </div>
+                            <button id="btn-export-csv"
+                                class="text-xs bg-foreground text-background hover:bg-neutral-200 transition duration-150 px-3 py-2 rounded font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Table wrapper -->
+                    <div class="overflow-x-auto w-full max-h-[500px]">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead
+                                class="bg-secondary border-b border-border text-xs uppercase tracking-wider text-muted-foreground sticky top-0">
+                                <tr id="ledger-headers-row">
+                                    <!-- Dynamic headers will be injected here -->
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border/60" id="ledger-body-rows">
+                                <!-- Dynamic rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Content: JSON -->
+                <div id="tab-json-content" class="hidden bg-card border border-border rounded-xl p-6 shadow space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-md font-bold flex items-center gap-2">
+                            <i data-lucide="braces" class="w-4 h-4 text-muted-foreground"></i> Output Profile JSON
+                        </h3>
+                        <div class="flex items-center space-x-2">
+                            <button id="btn-copy-json"
+                                class="text-xs bg-secondary text-foreground hover:bg-neutral-800 transition duration-150 px-3 py-1.5 rounded border border-border flex items-center gap-1.5">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy to Clipboard
+                            </button>
+                            <button id="btn-download-json"
+                                class="text-xs bg-foreground text-background hover:bg-neutral-200 transition duration-150 px-3 py-1.5 rounded font-semibold flex items-center gap-1.5">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> Download File
+                            </button>
+                        </div>
+                    </div>
+                    <pre class="bg-neutral-950 border border-border/60 rounded-lg p-6 overflow-x-auto text-xs mono leading-relaxed text-neutral-300"
+                        id="json-display"></pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-border bg-card/20 py-4 text-center text-xs text-muted-foreground mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            &copy; 2026 FinExis Analytics. Secured server-side Python parser execution.
+        </div>
+    </footer>
+
+    <!-- Scripting frontend UI calls -->
+    <script>
+        // Initialize lucide icons
+        lucide.createIcons();
+
+        // Elements
+        const dropzone = document.getElementById("dropzone");
+        const fileInput = document.getElementById("fileInput");
+        const emptyState = document.getElementById("empty-state");
+        const progressState = document.getElementById("progress-state");
+        const dashboardResults = document.getElementById("dashboard-results");
+
+        const progressStep = document.getElementById("progress-step");
+        const progressPercent = document.getElementById("progress-percent");
+        const progressBarFill = document.getElementById("progress-bar-fill");
+
+        // Tabs
+        const btnTabProfile = document.getElementById("btn-tab-profile");
+        const btnTabLedger = document.getElementById("btn-tab-ledger");
+        const btnTabJson = document.getElementById("btn-tab-json");
+
+        const tabProfileContent = document.getElementById("tab-profile-content");
+        const tabLedgerContent = document.getElementById("tab-ledger-content");
+        const tabJsonContent = document.getElementById("tab-json-content");
+
+        // Overview / Header fields
+        const outInst = document.getElementById("out-inst");
+        const outName = document.getElementById("out-name");
+        const outAcct = document.getElementById("out-acct");
+
+        // Action Buttons
+        const btnCopyJson = document.getElementById("btn-copy-json");
+        const btnDownloadJson = document.getElementById("btn-download-json");
+        const btnExportCsv = document.getElementById("btn-export-csv");
+        const jsonDisplay = document.getElementById("json-display");
+
+        // Ledger Table Details
+        const ledgerHeadersRow = document.getElementById("ledger-headers-row");
+        const ledgerBodyRows = document.getElementById("ledger-body-rows");
+        const ledgerCountLabel = document.getElementById("ledger-count-label");
+        const txSearchInput = document.getElementById("tx-search-input");
+
+        let currentMetadata = null;
+        let currentTransactions = [];
+        let currentFilename = "";
+
+        // Tab Switching Logic
+        btnTabProfile.addEventListener("click", () => switchTab(btnTabProfile, tabProfileContent));
+        btnTabLedger.addEventListener("click", () => switchTab(btnTabLedger, tabLedgerContent));
+        btnTabJson.addEventListener("click", () => switchTab(btnTabJson, tabJsonContent));
+
+        function switchTab(activeBtn, activeContent) {
+            [btnTabProfile, btnTabLedger, btnTabJson].forEach(b => {
+                b.className = "pb-3 text-sm font-semibold border-b-2 border-transparent text-muted-foreground hover:text-foreground transition-all duration-150";
+            });
+            [tabProfileContent, tabLedgerContent, tabJsonContent].forEach(c => c.classList.add("hidden"));
+
+            activeBtn.className = "pb-3 text-sm font-semibold border-b-2 border-foreground text-foreground transition-all duration-150";
+            activeContent.classList.remove("hidden");
+        }
+
+        // Trigger file input dialog
+        dropzone.addEventListener("click", () => fileInput.click());
+
+        // File drop triggers
+        dropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropzone.classList.add("border-neutral-400");
+        });
+
+        dropzone.addEventListener("dragleave", () => {
+            dropzone.classList.remove("border-neutral-400");
+        });
+
+        dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("border-neutral-400");
+            if (e.dataTransfer.files.length > 0) {
+                processFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                processFile(e.target.files[0]);
+            }
+        });
+
+        // Search Filter for Transactions list
+        txSearchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase();
+            renderTransactionTable(currentTransactions, query);
+        });
+
+        // State machine manager for progress reporting
+        function updateProgress(percent, stepText) {
+            progressBarFill.style.width = `${percent}%`;
+            progressPercent.innerText = `${percent}% Completed`;
+            progressStep.innerText = stepText;
+        }
+
+        // File Processor Orchestrator
+        async function processFile(file) {
+            if (!file || file.type !== "application/pdf") {
+                alert("Please upload a valid PDF document.");
+                return;
+            }
+
+            currentFilename = file.name;
+            emptyState.classList.add("hidden");
+            dashboardResults.classList.add("hidden");
+            progressState.classList.remove("hidden");
+
+            // Start simulated gradual growth
+            let progress = 5;
+            updateProgress(progress, "Uploading statement PDF...");
+
+            const progressInterval = setInterval(() => {
+                if (progress < 95) {
+                    // Gradually slow down as it gets closer to 95%
+                    const increment = Math.max(0.5, (95 - progress) * 0.05 + Math.random() * 1.5);
+                    progress = Math.min(95, progress + increment);
+
+                    let stepText = "Uploading statement PDF...";
+                    if (progress > 25 && progress <= 55) {
+                        stepText = "Running profile metadata engine (python)...";
+                    } else if (progress > 55 && progress <= 80) {
+                        stepText = "Parsing transaction logs...";
+                    } else if (progress > 80) {
+                        stepText = "Building tabular reports...";
+                    }
+
+                    updateProgress(Math.floor(progress), stepText);
+                }
+            }, 150);
+
+            try {
+                // Construct file data payload
+                const formData = new FormData();
+                formData.append("file", file);
+
+                // Call serverless endpoint /api/extract
+                const response = await fetch("/api/extract", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errDetail = await response.json();
+                    throw new Error(errDetail.detail || "Server error processing PDF");
+                }
+
+                const data = await response.json();
+
+                // Stop interval and complete progress bar
+                clearInterval(progressInterval);
+                updateProgress(100, "Dashboard loaded successfully!");
+
+                currentMetadata = data.metadata;
+                currentTransactions = data.transactions;
+
+                renderDashboard(currentMetadata);
+                renderTransactionTable(currentTransactions);
+
+                // Wait 300ms for visual feedback before transitions
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Show success results
+                progressState.classList.add("hidden");
+                dashboardResults.classList.remove("hidden");
+                switchTab(btnTabProfile, tabProfileContent);
+
+            } catch (err) {
+                clearInterval(progressInterval);
+                console.error(err);
+                alert("Python Extraction Failed: " + err.message);
+                progressState.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+            }
+        }
+
+        // Clean value renderer with UNKNOWN styled badge
+        function renderCell(val, elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+
+            if (val === "UNKNOWN" || val === "" || val === null) {
+                el.innerHTML = `<span class="badge-unknown px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 border border-red-500/30 text-red-500 font-mono">UNKNOWN</span>`;
+            } else {
+                el.innerHTML = `<span class="text-neutral-200">${val}</span>`;
+            }
+        }
+
+        // Render extracted fields onto screen DOM
+        function renderDashboard(meta) {
+            // Overview summaries
+            let instName = meta.institution.bank_name;
+            if (instName === "UNKNOWN") {
+                instName = meta.institution.platform;
+            }
+
+            renderCell(instName, "out-inst");
+            renderCell(meta.account_holder.name, "out-name");
+            renderCell(meta.account_profile.account_number, "out-acct");
+
+            // Holder details
+            renderCell(meta.account_holder.name, "val-name");
+            renderCell(meta.account_holder.customer_id_or_crn, "val-cid");
+            renderCell(meta.account_holder.mobile_number, "val-mobile");
+            renderCell(meta.account_holder.email, "val-email");
+            renderCell(meta.account_holder.pan_number, "val-pan");
+            renderCell(meta.account_holder.joint_holders, "val-joint");
+            renderCell(meta.account_holder.address_raw, "val-address");
+
+            // Profile details
+            renderCell(meta.account_profile.account_number, "val-acct");
+            renderCell(meta.account_profile.account_type, "val-type");
+            renderCell(meta.routing_identifiers.ifsc_code, "val-ifsc");
+            renderCell(meta.routing_identifiers.micr_code, "val-micr");
+            renderCell(meta.routing_identifiers.branch_name, "val-branch-name");
+            renderCell(meta.routing_identifiers.branch_code, "val-branch-code");
+            renderCell(meta.statement_details.period_raw, "val-period");
+            renderCell(meta.account_profile.nominee_registered, "val-nominee");
+
+            // UPI Box display triggers
+            const upiBox = document.getElementById("box-upi-stats");
+            if (meta.document_type === "UPI_STATEMENT") {
+                upiBox.classList.remove("hidden");
+                renderCell(meta.upi_summary.total_sent, "val-upi-sent");
+                renderCell(meta.upi_summary.total_received, "val-upi-recv");
+                renderCell(meta.upi_summary.transaction_count, "val-upi-count");
+                renderCell(meta.upi_summary.wallet_balance, "val-upi-wallet");
+            } else {
+                upiBox.classList.add("hidden");
+            }
+
+            // JSON pre block content injection
+            jsonDisplay.innerText = JSON.stringify(meta, null, 2);
+        }
+
+        // Render transactions array in layout grid
+        function renderTransactionTable(transactions, query = "") {
+            // Empty columns config
+            ledgerHeadersRow.innerHTML = "";
+            ledgerBodyRows.innerHTML = "";
+
+            if (!transactions || transactions.length === 0) {
+                ledgerCountLabel.innerText = "0 transactions extracted.";
+                ledgerBodyRows.innerHTML = `<tr><td colspan="100%" class="py-8 text-center text-muted-foreground">No transaction data extracted by Python tabular engine.</td></tr>`;
+                return;
+            }
+
+            // Determine unique key names dynamically
+            const columns = Object.keys(transactions[0]);
+
+            // Build Table Headers
+            columns.forEach(col => {
+                const th = document.createElement("th");
+                th.className = "py-3 px-4 text-left font-semibold text-neutral-300";
+                th.innerText = col.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+                ledgerHeadersRow.appendChild(th);
+            });
+
+            // Filter transactions by narration query
+            const filtered = transactions.filter(t => {
+                if (!query) return true;
+                return Object.values(t).some(val =>
+                    String(val).toLowerCase().includes(query)
+                );
+            });
+
+            ledgerCountLabel.innerText = `Showing ${filtered.length} of ${transactions.length} records found`;
+
+            if (filtered.length === 0) {
+                ledgerBodyRows.innerHTML = `<tr><td colspan="100%" class="py-8 text-center text-muted-foreground">No matches found for search query.</td></tr>`;
+                return;
+            }
+
+            // Populate rows
+            filtered.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.className = "border-b border-border/30 hover:bg-secondary/20 transition duration-100";
+
+                columns.forEach(col => {
+                    const td = document.createElement("td");
+                    td.className = "py-3 px-4 text-neutral-300 break-words max-w-[280px]";
+
+                    const val = row[col];
+                    if (val === "" || val === null || val === undefined) {
+                        td.innerHTML = `<span class="text-neutral-600 font-mono">-</span>`;
+                    } else {
+                        td.innerText = String(val);
+                    }
+                    tr.appendChild(td);
+                });
+                ledgerBodyRows.appendChild(tr);
+            });
+        }
+
+        // Copy JSON logic
+        btnCopyJson.addEventListener("click", () => {
+            if (!currentMetadata) return;
+            navigator.clipboard.writeText(JSON.stringify(currentMetadata, null, 2))
+                .then(() => {
+                    const originalText = btnCopyJson.innerHTML;
+                    btnCopyJson.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> Copied!`;
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        btnCopyJson.innerHTML = originalText;
+                        lucide.createIcons();
+                    }, 2000);
+                });
+        });
+
+        // Download JSON logic
+        btnDownloadJson.addEventListener("click", () => {
+            if (!currentMetadata) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentMetadata, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            const downloadName = currentFilename.replace(/\.[^/.]+$/, "") + "_profile.json";
+            downloadAnchor.setAttribute("download", downloadName);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        });
+
+        // Export Transactions to CSV
+        btnExportCsv.addEventListener("click", () => {
+            if (currentTransactions.length === 0) return;
+
+            const columns = Object.keys(currentTransactions[0]);
+
+            // Build CSV rows
+            const csvRows = [];
+            // Header
+            csvRows.push(columns.map(c => `"${c.replace(/"/g, '""')}"`).join(","));
+
+            // Data Rows
+            currentTransactions.forEach(row => {
+                const values = columns.map(col => {
+                    const val = row[col] === null ? "" : String(row[col]);
+                    return `"${val.replace(/"/g, '""')}"`;
+                });
+                csvRows.push(values.join(","));
+            });
+
+            const csvString = csvRows.join("\n");
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", url);
+            const downloadName = currentFilename.replace(/\.[^/.]+$/, "") + "_transactions.csv";
+            downloadAnchor.setAttribute("download", downloadName);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+AIRTEL_POSTPAID,TELECOM_POSTPAID,Airtel Postpaid,Bharti Airtel Limited,"AIRTEL POSTPAID, AIRTEL BILL",DIGITAL_PAYMENT
+JIO_FIBER,TELECOM_POSTPAID,JioFiber Broadband,Reliance Jio Infocomm Limited,"JIO FIBER, JIOFIBER",DIGITAL_PAYMENT
+BSNL_BROADBAND,TELECOM_POSTPAID,BSNL Broadband,Bharat Sanchar Nigam Limited,BSNL BROADBAND,DIGITAL_PAYMENT
+ACT_FIBERNET,TELECOM_POSTPAID,ACT Fibernet,Atria Convergence Technologies Limited,"ACT FIBERNET, ACT BROADBAND",DIGITAL_PAYMENT
+HATHWAY,TELECOM_POSTPAID,Hathway Broadband,Hathway Cable and Datacom Limited,HATHWAY,DIGITAL_PAYMENT
+EXCITEL,TELECOM_POSTPAID,Excitel Broadband,Excitel Broadbands Private Limited,EXCITEL,DIGITAL_PAYMENT

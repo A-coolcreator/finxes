@@ -1,0 +1,4 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+PMC_BANK,COOP_BANK,Punjab & Maharashtra Co-op Bank,Punjab and Maharashtra Co-operative Bank Limited,PMC BANK,HIGH_RISK_COOP_BANK
+URBAN_COOP,COOP_BANK,Generic Urban Co-op Bank,(Varies),"URBAN COOP, CO-OP BANK, SAHAKARI BANK",HIGH_RISK_COOP_BANK
+DISTRICT_COOP,COOP_BANK,District Central Co-op Bank,(Varies by district),"DCCB, DISTRICT COOP",HIGH_RISK_COOP_BANK

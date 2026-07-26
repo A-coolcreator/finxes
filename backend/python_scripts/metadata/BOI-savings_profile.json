@@ -1,0 +1,48 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "BANK OF INDIA",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "MEGHA CHHAPRE",
+    "customer_id_or_crn": "134461007",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "H N 11 WARD N0 1 NEAR RAM MANDIR VILL NAKWAD PO JIJGAON KHURD TEH DIST HARDA 461331"
+  },
+  "account_profile": {
+    "account_number": "954510110000935",
+    "account_type": "SAVINGS",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "BKID0009545",
+    "micr_code": "UNKNOWN",
+    "branch_name": "GHANTAGHAR",
+    "branch_code": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "01-01-2024 to 12-06-2026",
+    "start_date": "01-01-2024",
+    "end_date": "12-06-2026",
+    "generated_at": "UNKNOWN"
+  },
+  "summary_snapshot": {
+    "opening_balance": 0.0,
+    "closing_balance": 5480.25
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

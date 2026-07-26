@@ -1,0 +1,48 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "BANK OF BARODA",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "SRIDHARA KUMAR PADHY",
+    "customer_id_or_crn": "UNKNOWN",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "AT/PO HALDIAPADAR RALAB ROAD TIRUPATI NAGAR 4TH LANE BERHAMPUR GANJAM ODISHA 760003 BERHAMPUR"
+  },
+  "account_profile": {
+    "account_number": "85650100011905",
+    "account_type": "SBA",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "BARB0DBBERH",
+    "micr_code": "760012005",
+    "branch_name": "VINCENT SCHOOL ROAD KHOLIKOTE BERHAMPUR BERHAMPUR 760005",
+    "branch_code": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "01-12-2025 to 07-02-2026",
+    "start_date": "01-12-2025",
+    "end_date": "07-02-2026",
+    "generated_at": "07/02/2026 03:54:04 PM"
+  },
+  "summary_snapshot": {
+    "opening_balance": 9330.76,
+    "closing_balance": 10968.25
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

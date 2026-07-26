@@ -1,0 +1,9 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+BESCOM,UTILITY,BESCOM (Electricity),Bangalore Electricity Supply Company Limited,BESCOM,UTILITY_PAYMENT
+MSEDCL,UTILITY,MSEDCL (Electricity),Maharashtra State Electricity Distribution Co. Ltd.,"MSEDCL, MSEB",UTILITY_PAYMENT
+TATA_POWER,UTILITY,Tata Power,Tata Power Company Limited,TATA POWER,UTILITY_PAYMENT
+ADANI_ELEC,UTILITY,Adani Electricity,Adani Electricity Mumbai Limited,ADANI ELECTRICITY,UTILITY_PAYMENT
+TNEB,UTILITY,TNEB (Tamil Nadu Electricity),Tamil Nadu Generation and Distribution Corporation,"TNEB, TANGEDCO",UTILITY_PAYMENT
+IGL,UTILITY,Indraprastha Gas (IGL),Indraprastha Gas Limited,"IGL, GAS BILL, PNG BILL",UTILITY_PAYMENT
+MGL,UTILITY,Mahanagar Gas (MGL),Mahanagar Gas Limited,"MGL, MAHANAGAR GAS",UTILITY_PAYMENT
+WATER_BILL,UTILITY,Water / Municipal Water,Various State Water Boards,"WATER BILL, MUNICIPAL WATER",UTILITY_PAYMENT

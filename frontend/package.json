@@ -1,0 +1,8 @@
+{
+  "name": "finexis-frontend-rule-engine-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:rule-engine": "node --test tests/transaction-rule-engine.test.mjs"
+  }
+}

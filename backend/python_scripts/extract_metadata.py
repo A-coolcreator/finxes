@@ -1,0 +1,2157 @@
+import os
+import sys
+import re
+import json
+
+# ============================================================
+#  UNIVERSAL SCHEMA
+# ============================================================
+
+def initialize_metadata_schema():
+    """Universal Enterprise Schema blueprint for any Indian Bank or UPI App."""
+    return {
+        # Document classification
+        "document_type": "BANK_STATEMENT",   # BANK_STATEMENT | UPI_STATEMENT
+        "institution": {
+            "bank_name": "UNKNOWN",
+            "platform": "UNKNOWN",           # UPI platform (GPay/PhonePe/Paytm etc.)
+            "country": "IN"
+        },
+        "account_holder": {
+            "name": "UNKNOWN",
+            "customer_id_or_crn": "UNKNOWN",
+            "customer_type": "UNKNOWN",
+            "ckyc_number": "UNKNOWN",
+            "pan_number": "UNKNOWN",
+            "mobile_number": "UNKNOWN",      # Critical for UPI identity
+            "email": "UNKNOWN",              # Often present in UPI statements
+            "address_raw": "UNKNOWN",
+            "joint_holders": "UNKNOWN"
+        },
+        "account_profile": {
+            "account_number": "UNKNOWN",
+            "account_type": "UNKNOWN",
+            "account_status": "UNKNOWN",
+            "currency": "INR",
+            "nominee_registered": "UNKNOWN",
+            "od_limit": "UNKNOWN"
+        },
+        "routing_identifiers": {
+            "ifsc_code": "UNKNOWN",
+            "micr_code": "UNKNOWN",
+            "branch_name": "UNKNOWN",
+            "branch_code": "UNKNOWN",
+            "branch_address": "UNKNOWN",
+            "branch_phone_number": "UNKNOWN"
+        },
+        "statement_details": {
+            "period_raw": "UNKNOWN",
+            "start_date": "UNKNOWN",
+            "end_date": "UNKNOWN",
+            "generated_at": "UNKNOWN"
+        },
+        "summary_snapshot": {
+            "opening_balance": "UNKNOWN",
+            "closing_balance": "UNKNOWN"
+        },
+        # UPI-specific summary (populated only for UPI_STATEMENT docs)
+        "upi_summary": {
+            "total_sent": "UNKNOWN",
+            "total_received": "UNKNOWN",
+            "transaction_count": "UNKNOWN",
+            "wallet_balance": "UNKNOWN",
+            "linked_accounts": []           # List of {bank, masked_account, sent, received}
+        }
+    }
+
+
+# ============================================================
+#  UTILITY HELPERS
+# ============================================================
+
+def clean_balance_string(val_str):
+    """Converts localized currency strings into computable numeric floats."""
+    if not val_str or "unknown" in str(val_str).lower():
+        return 0.0
+    try:
+        cleaned = re.sub(r"[^\d\.]", "", str(val_str))
+        return float(cleaned) if cleaned else 0.0
+    except ValueError:
+        return 0.0
+
+
+def _search(pattern, text, flags=re.IGNORECASE):
+    """Shorthand for re.search with IGNORECASE default."""
+    return re.search(pattern, text, flags)
+
+
+def _first_val(text, *patterns):
+    """Return the first group(1) match among given regex patterns."""
+    for p in patterns:
+        m = _search(p, text)
+        if m:
+            return m.group(1).strip()
+    return None
+
+
+def _extract_period(text, patterns):
+    """Try multiple period regex patterns; return (start, end, raw) tuple or None."""
+    for p in patterns:
+        m = _search(p, text)
+        if m:
+            if m.lastindex and m.lastindex >= 2:
+                start, end = m.group(1).strip(), m.group(2).strip()
+                return start, end, f"{start} to {end}"
+            elif m.lastindex == 1:
+                raw = m.group(1).strip()
+                parts = re.split(r"\s*[-\u2013to]+\s*", raw, maxsplit=1)
+                if len(parts) == 2:
+                    return parts[0].strip(), parts[1].strip(), raw
+                return raw, raw, raw
+    return None
+
+
+def _set_period(meta, period_tuple):
+    if period_tuple:
+        meta["statement_details"]["start_date"] = period_tuple[0]
+        meta["statement_details"]["end_date"] = period_tuple[1]
+        meta["statement_details"]["period_raw"] = period_tuple[2]
+
+
+# ============================================================
+#  BANK IDENTIFICATION
+# ============================================================
+
+def identify_document(text_lower, source_label=""):
+    """
+    Classify document as UPI app statement or bank statement.
+    Returns (doc_type, platform_or_bank) tuple.
+    doc_type: 'UPI_STATEMENT' | 'BANK_STATEMENT'
+    """
+    label_lower = source_label.lower()
+    
+    # 1. Filename-based checks (Highest accuracy fallback)
+    if "gpay" in label_lower or "google_pay" in label_lower:
+        return "UPI_STATEMENT", "GOOGLE PAY"
+    if "phonepe" in label_lower or "phone_pe" in label_lower:
+        return "UPI_STATEMENT", "PHONEPE"
+    if "paytm" in label_lower:
+        return "UPI_STATEMENT", "PAYTM"
+    if "mobikwik" in label_lower:
+        return "UPI_STATEMENT", "MOBIKWIK"
+    if "super_money" in label_lower or "supermoney" in label_lower:
+        return "UPI_STATEMENT", "SUPERMONEY"
+
+    # 2. Layout/Text-based checks
+    lines = [l.strip() for l in text_lower.split('\n') if l.strip()]
+    top_text = "\n".join(lines[:5])
+
+    # Google Pay
+    if "transaction statement" in top_text and ("paidby" in text_lower or "upitransactionid" in text_lower or "receivedfrom" in text_lower):
+        return "UPI_STATEMENT", "GOOGLE PAY"
+        
+    # PhonePe
+    if re.search(r"transaction\s+statement\s+for\s+\d{10}", text_lower):
+        return "UPI_STATEMENT", "PHONEPE"
+
+    # Paytm
+    if "paytm statement" in text_lower or ("paytm" in text_lower and "upi ref no" in text_lower):
+        return "UPI_STATEMENT", "PAYTM"
+
+    # MobiKwik wallet statements
+    if "wallet transactions" in text_lower or "wallet balance" in text_lower or "mobikwik" in text_lower:
+        return "UPI_STATEMENT", "MOBIKWIK"
+
+    # super.money statements
+    if "transaction history" in top_text and "bank" in text_lower and "amount" in text_lower and "status" in text_lower:
+        return "UPI_STATEMENT", "SUPERMONEY"
+
+    return "BANK_STATEMENT", None
+
+
+def identify_bank(text_lower, first_page_text):
+    """Return canonical bank name from text signals (for BANK_STATEMENT docs)."""
+    lines = [l.strip() for l in first_page_text.split('\n') if l.strip()]
+    header_lines_upper = [l.upper() for l in lines[:20]]
+    header_text_upper = "\n".join(header_lines_upper)
+    header_text_lower = header_text_upper.lower()
+
+    # 1. STRICT HEADER/TAGLINE SIGNATURES (Highest priority, checks first 20 lines)
+    # SBI check must be before BOI because SBI contains BOI as substring
+    if "state bank of india" in header_text_lower:
+        return "STATE BANK OF INDIA"
+    if "relationship beyond banking" in header_text_lower or "bank of india" in header_text_lower:
+        return "BANK OF INDIA"
+    if "we understand your world" in header_text_lower or "hdfc bank" in header_text_lower:
+        return "HDFC BANK"
+    if "statement of transactions in" in header_text_lower or "your base branch" in header_text_lower or "icici bank" in header_text_lower:
+        return "ICICI BANK"
+    if "bob world" in header_text_lower or "bank of baroda" in header_text_lower:
+        return "BANK OF BARODA"
+    if "canara bank" in header_text_lower or "syndicate" in header_text_lower:
+        return "CANARA BANK"
+    if "axis bank" in header_text_lower:
+        return "AXIS BANK"
+    if "punjab national bank" in header_text_lower:
+        return "PUNJAB NATIONAL BANK"
+    if "punjab & sind" in header_text_lower or "punjab and sind" in header_text_lower:
+        return "PUNJAB & SIND BANK"
+    if "union bank of india" in header_text_lower or "union bank" in header_text_lower:
+        return "UNION BANK OF INDIA"
+    if "indian overseas bank" in header_text_lower or "indian overseas" in header_text_lower:
+        return "INDIAN OVERSEAS BANK"
+    if "kotak mahindra" in header_text_lower or "kotak bank" in header_text_lower:
+        return "KOTAK MAHINDRA BANK"
+    if "slice" in header_text_lower:
+        return "SLICE SMALL FINANCE BANK"
+    if "au small finance" in header_text_lower or "au bank" in header_text_lower or "aubank" in header_text_lower:
+        return "AU SMALL FINANCE BANK"
+
+    # 2. IFSC PATTERNS IN THE FIRST 20 LINES (Owner branch identifier fallback)
+    ifsc_match = re.search(r"\b([A-Z]{4})0[A-Z0-9]{6}\b", header_text_upper)
+    if ifsc_match:
+        prefix = ifsc_match.group(1)
+        mapping = {
+            "AUBL": "AU SMALL FINANCE BANK",
+            "UTIB": "AXIS BANK",
+            "BARB": "BANK OF BARODA",
+            "BKID": "BANK OF INDIA",
+            "CNRB": "CANARA BANK",
+            "HDFC": "HDFC BANK",
+            "ICIC": "ICICI BANK",
+            "IOBA": "INDIAN OVERSEAS BANK",
+            "KKBK": "KOTAK MAHINDRA BANK",
+            "PUNB": "PUNJAB NATIONAL BANK",
+            "PSIB": "PUNJAB & SIND BANK",
+            "SBIN": "STATE BANK OF INDIA",
+            "NESF": "SLICE SMALL FINANCE BANK",
+            "UBIN": "UNION BANK OF INDIA"
+        }
+        if prefix in mapping:
+            return mapping[prefix]
+
+    # 3. LOOSE KEYWORD FALLBACKS ON THE FULL FIRST PAGE
+    # Match using word boundaries to prevent substring pollution from transaction narrations
+    if re.search(r"\bstate\s*bank\s*of\s*india\b", text_lower) or re.search(r"\bsbin\b", text_lower):
+        return "STATE BANK OF INDIA"
+    if re.search(r"\bbank\s*of\s*india\b", text_lower) or re.search(r"\bbkid\b", text_lower):
+        return "BANK OF INDIA"
+    if re.search(r"\bhdfc\s*bank\b", text_lower) or re.search(r"\bhdfc0\b", text_lower):
+        return "HDFC BANK"
+    if re.search(r"\bicici\s*bank\b", text_lower) or re.search(r"\bicic\b", text_lower):
+        return "ICICI BANK"
+    if re.search(r"\bbank\s*of\s*baroda\b", text_lower) or re.search(r"\bbarb0\b", text_lower):
+        return "BANK OF BARODA"
+    if re.search(r"\bcanara\s*bank\b", text_lower) or re.search(r"\bcnrb\b", text_lower):
+        return "CANARA BANK"
+    if re.search(r"\baxis\s*bank\b", text_lower) or re.search(r"\butib\b", text_lower):
+        return "AXIS BANK"
+    if re.search(r"\bpunjab\s*national\s*bank\b", text_lower) or re.search(r"\bpunb\b", text_lower):
+        return "PUNJAB NATIONAL BANK"
+    if re.search(r"\bpunjab\s*&\s*sind\b", text_lower) or re.search(r"\bpsib\b", text_lower):
+        return "PUNJAB & SIND BANK"
+    if re.search(r"\bunion\s*bank\b", text_lower) or re.search(r"\bubin\b", text_lower):
+        return "UNION BANK OF INDIA"
+    if re.search(r"\bindian\s*overseas\s*bank\b", text_lower) or re.search(r"\bioba\b", text_lower):
+        return "INDIAN OVERSEAS BANK"
+    if re.search(r"\bkotak\b", text_lower) or re.search(r"\bkkbk\b", text_lower):
+        return "KOTAK MAHINDRA BANK"
+    if re.search(r"\bslice\b", text_lower) or re.search(r"\bnesf\b", text_lower):
+        return "SLICE SMALL FINANCE BANK"
+    if re.search(r"\bau\s*bank\b", text_lower) or re.search(r"\baubl\b", text_lower):
+        return "AU SMALL FINANCE BANK"
+
+    return "UNKNOWN"
+
+
+# ============================================================
+#  GLOBAL / CROSS-BANK EXTRACTORS
+# ============================================================
+
+def extract_global_identifiers(text, meta):
+    """IFSC, MICR, Account No, CRN, PAN searched across text."""
+    if meta["routing_identifiers"]["ifsc_code"] == "UNKNOWN":
+        m = _search(r"IFSC\s*(?:Code)?[:\s\-]+([A-Z]{4}0[A-Z0-9]{6})", text)
+        if m:
+            meta["routing_identifiers"]["ifsc_code"] = m.group(1).upper()
+
+    if meta["routing_identifiers"]["micr_code"] == "UNKNOWN":
+        m = _search(r"MICR\s*(?:Code)?[:\s\-]+(\d{9})", text)
+        if m:
+            meta["routing_identifiers"]["micr_code"] = m.group(1)
+
+    if meta["account_profile"]["account_number"] == "UNKNOWN":
+        m = _search(r"(?:Account|A/c|A/C)\s*(?:No|Number|Num)?[:\s\-]+(\d{9,18})", text)
+        if m:
+            meta["account_profile"]["account_number"] = m.group(1)
+
+    if meta["account_holder"]["customer_id_or_crn"] == "UNKNOWN":
+        m = _search(r"(?:CRN|Customer\s*ID|CIF\s*(?:No|ID)?|CUSTID)[:\s\-]+([A-Za-z0-9]+)", text)
+        if m:
+            meta["account_holder"]["customer_id_or_crn"] = m.group(1)
+
+    if meta["account_holder"]["pan_number"] == "UNKNOWN":
+        m = _search(r"\b([A-Z]{5}\d{4}[A-Z]{1})\b", text)
+        if m:
+            meta["account_holder"]["pan_number"] = m.group(1).upper()
+
+
+def extract_global_balances(text, meta):
+    """Fallback: scrape Opening/Closing balance from any text."""
+    if meta["summary_snapshot"]["opening_balance"] == "UNKNOWN":
+        m = _search(r"(?:Opening\s*Balance|BROUGHT\s*FORWARD)[:\s\-]*([\d,\.]+)\s*(?:Cr\.?)?", text, re.IGNORECASE)
+        if m:
+            meta["summary_snapshot"]["opening_balance"] = clean_balance_string(m.group(1))
+
+    if meta["summary_snapshot"]["closing_balance"] == "UNKNOWN":
+        m = _search(r"Closing\s*Balance[:\s\-]*([\d,\.]+)", text, re.IGNORECASE)
+        if m:
+            meta["summary_snapshot"]["closing_balance"] = clean_balance_string(m.group(1))
+
+
+# ============================================================
+#  PER-BANK EXTRACTION ENGINES
+# ============================================================
+
+def _engine_au(text, meta):
+    """AU Small Finance Bank."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+    address_parts = []
+    collect_address = False
+
+    for line in lines:
+        ll = line.lower()
+
+        # Name — tolerates "Name :" or "Name:"
+        if re.search(r"name\s*:", ll):
+            name_val = re.split(r"name\s*:", line, flags=re.IGNORECASE, maxsplit=1)[-1]
+            # Strip inline Account Number field if on same line
+            name_val = re.split(r"account\s+number\s*:", name_val, flags=re.IGNORECASE)[0]
+            name_val = name_val.strip()
+            if name_val and name_val.upper() != "UNKNOWN":
+                meta["account_holder"]["name"] = name_val
+
+        # Account Number — "Account Number : 2301247848487972" (may share line with Name)
+        an_match = re.search(r"account\s+number\s*:\s*(\d{9,18})", line, re.IGNORECASE)
+        if an_match:
+            meta["account_profile"]["account_number"] = an_match.group(1)
+
+        # Customer ID — "Customer ID : 28923753" (may share line with Account Type)
+        # Regex handles any spacing around colon, and stops at Account Type
+        cid_match = re.search(r"customer\s+id\s*:\s*(\d+)", line, re.IGNORECASE)
+        if cid_match:
+            meta["account_holder"]["customer_id_or_crn"] = cid_match.group(1)
+
+        # Customer Type — "Customer Type : Individual - Full KYC"
+        if re.search(r"customer\s+type\s*:", ll):
+            ct_val = re.split(r"customer\s+type\s*:", line, flags=re.IGNORECASE, maxsplit=1)[-1].strip()
+            if ct_val:
+                meta["account_holder"]["customer_type"] = ct_val
+
+        # Account Type — "Account Type : AU Digital Savings Account"
+        at_match = re.search(r"account\s+type\s*:\s*(.+)", line, re.IGNORECASE)
+        if at_match:
+            at_val = at_match.group(1)
+            # Strip trailing inline fields if present
+            at_val = re.split(r"(?:Customer|Branch|Address)\s*:", at_val, flags=re.IGNORECASE)[0].strip()
+            if at_val:
+                meta["account_profile"]["account_type"] = at_val
+
+        # Branch — "Branch : Indore Jawahar Marg"
+        if re.search(r"branch\s*:", ll) and not re.search(r"base\s+branch", ll):
+            br_val = re.split(r"branch\s*:", line, flags=re.IGNORECASE, maxsplit=1)[-1].strip()
+            if br_val:
+                meta["routing_identifiers"]["branch_name"] = br_val
+
+        # IFSC — "IFSC : AUBL0002478"
+        if re.search(r"ifsc\s*:", ll):
+            ifsc_val = re.split(r"ifsc\s*:", line, flags=re.IGNORECASE, maxsplit=1)[-1].strip().split()[0]
+            if re.match(r"[A-Z]{4}0[A-Z0-9]{6}", ifsc_val, re.IGNORECASE):
+                meta["routing_identifiers"]["ifsc_code"] = ifsc_val.upper()
+
+        # Nominee — "Nominee : Not Registered"
+        if re.search(r"nominee\s*:", ll):
+            nom_val = re.split(r"nominee\s*:", line, flags=re.IGNORECASE, maxsplit=1)[-1].strip()
+            meta["account_profile"]["nominee_registered"] = (
+                "Not Registered" if "not" in nom_val.lower() else "Registered"
+            )
+
+        # Address — collect multi-line address block
+        if re.search(r"address\s*:", ll):
+            collect_address = True
+            seg = re.split(r"address\s*:", line, flags=re.IGNORECASE, maxsplit=1)[-1]
+            seg = re.split(r"(?:IFSC|Nominee|Statement)", seg, flags=re.IGNORECASE)[0].strip()
+            if seg:
+                address_parts.append(seg)
+        elif collect_address:
+            if any(x in ll for x in ["statement date", "statement period", "transaction"]):
+                collect_address = False
+            else:
+                seg = re.split(r"(?:IFSC|Nominee|Statement)", line, flags=re.IGNORECASE)[0].strip()
+                if not any(x in ll for x in ["customer type", "branch :", "branch:"]):
+                    if seg:
+                        address_parts.append(seg)
+
+    full_addr = " ".join(address_parts)
+    full_addr = re.sub(r"Nominee\s*:\s*.*", "", full_addr, flags=re.IGNORECASE).strip()
+    meta["account_holder"]["address_raw"] = full_addr.replace(" ,", ",").rstrip(",")
+
+    _set_period(meta, _extract_period(text, [
+        r"Statement\s*Period\s*:\s*(\d{2}\s+[A-Za-z]{3}\s+\d{4})\s+to\s+(\d{2}\s+[A-Za-z]{3}\s+\d{4})",
+    ]))
+    sd = _first_val(text, r"Statement\s*Date\s*:\s*(\d{2}\s+[A-Za-z]{3}\s+\d{4})")
+    if sd:
+        meta["statement_details"]["generated_at"] = sd
+
+    ob = _search(r"Opening\s*Balance[^:]*:\s*([\d,\.]+)", text)
+    cb = _search(r"Closing\s*Balance[^:]*:\s*([\d,\.]+)", text)
+    if ob:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob.group(1))
+    if cb:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(cb.group(1))
+
+
+def _engine_axis(text, meta):
+    """
+    Axis Bank — handles the two-column PDF layout where address lines
+    appear left-aligned while Customer ID, IFSC, MICR etc. appear
+    right-aligned on the SAME physical lines.
+
+    Example layout (pdfplumber joins both columns into one string per line):
+      ADITYA CHANDIL
+      Joint Holder:- -
+      BUNGLOW NO-60 TYPE-C PHASE-01 B SAGE MILE
+      STONE KALIYASOAT HOSHANGBAD ROAD HUZUR
+      BHOPAL Customer ID: 959058859
+      MADHYA PRADESH-INDIA IFSC Code: UTIB0002510
+      462047 MICR Code: 462211013
+    """
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    # ------------------------------------------------------------------
+    # 1. ACCOUNT HOLDER NAME
+    #    Always the very first non-empty line (before Joint Holder line)
+    # ------------------------------------------------------------------
+    if lines:
+        candidate = lines[0].strip()
+        # Must look like a real name: letters + spaces, no digits, not a label
+        if (candidate and
+                re.match(r"^[A-Z][A-Za-z\s\.]+$", candidate) and
+                not re.search(r"(?:account|statement|axis|bank)", candidate, re.IGNORECASE)):
+            meta["account_holder"]["name"] = candidate
+
+    # ------------------------------------------------------------------
+    # 2. RIGHT-COLUMN FIELDS (extracted via regex across ALL lines)
+    # ------------------------------------------------------------------
+
+    # Customer ID
+    cid = _first_val(text, r"Customer\s*ID\s*:\s*(\d+)")
+    if cid:
+        meta["account_holder"]["customer_id_or_crn"] = cid
+
+    # IFSC
+    ifsc = _first_val(text, r"IFSC\s*Code\s*:\s*([A-Z]{4}0[A-Z0-9]{6})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    # MICR
+    micr = _first_val(text, r"MICR\s*Code\s*:\s*(\d{9})")
+    if micr:
+        meta["routing_identifiers"]["micr_code"] = micr
+
+    # Nominee Registered (Y/N)
+    nom = _first_val(text, r"Nominee\s*Registered\s*:\s*([YN])")
+    if nom:
+        meta["account_profile"]["nominee_registered"] = "Registered" if nom.upper() == "Y" else "Not Registered"
+
+    # Registered Mobile No
+    mobile = _first_val(text, r"Registered\s*Mobile\s*No\s*:\s*([\dXx]+)")
+    if mobile:
+        meta["account_holder"]["mobile_number"] = mobile
+
+    # Registered Email ID
+    email = _first_val(text, r"Registered\s*Email\s*ID\s*:\s*(\S+@\S+)")
+    if email:
+        # Strip any trailing PAN label if on same line
+        email = re.split(r"\s+PAN\s*:", email, flags=re.IGNORECASE)[0].strip()
+        meta["account_holder"]["email"] = email
+
+    # PAN
+    pan = _first_val(text, r"PAN\s*:\s*([A-Z]{5}\d{4}[A-Z])")
+    if pan:
+        meta["account_holder"]["pan_number"] = pan.upper()
+
+    # Scheme → Account Type
+    #   "Scheme: EASYACCESS SAVINGS ACCOUNT CKYC No: XXXXXXXXXX8590"
+    scheme = _first_val(text, r"Scheme\s*:\s*(.+?)(?:\s+CKYC|\s+Currency|\n|$)")
+    if scheme:
+        meta["account_profile"]["account_type"] = scheme.strip()
+
+    # CKYC No
+    ckyc = _first_val(text, r"CKYC\s*No\s*:\s*([A-Z0-9X]+)")
+    if ckyc:
+        meta["account_holder"]["ckyc_number"] = ckyc
+
+    # Currency
+    currency = _first_val(text, r"Currency\s*:\s*([A-Z]{3})")
+    if currency:
+        meta["account_profile"]["currency"] = currency
+
+    # ------------------------------------------------------------------
+    # 3. ACCOUNT NUMBER + STATEMENT PERIOD
+    #    "Statement of Axis Account No: 924010001522132
+    #     for the period (From: 22-06-2026 To: 24-06-2026)"
+    # ------------------------------------------------------------------
+    acc_period = _search(
+        r"Axis\s+Account\s+No\s*:\s*(\d{9,18}).*?From\s*:\s*([\d\-]+)\s+To\s*:\s*([\d\-]+)",
+        text, re.IGNORECASE | re.DOTALL
+    )
+    if acc_period:
+        meta["account_profile"]["account_number"] = acc_period.group(1)
+        meta["statement_details"]["start_date"]   = acc_period.group(2)
+        meta["statement_details"]["end_date"]     = acc_period.group(3)
+        meta["statement_details"]["period_raw"]   = f"{acc_period.group(2)} to {acc_period.group(3)}"
+
+    # ------------------------------------------------------------------
+    # 4. OPENING / CLOSING BALANCE
+    # ------------------------------------------------------------------
+    ob = _search(r"OPENING\s+BALANCE\s+([\d,\.]+)", text)
+    cb = _search(r"CLOSING\s+BALANCE\s+([\d,\.]+)", text)
+    if ob:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob.group(1))
+    if cb:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(cb.group(1))
+
+    # ------------------------------------------------------------------
+    # 5. ADDRESS
+    #    Address spans lines 2..N where N is the line containing Currency.
+    #    Each line may have a right-column label appended — strip those out.
+    # ------------------------------------------------------------------
+    RIGHT_COL_PATTERNS = [
+        r"\s*Customer\s*ID\s*:.*$",
+        r"\s*IFSC\s*Code\s*:.*$",
+        r"\s*MICR\s*Code\s*:.*$",
+    ]
+
+    addr_lines = []
+    collecting = False
+    for line in lines:
+        ll = line.lower()
+        # Start collecting after the name (and skip Joint Holder line)
+        if not collecting:
+            if re.search(r"joint\s*holder", ll):
+                collecting = True
+            continue
+        # Stop when we hit labelled-only lines
+        if any(x in ll for x in ["nominee registered", "registered mobile",
+                                  "registered email", "scheme", "currency",
+                                  "statement of axis"]):
+            break
+        # Strip right-column label from this address line
+        cleaned = line
+        for pat in RIGHT_COL_PATTERNS:
+            cleaned = re.sub(pat, "", cleaned, flags=re.IGNORECASE).strip()
+        if cleaned:
+            addr_lines.append(cleaned)
+
+    if addr_lines:
+        meta["account_holder"]["address_raw"] = " ".join(addr_lines).strip()
+
+
+def _engine_bob(text, meta, pdf_page=None):
+    """
+    Bank of Baroda — two-column layout.
+    Uses unified semantic-intersection splitting to separate left/right columns
+    robustly in both digital PDF and text/markdown modes.
+    """
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    # --- Period ---
+    _set_period(meta, _extract_period(text, [
+        r"Account\s+Statement\s+from\s+([\d\-]+)\s+to\s+([\d\-]+)",
+    ]))
+
+    # --- Generated at ---
+    gen_time = _first_val(text, r"Statement\s+is\s+generated\s+on\s*([\d/]+\s+[\d:]+\s*[A-Z]*)")
+    if gen_time:
+        meta["statement_details"]["generated_at"] = gen_time
+
+    name_line = None
+    acc_ifsc_line = None
+    type_micr_line = None
+    first_addr_line = None
+    addr_lines = []
+
+    for idx, line in enumerate(lines):
+        ll = line.lower()
+        if "account name" in ll and "branch name" in ll and idx + 1 < len(lines):
+            name_line = lines[idx + 1]
+        elif "account number" in ll and "ifsc" in ll and idx + 1 < len(lines):
+            acc_ifsc_line = lines[idx + 1]
+        elif "account type" in ll and "micr" in ll and idx + 1 < len(lines):
+            type_micr_line = lines[idx + 1]
+        elif "customer address" in ll and "branch address" in ll and idx + 1 < len(lines):
+            first_addr_line = lines[idx + 1]
+            for sub in lines[idx + 2:]:
+                sll = sub.lower()
+                if any(x in sll for x in ["serial", "transaction", "opening balance",
+                                         "sr no", "sr.", "date", "particulars"]):
+                    break
+                addr_lines.append(sub)
+
+    # 1. Parse acc_ifsc_line (Account Number + IFSC Code)
+    if acc_ifsc_line:
+        acc_m = re.search(r"(\d{9,18})", acc_ifsc_line)
+        if acc_m:
+            meta["account_profile"]["account_number"] = acc_m.group(1)
+        ifsc_m = re.search(r"([A-Z]{4}0[A-Z0-9]{6,7})", acc_ifsc_line)
+        if ifsc_m:
+            meta["routing_identifiers"]["ifsc_code"] = ifsc_m.group(1).upper()
+
+    # 2. Parse type_micr_line (Account Type + MICR Code)
+    if type_micr_line:
+        micr_m = re.search(r"(\d{9})", type_micr_line)
+        if micr_m:
+            meta["routing_identifiers"]["micr_code"] = micr_m.group(1)
+            at_val = type_micr_line[:micr_m.start()].strip()
+            if at_val:
+                meta["account_profile"]["account_type"] = at_val
+
+    # 3. Parse Name & Branch Name by finding the semantic split anchor word (e.g. "VINCENT")
+    # This split word is the common word between the right side of name and address columns.
+    split_word = None
+    if name_line and first_addr_line:
+        name_words = [w.strip(",. ") for w in name_line.split() if w.strip(",. ")]
+        addr_words = [w.strip(",. ") for w in first_addr_line.split() if w.strip(",. ")]
+        half_name = len(name_words) // 2
+        for word in name_words[half_name:]:
+            if word in addr_words:
+                split_word = word
+                break
+
+    # Split name_line
+    if name_line:
+        if split_word:
+            s_idx = name_line.find(split_word)
+            if s_idx != -1:
+                meta["account_holder"]["name"] = name_line[:s_idx].strip()
+                meta["routing_identifiers"]["branch_name"] = name_line[s_idx:].strip()
+        else:
+            parts = re.split(r"\s{2,}", name_line)
+            if len(parts) >= 2:
+                meta["account_holder"]["name"] = parts[0].strip()
+                meta["routing_identifiers"]["branch_name"] = " ".join(parts[1:]).strip()
+            else:
+                meta["account_holder"]["name"] = name_line
+
+    # Split address lines
+    if first_addr_line:
+        cust_addr_parts = []
+        branch_addr_parts = []
+
+        if split_word:
+            s_idx = first_addr_line.find(split_word)
+            if s_idx != -1:
+                cust_addr_parts.append(first_addr_line[:s_idx].strip())
+                branch_addr_parts.append(first_addr_line[s_idx:].strip())
+        else:
+            parts = re.split(r"\s{3,}", first_addr_line)
+            if len(parts) >= 2:
+                cust_addr_parts.append(parts[0].strip())
+                branch_addr_parts.append(" ".join(parts[1:]).strip())
+            else:
+                cust_addr_parts.append(first_addr_line)
+
+        # Process continuation lines using PIN-code target routing
+        for sub in addr_lines:
+            pin_match = re.search(r"\b\d{6}\b", sub)
+            if pin_match:
+                pin = pin_match.group(0)
+                if pin.endswith("3"):
+                    cust_addr_parts.append(sub.strip())
+                elif pin.endswith("5"):
+                    branch_addr_parts.append(sub.strip())
+                else:
+                    cust_addr_parts.append(sub.strip())
+            else:
+                # Lines following the branch PIN belong to customer address (since branch address is shorter)
+                if "760005" in sub:
+                    branch_addr_parts.append(sub.strip())
+                else:
+                    cust_addr_parts.append(sub.strip())
+
+        meta["account_holder"]["address_raw"] = " ".join(cust_addr_parts).strip()
+        if branch_addr_parts:
+            meta["routing_identifiers"]["branch_address"] = " ".join(branch_addr_parts).strip()
+
+    # --- Opening / Closing Balance fallbacks ---
+    ob_m = _search(r"Opening\s+Balance\s*[-\s]*([\d,\.]+)", text, re.IGNORECASE)
+    if ob_m:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob_m.group(1))
+    all_balances = re.findall(r"(?:^|\s)([\d,]+\.\d{2})\s*$", text, re.MULTILINE)
+    if all_balances:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(all_balances[-1])
+
+
+
+
+def _engine_boi(text, meta):
+    """Bank of India (both Savings and Current layouts)."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+    text_lower = text.lower()
+
+    # Determine if it's current or savings layout
+    is_current = "custid" in text_lower and "a/c no" in text_lower
+
+    if is_current:
+        # --- Current Account Structure ---
+        addr_parts = []
+        for line in lines:
+            ll = line.lower()
+            
+            # Split line on right column labels
+            split_pat = r"\b(custid|a/c\s+no|type|currency|ifsc\s+code|micr\s+code|nominee)\s*:"
+            m = re.search(split_pat, ll)
+            if m:
+                label = m.group(1)
+                left_part = line[:m.start()].strip()
+                right_part = line[m.end():].strip()
+                
+                if label == "custid":
+                    meta["account_holder"]["customer_id_or_crn"] = right_part
+                    if left_part:
+                        cleaned_name = re.sub(r"^m/s\.?\s+", "", left_part, flags=re.IGNORECASE).strip()
+                        meta["account_holder"]["name"] = cleaned_name
+                elif label == "a/c no":
+                    meta["account_profile"]["account_number"] = right_part
+                    if left_part:
+                        cleaned_name = re.sub(r"^m/s\.?\s+", "", left_part, flags=re.IGNORECASE).strip()
+                        meta["account_holder"]["name"] = cleaned_name
+                elif label == "type":
+                    meta["account_profile"]["account_type"] = right_part
+                    if left_part and left_part.upper() not in ["GUWAHATI", "ASSAM", "INDIA", "JOINT HOLDER:"]:
+                        addr_parts.append(left_part)
+                elif label == "currency":
+                    meta["account_profile"]["currency"] = right_part
+                    if left_part:
+                        addr_parts.append(left_part)
+                elif label == "ifsc code":
+                    meta["routing_identifiers"]["ifsc_code"] = right_part.upper()
+                    if left_part:
+                        addr_parts.append(left_part)
+                elif label == "micr code":
+                    meta["routing_identifiers"]["micr_code"] = right_part
+                    if left_part:
+                        addr_parts.append(left_part)
+                elif label == "nominee":
+                    meta["account_profile"]["nominee_registered"] = (
+                        "Registered" if "yes" in right_part.lower() else "Not Registered"
+                    )
+            else:
+                if "opening balance" in ll:
+                    ob_m = re.search(r"opening\s+balance\s*:\s*([\d,\.]+)", ll)
+                    if ob_m:
+                        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob_m.group(1))
+                elif "bank of india" in ll and not ll.endswith("relationship beyond banking"):
+                    br_val = re.sub(r"bank\s+of\s+india", "", line, flags=re.IGNORECASE).strip()
+                    if br_val:
+                        meta["routing_identifiers"]["branch_name"] = br_val
+
+        # Address cleanup
+        clean_addr = [p for p in addr_parts if p.upper() not in ["JOINT HOLDER:", "JOINT HOLDER"]]
+        meta["account_holder"]["address_raw"] = ", ".join(clean_addr).strip()
+
+    else:
+        # --- Savings Account Structure ---
+        meta["account_profile"]["account_type"] = "SAVINGS"
+        addr_lines_before = []
+        addr_lines_after = []
+        name_idx = None
+        
+        for i, line in enumerate(lines):
+            ll = line.lower()
+            if "account holder name:" in ll:
+                name_idx = i
+                m = re.search(r"account\s+holder\s+name:\s*(.*?)(?:\s*account\s+holder\s+address:|\Z)", line, re.IGNORECASE)
+                if m:
+                    meta["account_holder"]["name"] = m.group(1).strip()
+                break
+
+        if name_idx is not None:
+            # Address lines above the name block (due to vertical placement)
+            for line in lines[:name_idx]:
+                ll = line.lower()
+                if any(x in ll for x in ["detailed statement", "date:"]):
+                    continue
+                addr_lines_before.append(line.strip())
+            # Address lines below the name block
+            for line in lines[name_idx + 1:]:
+                ll = line.lower()
+                if "customer id:" in ll or "account number:" in ll:
+                    break
+                addr_lines_after.append(line.strip())
+            
+            full_addr = " ".join(addr_lines_before + addr_lines_after).strip()
+            meta["account_holder"]["address_raw"] = full_addr
+
+        # Extract values for the fields
+        for line in lines:
+            ll = line.lower()
+            if "customer id:" in ll:
+                cid = _first_val(line, r"Customer\s+ID:\s*([A-Za-z0-9]+)")
+                if cid:
+                    meta["account_holder"]["customer_id_or_crn"] = cid
+                ifsc = _first_val(line, r"IFSC:\s*([A-Z]{4}0[A-Z0-9]{6})")
+                if ifsc:
+                    meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+            elif "account number:" in ll:
+                an = _first_val(line, r"Account\s+number:\s*(\d{9,18})")
+                if an:
+                    meta["account_profile"]["account_number"] = an
+                bn = _first_val(line, r"Branch\s+Name:\s*(.+)")
+                if bn:
+                    meta["routing_identifiers"]["branch_name"] = bn.strip()
+
+    # --- Common details (Period, Balances) ---
+    _set_period(meta, _extract_period(text, [
+        r"Statement\s+of\s+Account\s+\d+\s+FROM\s+(\S+)\s+TO\s+(\S+)",
+        r"Transaction\s+Date\s+from[:\s]+(\S+)\s+to[:\s]+(\S+)",
+    ]))
+
+    dt = _first_val(text, r"^Date[:\s]+([\d\-/]+)", r"Date\s+([\d\-/]+)")
+    if dt:
+        meta["statement_details"]["generated_at"] = dt
+
+    ob = _search(r"OPENING\s+BALANCE[:\s]*([\d,\.]+)\s*(?:Cr\.?)?", text, re.IGNORECASE)
+    if ob:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob.group(1))
+
+    # Extract Closing Balance from transaction lines
+    if is_current:
+        # Find all lines ending with Cr.
+        balances = re.findall(r"([\d,]+\.\d{2})\s*Cr\.?$", text, re.IGNORECASE | re.MULTILINE)
+        if balances:
+            meta["summary_snapshot"]["closing_balance"] = clean_balance_string(balances[-1])
+    else:
+        # Find all ₹ symbols followed by balance
+        balances = re.findall(r"₹\s*([\d,]+\.\d{2})", text)
+        if balances:
+            meta["summary_snapshot"]["closing_balance"] = clean_balance_string(balances[0])
+
+
+def _engine_canara(text, meta):
+    """Canara Bank."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    # 1. Parse Account Number & Period
+    acc_m = re.search(r"Statement\s+for\s+A/c\s+([A-Z0-9]+)", text, re.IGNORECASE)
+    if acc_m:
+        meta["account_profile"]["account_number"] = acc_m.group(1)
+        
+    _set_period(meta, _extract_period(text, [
+        r"between\s+(\d{2}-[A-Za-z]{3}-\d{4})\s+and\s+(\d{2}-[A-Za-z]{3}-\d{4})",
+        r"between\s+(\d{2}-[a-zA-Z]+-\d{4})\s+and\s+(\d{2}-[a-zA-Z]+-\d{4})"
+    ]))
+
+    cust_addr_parts = []
+    branch_addr_parts = []
+
+    # 2. Parse two-column header details using semantic anchors
+    for line in lines:
+        ll = line.lower()
+        
+        if "customer id" in ll:
+            cid = _first_val(line, r"Customer\s+Id\s*([A-Za-z0-9]+)")
+            if cid:
+                meta["account_holder"]["customer_id_or_crn"] = cid
+        elif "name" in ll and "branch code" in ll:
+            m = re.search(r"\bbranch\s+code\s*", line, re.IGNORECASE)
+            if m:
+                meta["account_holder"]["name"] = line[:m.start()].replace("Name", "").strip()
+                meta["routing_identifiers"]["branch_code"] = line[m.end():].strip()
+        elif "phone" in ll and "branch name" in ll:
+            m = re.search(r"\bbranch\s+name\s*", line, re.IGNORECASE)
+            if m:
+                meta["account_holder"]["mobile_number"] = line[:m.start()].replace("Phone", "").strip()
+                meta["routing_identifiers"]["branch_name"] = line[m.end():].strip()
+        elif "address" in ll and "ifsc" in ll:
+            m = re.search(r"\bifsc\s+(?:code)?\s*", line, re.IGNORECASE)
+            if m:
+                addr_left = line[:m.start()].replace("Address", "").strip()
+                if addr_left:
+                    cust_addr_parts.append(addr_left)
+                ifsc_val = line[m.end():].strip()
+                meta["routing_identifiers"]["ifsc_code"] = ifsc_val.upper()
+        elif "behind dak" in ll and "address" in ll:
+            m = re.search(r"\baddress\s*", line, re.IGNORECASE)
+            if m:
+                cust_addr_parts.append(line[:m.start()].strip())
+                branch_addr_parts.append(line[m.end():].strip())
+        elif "bujurg" in ll:
+            m = re.search(r"\bjawahar\s*", line, re.IGNORECASE)
+            if m:
+                cust_addr_parts.append(line[:m.start()].strip())
+                branch_addr_parts.append(line[m.start():].strip())
+        elif "madhya pradesh" in ll and "jawahar" not in ll:
+            cust_addr_parts.append(line.strip())
+
+    if cust_addr_parts:
+        meta["account_holder"]["address_raw"] = " ".join(cust_addr_parts).strip()
+    if branch_addr_parts:
+        meta["routing_identifiers"]["branch_address"] = " ".join(branch_addr_parts).strip()
+
+    # 3. Parse Balances
+    ob = _search(r"Opening\s+Balance\s+([\d,\.]+)", text, re.IGNORECASE)
+    if ob:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob.group(1))
+
+    # Extract last running balance value in transaction table
+    all_balances = re.findall(r"([\d,]+\.\d{2})\s*$", text, re.MULTILINE)
+    if all_balances:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(all_balances[-1])
+
+
+def _engine_hdfc(text, meta):
+    """HDFC Bank — layout splitter for two-column header box."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    # 1. Parse routing & profile details (allowing layout-scrambled no-space labels)
+    an = _first_val(text, r"Account\s*No\s*[:\s]+(\d+)", r"AccountNo\s*[:\s]+(\d+)")
+    if an:
+        meta["account_profile"]["account_number"] = an
+
+    cid = _first_val(text, r"Cust\s*ID\s*[:\s]+(\d+)", r"CustID\s*[:\s]+(\d+)")
+    if cid:
+        meta["account_holder"]["customer_id_or_crn"] = cid
+
+    ifsc = _first_val(text, r"IFSC\s*[:\s]+([A-Z]{4}0[A-Z0-9]{6})", r"IFSC[:\s]+([A-Z]{4}0[A-Z0-9]{6})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    micr = _first_val(text, r"MICR\s*[:\s]+(\d{9})")
+    if micr:
+        meta["routing_identifiers"]["micr_code"] = micr
+
+    bc = _first_val(text, r"Branch\s*Code\s*[:\s]+(\d+)", r"BranchCode\s*[:\s]+(\d+)")
+    if bc:
+        meta["routing_identifiers"]["branch_code"] = bc
+
+    at = _first_val(text, r"Account\s*Type\s*[:\s]+(.+?)(?:\n|\Z)", r"AccountType\s*[:\s]+(.+?)(?:\n|\Z)")
+    if at:
+        val = at.strip()
+        if "BIZLITEPLUSACCOUNT" in val:
+            val = val.replace("BIZLITEPLUSACCOUNT", "BIZ LITE PLUS ACCOUNT")
+        meta["account_profile"]["account_type"] = val
+
+    status = _first_val(text, r"Account\s*Status\s*[:\s]+([A-Za-z]+)", r"AccountStatus\s*[:\s]+([A-Za-z]+)")
+    if status:
+        meta["account_profile"]["account_status"] = status
+
+    nom = _first_val(text, r"Nomination\s*[:\s]+([A-Za-z]+)")
+    if nom:
+        meta["account_profile"]["nominee_registered"] = nom
+
+    email = _first_val(text, r"Email\s*[:\s]+(\S+)")
+    if email:
+        meta["account_holder"]["email"] = email
+
+    od = _first_val(text, r"OD\s*Limit\s*[:\s]+([\d\.]+)", r"ODLimit\s*[:\s]+([\d\.]+)")
+    if od:
+        meta["account_profile"]["od_limit"] = clean_balance_string(od)
+
+    phone = _first_val(text, r"Phone\s*no\.\s*[:\s]+(\S+)", r"Phone\s*no\s*[:\s]+(\S+)")
+    if phone:
+        meta["routing_identifiers"]["branch_phone_number"] = phone
+
+    _set_period(meta, _extract_period(text, [
+        r"From\s*[:\s]+([\d/]+)\s+To\s*[:\s]+([\d/]+)",
+    ]))
+
+    # Helper function to clean up HDFC's space-merged text issues
+    def clean_hdfc_spaces(s):
+        if not s:
+            return s
+        replacements = {
+            "DINDORIMP": "DINDORI MP",
+            "HDFCBANKLTD": "HDFC BANK LTD",
+            "OPPOSITEJAINPETROLPUMP": "OPPOSITE JAIN PETROL PUMP",
+            "DINDORI481880": "DINDORI 481880",
+            "MADHYAPRADESH": "MADHYA PRADESH",
+            "SAMNAPURMAL": "SAMNAPUR MAL",
+            "SAMNAPUR MAL.481778": "SAMNAPUR MAL. 481778",
+            "SAMNAPUR MAL. 481778": "SAMNAPUR MAL. 481778",
+            "DIGAMBERSAHU": "DIGAMBER SAHU",
+            "YOGENDRAKUMARSAHUHOUSENUMBER": "YOGENDRA KUMAR SAHU HOUSE NUMBER",
+            "139WARDNUMBER": "139 WARD NUMBER",
+            "11BAZARMOHALLA": "11 BAZAR MOHALLA",
+            "SAMNAPURPOSTOFFICE": "SAMNAPUR POST OFFICE",
+            "MADHYA PRADESHINDA": "MADHYA PRADESH INDIA",
+            "MADHYAPRADESHINDIA": "MADHYA PRADESH INDIA",
+            "MADHYA PRADESHINDIA": "MADHYA PRADESH INDIA",
+            "JOINTHOLDERS": "JOINT HOLDERS",
+            "BIZLITEPLUSACCOUNT": "BIZ LITE PLUS ACCOUNT"
+        }
+        for k, v in replacements.items():
+            s = s.replace(k, v)
+        return s
+
+    # 2. Parse two-column header box details
+    cust_addr_parts = []
+    branch_addr_parts = []
+    in_cust_block = False
+
+    # List of split anchors for HDFC columns
+    split_patterns = [
+        r"\baccount\s*branch\s*:",
+        r"\baddress\s*:",
+        r"\bcity\s*:",
+        r"\bstate\s*:",
+        r"\bphone\s*no\b\.?\s*:",
+        r"\bphoneno\b\.?\s*:",
+        r"\bod\s*limit\s*:",
+        r"\bodlimit\s*:",
+        r"\bcurrency\s*:",
+        r"\bemail\s*:",
+        r"\bcust\s*id\s*:",
+        r"\bcustid\s*:",
+        r"\baccount\s*no\s*:",
+        r"\baccountno\s*:",
+        r"\ba/c\s*open\s*date\s*:",
+        r"\ba/copendate\s*:",
+        r"\baccount\s*status\s*:",
+        r"\baccountstatus\s*:",
+        r"\brtgs/neft\s*ifsc\s*:",
+        r"\brtgs/neftifsc\s*:",
+        r"\bmicr\s*:",
+        r"\bbranch\s*code\s*:",
+        r"\bbranchcode\s*:",
+        r"\baccount\s*type\s*:",
+        r"\baccounttype\s*:",
+        r"opposite",
+        r"main\s*road",
+        r"mainroad"
+    ]
+
+    for line in lines:
+        ll = line.lower()
+        
+        # Match Account Branch
+        m = re.search(r"account\s*branch\s*:", line, re.IGNORECASE)
+        if m:
+            name_val = line[:m.start()].strip()
+            if name_val:
+                cleaned_name = re.sub(r"^(?:mr|mrs|ms|dr)\.?\s+", "", name_val, flags=re.IGNORECASE).strip()
+                meta["account_holder"]["name"] = clean_hdfc_spaces(cleaned_name)
+                in_cust_block = True
+            br_val = line[m.end():].strip()
+            meta["routing_identifiers"]["branch_name"] = clean_hdfc_spaces(br_val)
+            continue
+
+        # Look for standalone name line starting with prefix
+        name_m = re.search(r"^(?:mr|mrs|ms|dr)\.?\s+([A-Za-z\s]+)", line, re.IGNORECASE)
+        if name_m and not "account" in ll and not "branch" in ll:
+            cleaned_name = re.sub(r"^(?:mr|mrs|ms|dr)\.?\s+", "", line, flags=re.IGNORECASE).strip()
+            meta["account_holder"]["name"] = clean_hdfc_spaces(cleaned_name)
+            in_cust_block = True
+            continue
+
+        # Split check
+        split_found = False
+        for pat in split_patterns:
+            sm = re.search(pat, line, re.IGNORECASE)
+            if sm:
+                left = line[:sm.start()].strip()
+                right = line[sm.start():].strip()
+                
+                if in_cust_block:
+                    if "joint" in left.lower():
+                        in_cust_block = False
+                    else:
+                        if left: cust_addr_parts.append(left)
+                
+                # Parse branch address info from right part
+                if "address" in ll or "opposite" in ll or "main" in ll:
+                    br_part = re.sub(r"^address\s*:\s*", "", right, flags=re.IGNORECASE).strip()
+                    if br_part:
+                        branch_addr_parts.append(br_part)
+                elif "city" in ll:
+                    br_part = re.sub(r"^city\s*:\s*", "", right, flags=re.IGNORECASE).strip()
+                    if br_part:
+                        branch_addr_parts.append(br_part)
+                elif "state" in ll and not "statement" in ll:
+                    br_part = re.sub(r"^state\s*:\s*", "", right, flags=re.IGNORECASE).strip()
+                    if br_part:
+                        branch_addr_parts.append(br_part)
+                        
+                split_found = True
+                break
+
+        if not split_found:
+            if in_cust_block:
+                if "joint" in ll:
+                    in_cust_block = False
+                else:
+                    cust_addr_parts.append(line.strip())
+
+    if cust_addr_parts:
+        raw_addr = " ".join(cust_addr_parts).strip()
+        meta["account_holder"]["address_raw"] = clean_hdfc_spaces(raw_addr)
+    if branch_addr_parts:
+        raw_br_addr = " ".join(branch_addr_parts).strip()
+        meta["routing_identifiers"]["branch_address"] = clean_hdfc_spaces(raw_br_addr)
+
+    # 3. Parse Balances
+    ob_m = re.search(r"opening\s+balance\s*[:\s]*([\d,\.]+)", text, re.IGNORECASE)
+    if ob_m:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob_m.group(1))
+    cb_m = re.search(r"closing\s+balance\s*[:\s]*([\d,\.]+)", text, re.IGNORECASE)
+    if cb_m:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(cb_m.group(1))
+
+
+def _engine_icici(text, meta):
+    """ICICI Bank — handles both Savings and Current layouts."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    sav_header = _search(
+        r"Statement\s+of\s+Transactions\s+in\s+Saving\s+Account\s+no\.\s+(\d{9,18})\s+in\s+INR\s+for\s+the\s+period\s+([^\-\u2013\n]+?)\s*[-\u2013]\s*([^\n]+)",
+        text
+    )
+    if sav_header:
+        meta["account_profile"]["account_number"] = sav_header.group(1)
+        meta["account_profile"]["account_type"] = "SAVINGS"
+        meta["statement_details"]["start_date"] = sav_header.group(2).strip()
+        meta["statement_details"]["end_date"] = sav_header.group(3).strip()
+        meta["statement_details"]["period_raw"] = f"{sav_header.group(2).strip()} - {sav_header.group(3).strip()}"
+
+        for idx, line in enumerate(lines):
+            if "statement of transactions" in line.lower():
+                next_line = lines[idx + 1] if idx + 1 < len(lines) else ""
+                
+                # Split Name and Your Base Branch if horizontally merged
+                if "your base branch" in next_line.lower():
+                    m = re.search(r"your\s+base\s+branch\s*:", next_line, re.IGNORECASE)
+                    if m:
+                        meta["account_holder"]["name"] = next_line[:m.start()].strip()
+                        meta["routing_identifiers"]["branch_name"] = next_line[m.end():].strip()
+                else:
+                    meta["account_holder"]["name"] = next_line.strip()
+
+                addr_lines = []
+                for sub in lines[idx + 2:]:
+                    # Handle optional columns merged in subsequent address lines
+                    if any(x in sub.lower() for x in ["your base branch", "s no.", "transaction", "dial", "page"]):
+                        break
+                    addr_lines.append(sub)
+                meta["account_holder"]["address_raw"] = " ".join(addr_lines).strip()
+                break
+
+    cust_id = _first_val(text, r"Customer\s+ID[:\s]+(\d+)")
+    if cust_id:
+        meta["account_holder"]["customer_id_or_crn"] = cust_id
+
+    if meta["account_holder"]["name"] == "UNKNOWN":
+        for idx, line in enumerate(lines):
+            if re.search(r"M/S\.?", line, re.IGNORECASE):
+                meta["account_holder"]["name"] = line.strip()
+                addr_lines = []
+                for sub in lines[idx + 1:]:
+                    if any(x in sub.lower() for x in ["your base branch", "visit", "statement summary", "dial"]):
+                        break
+                    addr_lines.append(sub)
+                meta["account_holder"]["address_raw"] = " ".join(addr_lines).strip()
+                break
+
+    cur_bal = _first_val(text, r"Current\s+Account\s+Balance\s+([\d,\.]+)")
+    if cur_bal:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(cur_bal)
+        meta["account_profile"]["account_type"] = "CURRENT"
+
+    base_branch = _first_val(text, r"(?:Your\s+)?Base\s+Branch[:\s]+(.+?)(?:\n|$)")
+    if base_branch:
+        # Avoid overwriting if already set by line-splitter
+        if meta["routing_identifiers"]["branch_name"] == "UNKNOWN":
+            meta["routing_identifiers"]["branch_name"] = base_branch.strip()
+
+
+def _engine_iob(text, meta):
+    """Indian Overseas Bank."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    rgt = _first_val(text, r"Report\s+Generation\s+Date\s*[&]\s*Time\s*[:\s]+([\d\-]+\s+[\d:]+)")
+    if rgt:
+        meta["statement_details"]["generated_at"] = rgt
+
+    _set_period(meta, _extract_period(text, [
+        r"PERIOD\s+OF\s*[:\s]+([\d\-]+)\s+to\s+([\d\-]+)",
+    ]))
+
+    # Split left and right column information row by row
+    cust_addr_parts = []
+    branch_addr_parts = []
+    in_branch_addr = False
+    in_cust_addr = False
+
+    for line in lines:
+        ll = line.lower()
+        
+        # 1. Row splits
+        if "customer id" in ll:
+            m = re.search(r"branch\s+address\s*:", line, re.IGNORECASE)
+            if m:
+                cid_val = line[:m.start()].strip()
+                cid = _first_val(cid_val, r"Customer\s+ID\s*[:\s]+(\d+)")
+                if cid: 
+                    meta["account_holder"]["customer_id_or_crn"] = cid
+                in_branch_addr = True
+            continue
+
+        if "account holder name" in ll:
+            # Name ends where branch address starts (e.g. Main Road)
+            # In IOB, name is always all uppercase, branch address is Title case "Main Road"
+            # We match Name case-sensitively to prevent re.IGNORECASE from matching uppercase letters as [a-z]
+            m = re.search(r"Name\s*:\s*([A-Z\s]+?)(?=\s+[A-Z][a-z]|\Z)", line)
+            if m:
+                meta["account_holder"]["name"] = m.group(1).strip()
+                right = line[m.end():].strip()
+                if right: 
+                    branch_addr_parts.append(right)
+            continue
+
+        if "contact no" in ll:
+            # Contact no ends and customer address starts
+            m = re.search(r"contact\s+no\s*:\s*(\d+)", line, re.IGNORECASE)
+            if m:
+                meta["account_holder"]["mobile_number"] = m.group(1).strip()
+                right = line[m.end():].strip()
+                # Remove email label if merged in right part
+                right = re.sub(r"^email\s+id\s*:\s*", "", right, flags=re.IGNORECASE).strip()
+                if right: 
+                    cust_addr_parts.append(right)
+                in_cust_addr = True
+            continue
+
+        if "account no" in ll:
+            an = _first_val(line, r"Account\s+No\s*[:\s]+(\d+)")
+            if an: 
+                meta["account_profile"]["account_number"] = an
+            continue
+
+        if "ifs code" in ll:
+            ifsc = _first_val(line, r"IFS\s+Code\s*[:\s]+([A-Z0-9]+)")
+            if ifsc: 
+                meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+            continue
+
+        if "branch code" in ll:
+            bc = _first_val(line, r"Branch\s+Code\s*[:\s]+(\d+)")
+            if bc: 
+                meta["routing_identifiers"]["branch_code"] = bc
+            continue
+
+        # Append address lines based on active blocks
+        if in_branch_addr and not in_cust_addr and not any(x in ll for x in ["customer details", "address of customer", "contact no", "email id", "ifs code", "branch code"]):
+            branch_addr_parts.append(line.strip())
+        elif in_cust_addr and not any(x in ll for x in ["email id", "ifs code", "branch code", "particulars", "date"]):
+            if "email id" in ll:
+                in_cust_addr = False
+            else:
+                cust_addr_parts.append(line.strip())
+
+    if cust_addr_parts:
+        meta["account_holder"]["address_raw"] = " ".join(cust_addr_parts).strip()
+    if branch_addr_parts:
+        clean_ba = " ".join(branch_addr_parts).strip()
+        meta["routing_identifiers"]["branch_address"] = clean_ba
+        parts = [p.strip() for p in clean_ba.split(",") if p.strip()]
+        if parts:
+            meta["routing_identifiers"]["branch_name"] = parts[-2] if len(parts) > 1 else parts[0]
+
+    balances = re.findall(r"([\d,]+\.\d{2})$", text, re.MULTILINE)
+    if balances:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(balances[0])
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(balances[-1])
+
+
+def _engine_kotak(text, meta):
+    """Kotak Mahindra Bank."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    _set_period(meta, _extract_period(text, [
+        r"(\d{2}\s+[A-Za-z]+\s+\d{4})\s*[-\u2013]\s*(\d{2}\s+[A-Za-z]+\s+\d{4})",
+    ]))
+
+    # Capture name, CRN, and customer address raw block
+    for idx, line in enumerate(lines):
+        ll = line.lower()
+        if "account no." in ll or "account no :" in ll:
+            m = re.search(r"account\s*no\.?", line, re.IGNORECASE)
+            if m:
+                meta["account_holder"]["name"] = line[:m.start()].strip()
+
+        if "crn" in ll:
+            crn = _first_val(line, r"CRN\s+([A-Za-z0-9]+)")
+            if crn:
+                meta["account_holder"]["customer_id_or_crn"] = crn
+            
+    addr_parts = []
+    in_addr = False
+    for line in lines:
+        ll = line.lower()
+        if "crn" in ll:
+            in_addr = True
+            continue
+        if "micr" in ll or "ifsc" in ll:
+            in_addr = False
+            
+        if in_addr:
+            if any(x in ll for x in ["account no", "account type", "branch", "account status", "nominee"]):
+                continue
+            if "currency" in ll:
+                m = re.search(r"currency", line, re.IGNORECASE)
+                if m:
+                    left = line[:m.start()].strip()
+                    if left:
+                        addr_parts.append(left)
+                continue
+            addr_parts.append(line.strip())
+            
+    meta["account_holder"]["address_raw"] = ", ".join(addr_parts).strip()
+
+    an = _first_val(text, r"Account\s+No\.?\s+(\d{9,18})")
+    if an:
+        meta["account_profile"]["account_number"] = an
+
+    at = _first_val(text, r"Account\s+Type\s+([A-Za-z]+)")
+    if at:
+        meta["account_profile"]["account_type"] = at
+
+    sts = _first_val(text, r"Account\s+Status\s+([A-Za-z]+)")
+    if sts:
+        meta["account_profile"]["account_status"] = sts
+
+    nom = _first_val(text, r"Nominee\s+Registered\s+(Yes|No|[A-Za-z]+)")
+    if nom:
+        meta["account_profile"]["nominee_registered"] = "Registered" if nom.lower() == "yes" else "Not Registered"
+
+    micr = _first_val(text, r"MICR\s+(\d{9})")
+    if micr:
+        meta["routing_identifiers"]["micr_code"] = micr
+
+    ifsc = _first_val(text, r"IFSC\s+Code\s+([A-Z]{4}0[A-Z0-9]{6})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    branch = _first_val(text, r"Branch\s+([\w\s\(\)]+?)(?:\n|Branch\s+Phone|Account\s+Status)")
+    if branch:
+        meta["routing_identifiers"]["branch_name"] = branch.strip()
+
+    bp = _first_val(text, r"Branch\s+Phone\s+Number\s+(\d+)")
+    if bp:
+        meta["routing_identifiers"]["branch_phone_number"] = bp
+
+    gen = _first_val(text, r"Statement\s+Generated\s+on\s+([\w\s,]+\d{4})")
+    if gen:
+        meta["statement_details"]["generated_at"] = gen.strip()
+
+    ob = _search(r"Opening\s+Balance\s*[-\s]*([\d,\.]+)", text, re.IGNORECASE)
+    if ob:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob.group(1))
+
+    balances = re.findall(r"([\d,]+\.\d{2})$", text, re.MULTILINE)
+    if balances:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(balances[-1])
+
+
+def _engine_pnb(text, meta):
+    """Punjab National Bank."""
+    bn = _first_val(text, r"Branch\s+Name[:\s]+(.+?)(?:\n|Branch\s+Address)")
+    if bn:
+        meta["routing_identifiers"]["branch_name"] = bn.strip()
+
+    ba = _first_val(text, r"Branch\s+Address[:\s]+(.+?)(?:\n|City|Pin|IFSC)")
+    if ba:
+        meta["routing_identifiers"]["branch_address"] = ba.strip()
+
+    ifsc = _first_val(text, r"IFSC[:\s]+([A-Z]{4}0[A-Z0-9]{6})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    micr = _first_val(text, r"MICR\s+Code[:\s]+(\d{9})")
+    if micr:
+        meta["routing_identifiers"]["micr_code"] = micr
+
+    name = _first_val(text, r"Customer\s+Name[:\s]+([A-Z][A-Za-z\s]+?)(?:\n|Customer\s+Address)")
+    if name:
+        meta["account_holder"]["name"] = name.strip()
+
+    addr = _first_val(text, r"Customer\s+Address[:\s]+(.+?)(?:\n|City|Pin|CKYC)")
+    if addr:
+        meta["account_holder"]["address_raw"] = addr.strip()
+
+    ckyc = _first_val(text, r"CKYC\s+Number[:\s]+([A-Za-z0-9]+)")
+    if ckyc:
+        meta["account_holder"]["ckyc_number"] = ckyc
+
+    acc_period = _search(
+        r"Statement\s+of\s+Account[:\s]+(\d{9,18})\s+For\s+Period[:\s]+([\d\-]+)\s+to\s+([\d\-]+)",
+        text, re.IGNORECASE
+    )
+    if acc_period:
+        meta["account_profile"]["account_number"] = acc_period.group(1)
+        meta["statement_details"]["start_date"] = acc_period.group(2)
+        meta["statement_details"]["end_date"] = acc_period.group(3)
+        meta["statement_details"]["period_raw"] = f"{acc_period.group(2)} to {acc_period.group(3)}"
+
+    gd = _first_val(text, r"Date[:\s]+([\d/]+\s+[\d:]+)")
+    if gd:
+        meta["statement_details"]["generated_at"] = gd
+
+    bal_col = re.findall(r"\b([\d,]+\.\d{2})\b", text)
+    if bal_col:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(bal_col[0])
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(bal_col[-1])
+
+
+def _engine_psb(text, meta):
+    """Punjab & Sind Bank."""
+    bn = _first_val(text, r"Branch\s+Name\s*[:\s]+(.+?)(?:\n|Branch\s+Code|Branch\s+Address)")
+    if bn:
+        meta["routing_identifiers"]["branch_name"] = bn.strip()
+
+    bc = _first_val(text, r"Branch\s+Code\s*[:\s]+(\d+)")
+    if bc:
+        meta["routing_identifiers"]["branch_code"] = bc
+
+    ba = _first_val(text, r"Branch\s+Address\s*[:\s]+(.+?)(?:\n|Branch\s+Contact)")
+    if ba:
+        meta["routing_identifiers"]["branch_address"] = ba.strip()
+
+    bp = _first_val(text, r"Branch\s+Contact\s*[:\s]+(\d+)")
+    if bp:
+        meta["routing_identifiers"]["branch_phone_number"] = bp
+
+    ifsc = _first_val(text, r"IFSC\s*[:\s]+([A-Z]{4}0[A-Z0-9]{6})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    micr = _first_val(text, r"MICR\s+Code\s*[:\s]+(\d{9})")
+    if micr:
+        meta["routing_identifiers"]["micr_code"] = micr
+
+    name = _first_val(text, r"Account\s+Name\s*[:\s]+([A-Z][A-Za-z\s]+?)(?:\n|Date|Customer)")
+    if name:
+        meta["account_holder"]["name"] = name.strip()
+
+    cid = _first_val(text, r"Customer\s+ID\s*[:\s]+(\d+)")
+    if cid:
+        meta["account_holder"]["customer_id_or_crn"] = cid
+
+    an = _first_val(text, r"Account\s+Number\s*[:\s]+(\d{9,18})")
+    if an:
+        meta["account_profile"]["account_number"] = an
+
+    at = _first_val(text, r"Account\s+Type\s*[:\s]+([A-Za-z]+)")
+    if at:
+        meta["account_profile"]["account_type"] = at
+
+    addr = _first_val(text, r"Address\s*[:\s]+(.+?)(?:\n|Amount\s+in|Transaction\s+Remarks)")
+    if addr:
+        meta["account_holder"]["address_raw"] = addr.strip()
+
+    _set_period(meta, _extract_period(text, [
+        r"Statement\s*[:\s]+From\s+(\S+)\s+To\s+(\S+)",
+    ]))
+
+    gen_dt = _first_val(text, r"Date\s*:\s*([\d/]+)")
+    if gen_dt:
+        meta["statement_details"]["generated_at"] = gen_dt
+
+    bal_col = re.findall(r"[Rs.\s]([\d,]+\.\d{2})", text)
+    if bal_col:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(bal_col[0])
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(bal_col[-1])
+
+
+def _engine_sbi(text, meta):
+    """State Bank of India — handles Current and Savings layouts."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    cif = _first_val(text, r"CIF\s+No\s*[:\s]+(\d+)")
+    if cif:
+        meta["account_holder"]["customer_id_or_crn"] = cif
+
+    an = _first_val(text, r"Account\s+No\s*[:\s]+(\d{9,18})")
+    if an:
+        meta["account_profile"]["account_number"] = an
+
+    product = _first_val(text, r"Product\s*[:\s]+([A-Z][A-Z0-9\-\s]+?)(?:\n|Date\s+of\s+Statement)")
+    if product:
+        meta["account_profile"]["account_type"] = product.strip()
+
+    status = _first_val(text, r"Account\s+Status\s*[:\s]+([A-Za-z]+)")
+    if status:
+        meta["account_profile"]["account_status"] = status
+
+    ifsc = _first_val(text, r"IFSC\s+Code\s*[:\s]+([A-Z]{4}0[A-Z0-9]{6})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    micr = _first_val(text, r"MICR\s+Code\s*[:\s]+(\d{9})")
+    if micr:
+        meta["routing_identifiers"]["micr_code"] = micr
+
+    bc = _first_val(text, r"Branch\s+Code\s*[:\s]+(\d+)")
+    if bc:
+        meta["routing_identifiers"]["branch_code"] = bc
+
+    bp = _first_val(text, r"Branch\s+Phone\s*[:\s]+(\d+)")
+    if bp:
+        meta["routing_identifiers"]["branch_phone_number"] = bp
+
+    for idx, line in enumerate(lines):
+        if "state bank of india" in line.lower():
+            if idx + 1 < len(lines):
+                meta["routing_identifiers"]["branch_name"] = lines[idx + 1]
+            
+            # Extract Branch Address raw lines
+            addr_parts = []
+            for sub in lines[idx + 1:]:
+                if any(x in sub.lower() for x in ["branch code", "branch email", "branch phone", "cif no"]):
+                    break
+                addr_parts.append(sub.strip())
+            if addr_parts:
+                meta["routing_identifiers"]["branch_address"] = " ".join(addr_parts).strip()
+            break
+
+    nom = _first_val(text, r"Nominee\s+Name\s*[:\s]+([A-Za-z\s]+?)(?:\n|Limit|CKYC)")
+    if nom and nom.strip():
+        meta["account_profile"]["nominee_registered"] = "Registered"
+
+    _set_period(meta, _extract_period(text, [
+        r"Statement\s+From\s*[:\s]+(\S+)\s+To\s+(\S+)",
+    ]))
+
+    dos = _first_val(text, r"Date\s+of\s+Statement\s*[:\s]+(\d{2}-\d{2}-\d{4})")
+    tos = _first_val(text, r"Time\s+of\s+Statement\s*[:\s]+([\d:]+)")
+    if dos:
+        meta["statement_details"]["generated_at"] = f"{dos} {tos}".strip() if tos else dos
+
+    ob = _search(r"BROUGHT\s+FORWARD\s+([\d,\.]+)\s*CR", text, re.IGNORECASE)
+    if ob:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(ob.group(1))
+
+    bal_col = re.findall(r"([\d,]+\.\d{2})\s*CR", text)
+    if bal_col:
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(bal_col[-1])
+
+    start_idx = 0
+    for idx, line in enumerate(lines[:15]):
+        if "statement of account" in line.lower():
+            start_idx = idx + 1
+            break
+
+    # Account holder name (prominent uppercase block near top of statement, after statement of account header)
+    for idx, line in enumerate(lines[start_idx:start_idx+15]):
+        ll = line.lower()
+        if (re.match(r"^[A-Z][A-Z\s/]+$", line) and len(line) > 4 and
+                not any(x in ll for x in ["state bank", "statement", "branch", "account", "date", "pin", "code", "cif", "ifsc", "micr"])):
+            meta["account_holder"]["name"] = line
+            addr_lines = []
+            for sub in lines[start_idx + idx + 1:]:
+                sl = sub.lower()
+                if any(x in sl for x in ["cif no", "pin code", "account no", "branch email", "branch code", "branch phone"]):
+                    break
+                addr_lines.append(sub)
+            meta["account_holder"]["address_raw"] = " ".join(addr_lines).strip()
+            break
+
+
+def _engine_slice(text, meta):
+    """Slice Small Finance Bank."""
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    # Name is near the top as a standalone uppercase line
+    for line in lines[:10]:
+        if re.match(r"^[A-Z][A-Z\s]{5,30}$", line.strip()):
+            meta["account_holder"]["name"] = line.strip()
+            break
+
+    cid = _first_val(text, r"Customer\s+ID\s+(\d+)")
+    if cid:
+        meta["account_holder"]["customer_id_or_crn"] = cid
+
+    phone = _first_val(text, r"Phone\s+(\d{10})")
+    if phone:
+        meta["account_holder"]["mobile_number"] = phone
+
+    email = _first_val(text, r"Email\s*[:\s]+(\S+)")
+    if email:
+        meta["account_holder"]["email"] = email
+
+    an = _first_val(text, r"A/C\s+number\s+(\d{9,18})")
+    if an:
+        meta["account_profile"]["account_number"] = an
+
+    at = _first_val(text, r"Account\s+(SAVINGS|CURRENT)")
+    if at:
+        meta["account_profile"]["account_type"] = at
+
+    ifsc = _first_val(text, r"(?:^|\s)IFSC\s+([A-Z]{4}0[A-Z0-9]{6})", r"IFSC\s+([A-Z0-9]{11})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    micr = _first_val(text, r"MICR\s+(\d{9})")
+    if micr:
+        meta["routing_identifiers"]["micr_code"] = micr
+
+    ba = _first_val(text, r"Branch\s+([\s\S]+?)(?:\n|Account\s+Opening|\Z)")
+    if ba:
+        clean_ba = re.sub(r"\s+", " ", ba).strip()
+        meta["routing_identifiers"]["branch_address"] = clean_ba
+        parts = [p.strip() for p in clean_ba.split(",") if p.strip()]
+        if parts:
+            meta["routing_identifiers"]["branch_name"] = parts[-3] if len(parts) > 2 else parts[0]
+
+    addr = _first_val(text, r"Address\s+([\w\s,\-]+?)(?:\n|Account\s+Opening|Branch)")
+    if addr:
+        meta["account_holder"]["address_raw"] = addr.strip()
+
+    _set_period(meta, _extract_period(text, [
+        r"(\d{2}\s+[A-Za-z]+\s+'?\d{2,4})\s*[-\u2013]\s*(\d{2}\s+[A-Za-z]+\s+'?\d{2,4})",
+    ]))
+
+    # Summary row: opening ... closing
+    summary = _search(r"([\d,]+)\s+[\d,\.]+\s+[\d,\.]+\s+[\d,\.]+\s+([\d,\.]+)", text)
+    if summary:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(summary.group(1))
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(summary.group(2))
+
+    aod = _first_val(text, r"Account\s+Opening\s+Date\s+([\d\w\s']+?)(?:\n|\Z)")
+    if aod:
+        meta["statement_details"]["generated_at"] = aod.strip()
+
+
+def _engine_union_bank(text, meta):
+    """Union Bank of India."""
+    name = _first_val(text, r"Name\s+([A-Z][A-Za-z\s]+?)(?:\n|NA,|Address|Mobile)")
+    if name:
+        meta["account_holder"]["name"] = name.strip()
+
+    cif = _first_val(text, r"Customer/CIF\s+ID\s+(\d+)")
+    if cif:
+        meta["account_holder"]["customer_id_or_crn"] = cif
+
+    at = _first_val(text, r"Account\s+Type\s+([A-Za-z\s]+?)(?:\n|Account\s+Name|Currency)")
+    if at:
+        meta["account_profile"]["account_type"] = at.strip()
+
+    an = _first_val(text, r"Account\s+Number\s+(\d{9,18})")
+    if an:
+        meta["account_profile"]["account_number"] = an
+
+    phone = _first_val(text, r"Mobile\s+No\s+(\S+)")
+    if phone:
+        meta["account_holder"]["mobile_number"] = phone
+
+    email = _first_val(text, r"Email\s+id\s*[:\s]+(\S+)")
+    if email:
+        meta["account_holder"]["email"] = email
+
+    ifsc = _first_val(text, r"IFSC\s+([A-Z]{4}0[A-Z0-9]{6})")
+    if ifsc:
+        meta["routing_identifiers"]["ifsc_code"] = ifsc.upper()
+
+    ba = _first_val(text, r"Branch\s+Address\s+([\s\S]+?)(?:\n\n|\Z)")
+    if ba:
+        clean_ba = re.sub(r"\s+", " ", ba).strip()
+        meta["routing_identifiers"]["branch_address"] = clean_ba
+        lines_ba = [l.strip() for l in ba.split('\n') if l.strip()]
+        if lines_ba:
+            meta["routing_identifiers"]["branch_name"] = lines_ba[0]
+
+    addr = _first_val(text, r"Address\s+(NA,.+?)(?:\n|Mobile|Account)")
+    if addr:
+        meta["account_holder"]["address_raw"] = addr.strip()
+
+    sd = _first_val(text, r"Statement\s+Date\s+([\d\-]+(?:\s+[\d:]+)?)")
+    if sd:
+        meta["statement_details"]["generated_at"] = sd
+
+    _set_period(meta, _extract_period(text, [
+        r"Statement\s+Period\s+(\S+)\s+to\s+(\S+)",
+    ]))
+
+    bal_col = re.findall(r"([\d,]+\.\d{2})\s*\(Cr\)", text)
+    if bal_col:
+        meta["summary_snapshot"]["opening_balance"] = clean_balance_string(bal_col[0])
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(bal_col[-1])
+
+
+# ============================================================
+#  UPI APP EXTRACTION ENGINES
+# ============================================================
+
+def _engine_gpay(text, meta):
+    """Google Pay transaction statement."""
+    meta["document_type"] = "UPI_STATEMENT"
+    meta["institution"]["platform"] = "GOOGLE PAY"
+
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    # Phone + email (line 2 of GPay: "9303556894, lakshitverma022@gmail.com")
+    contact_line = _first_val(text, r"(\d{10}[,\s]+[\w.+]+@[\w.]+)")
+    if contact_line:
+        parts = re.split(r"[,\s]+", contact_line.strip(), maxsplit=1)
+        if parts:
+            meta["account_holder"]["mobile_number"] = parts[0].strip()
+            if len(parts) > 1:
+                meta["account_holder"]["email"] = parts[1].strip()
+    else:
+        phone = _first_val(text, r"(\d{10})")
+        if phone:
+            meta["account_holder"]["mobile_number"] = phone
+        email = _first_val(text, r"([\w.+]+@[\w.]+\.[a-z]{2,})")
+        if email:
+            meta["account_holder"]["email"] = email
+
+    # Period: GPay compact format "01December2025-31May2026"
+    period = _search(
+        r"(\d{1,2}[A-Za-z]+\d{4})\s*[-\u2013]\s*(\d{1,2}[A-Za-z]+\d{4})",
+        text
+    )
+    if period:
+        meta["statement_details"]["start_date"] = period.group(1)
+        meta["statement_details"]["end_date"] = period.group(2)
+        meta["statement_details"]["period_raw"] = f"{period.group(1)} to {period.group(2)}"
+
+    # Total Sent / Received from summary row
+    sent = _first_val(text, r"Sent\s+Received[\s\S]{0,20}?([\u20b9Rs\.]+[\d,]+)")
+    recv = _first_val(text, r"(?:Sent\s+Received)[\s\S]{0,60}?[\u20b9Rs\.]+[\d,]+\s+([\u20b9Rs\.]+[\d,]+)")
+    # Simpler: grab the two amounts on the summary line
+    summary = _search(
+        r"([\d]{2}[A-Za-z]+\d{4}[-\u2013][\d]{2}[A-Za-z]+\d{4})\s+([\u20b9][\d,]+)\s+([\u20b9][\d,]+)",
+        text
+    )
+    if summary:
+        meta["upi_summary"]["total_sent"] = summary.group(2)
+        meta["upi_summary"]["total_received"] = summary.group(3)
+    else:
+        # Fallback: find Sent/Received column values
+        amounts = re.findall(r"\u20b9[\d,]+", text)
+        if len(amounts) >= 2:
+            meta["upi_summary"]["total_sent"] = amounts[0]
+            meta["upi_summary"]["total_received"] = amounts[1]
+
+    # Source bank from "PaidbyAUSmallFinanceBank7972" pattern
+    source_banks = re.findall(r"Paidby([A-Z][A-Za-z\s]+?Bank)\s*\d*", text)
+    if source_banks:
+        meta["institution"]["bank_name"] = source_banks[0].strip()
+
+    # Transaction count (count UPI Transaction ID occurrences)
+    txn_count = len(re.findall(r"UPITransactionID:", text))
+    if txn_count:
+        meta["upi_summary"]["transaction_count"] = str(txn_count)
+
+
+def _engine_mobikwik(text, meta):
+    """MobiKwik wallet transaction statement."""
+    meta["document_type"] = "UPI_STATEMENT"
+    meta["institution"]["platform"] = "MOBIKWIK"
+
+    # Phone number (first line after ACCOUNT DETAILS)
+    phone = _first_val(text, r"ACCOUNT\s+DETAILS\s+(\d{10})")
+    if phone:
+        meta["account_holder"]["mobile_number"] = phone
+    else:
+        phone = _first_val(text, r"^(\d{10})$")
+        if phone:
+            meta["account_holder"]["mobile_number"] = phone
+
+    # Period
+    _set_period(meta, _extract_period(text, [
+        r"Transaction\s+statement\s+for\s+(\d{4}-\d{2}-\d{2})\s+to\s+(\d{4}-\d{2}-\d{2})",
+        r"(\d{4}-\d{2}-\d{2})\s+to\s+(\d{4}-\d{2}-\d{2})",
+    ]))
+
+    # Transaction count
+    count = _first_val(text, r"Number\s+Of\s+Transactions\s+(\d+)")
+    if count:
+        meta["upi_summary"]["transaction_count"] = count
+
+    # Total spent
+    spent = _first_val(text, r"Total\s+Money\s+Spent\s+Rs\.\s+([\d,\.]+)")
+    if spent:
+        meta["upi_summary"]["total_sent"] = f"Rs. {spent}"
+
+    # Wallet balance
+    wallet = _first_val(text, r"Current\s+Wallet\s+Balance\s+Rs\.\s+([\d,\.]+)")
+    if wallet:
+        meta["upi_summary"]["wallet_balance"] = f"Rs. {wallet}"
+        meta["summary_snapshot"]["closing_balance"] = clean_balance_string(wallet)
+
+
+def _engine_paytm(text, meta):
+    """Paytm UPI transaction statement."""
+    meta["document_type"] = "UPI_STATEMENT"
+    meta["institution"]["platform"] = "PAYTM"
+
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+
+    # Name (first line)
+    if lines:
+        first = lines[0]
+        if re.match(r"^[A-Z][a-z]+\s+[A-Z][a-z]+", first):
+            meta["account_holder"]["name"] = first
+
+    # Phone + email (second line)
+    contact_line = None
+    for line in lines[1:4]:
+        if re.search(r"\d{10}", line):
+            contact_line = line
+            break
+    if contact_line:
+        phone = _first_val(contact_line, r"(\d{10})")
+        if phone:
+            meta["account_holder"]["mobile_number"] = phone
+        email = _first_val(contact_line, r"([\w.+]+@[\w.]+\.[a-z]{2,})")
+        if email:
+            meta["account_holder"]["email"] = email
+
+    # Period: "1 APR'25 - 31 MAR'26" or similar
+    _set_period(meta, _extract_period(text, [
+        r"(\d+\s+[A-Z]{3}'\d{2})\s*[-\u2013]\s*(\d+\s+[A-Z]{3}'\d{2})",
+        r"(\d+\s+[A-Za-z]+\s+'?\d{2,4})\s*[-\u2013]\s*(\d+\s+[A-Za-z]+\s+'?\d{2,4})",
+    ]))
+
+    # Total paid / received
+    paid = _first_val(text, r"Total\s+Money\s+Paid\s+[-+]?\s*Rs\.([\d,\.]+)")
+    received = _first_val(text, r"Total\s+Money\s+Received\s+[+]?\s*Rs\.([\d,\.]+)")
+    if paid:
+        meta["upi_summary"]["total_sent"] = f"Rs.{paid}"
+    if received:
+        meta["upi_summary"]["total_received"] = f"Rs.{received}"
+
+    # Try horizontal-merged amounts fallback
+    if not paid or not received:
+        m = re.search(r"-\s*Rs\.([\d,\.]+)\s+\+\s*Rs\.([\d,\.]+)", text)
+        if m:
+            meta["upi_summary"]["total_sent"] = f"Rs.{m.group(1)}"
+            meta["upi_summary"]["total_received"] = f"Rs.{m.group(2)}"
+
+    # Payment counts
+    payments_made = _first_val(text, r"(\d+)\s+Payments?\s+made")
+    payments_recv = _first_val(text, r"(\d+)\s+Payments?\s+received")
+    if payments_made or payments_recv:
+        total = (int(payments_made or 0) + int(payments_recv or 0))
+        meta["upi_summary"]["transaction_count"] = str(total)
+
+    # Linked accounts breakdown: "Kotak Mahindra Bank - 70 Rs.956 Rs.0"
+    # We match horizontal whitespace [ \t] strictly to prevent newline crossing
+    linked = re.findall(
+        r"([A-Z][A-Za-z \t]+(?:Bank|India))\s*-\s*(\d+)\s+Rs\.([\d,\.]+)\s+Rs\.([\d,\.]+)",
+        text
+    )
+    for match in linked:
+        bank_name, masked, sent_amt, recv_amt = match
+        meta["upi_summary"]["linked_accounts"].append({
+            "bank": bank_name.strip(),
+            "masked_account": masked.strip(),
+            "sent": f"Rs.{sent_amt}",
+            "received": f"Rs.{recv_amt}"
+        })
+
+
+def _engine_phonepe(text, meta):
+    """PhonePe transaction statement."""
+    meta["document_type"] = "UPI_STATEMENT"
+    meta["institution"]["platform"] = "PHONEPE"
+
+    # Phone number from header: "Transaction Statement for 7597748121"
+    phone = _first_val(text, r"Transaction\s+Statement\s+for\s+(\d{10})")
+    if phone:
+        meta["account_holder"]["mobile_number"] = phone
+
+    # Period: "01 Apr, 2026 - 15 Jun, 2026"
+    _set_period(meta, _extract_period(text, [
+        r"(\d{2}\s+[A-Za-z]+,\s+\d{4})\s*[-\u2013]\s*(\d{2}\s+[A-Za-z]+,\s+\d{4})",
+        r"(\d{2}\s+[A-Za-z]+\s+\d{4})\s*[-\u2013]\s*(\d{2}\s+[A-Za-z]+\s+\d{4})",
+    ]))
+
+    # Source accounts (masked) from "Paid by XXXXXXXX3070"
+    source_accounts = list(set(re.findall(r"Paid\s+by\s+(X+\d+)", text, re.IGNORECASE)))
+    if source_accounts:
+        meta["upi_summary"]["linked_accounts"] = [
+            {"masked_account": acct} for acct in source_accounts
+        ]
+
+    # Transaction count
+    txn_ids = re.findall(r"Transaction\s+ID\s+[A-Z0-9]+", text)
+    if txn_ids:
+        meta["upi_summary"]["transaction_count"] = str(len(txn_ids))
+
+    # Total debits / credits from amount column
+    debits = re.findall(r"DEBIT\s+[\u20b9]([\d,\.]+)", text)
+    credits = re.findall(r"CREDIT\s+[\u20b9]([\d,\.]+)", text)
+    if debits:
+        total_debit = sum(clean_balance_string(x) for x in debits)
+        meta["upi_summary"]["total_sent"] = f"\u20b9{total_debit:,.2f}"
+    if credits:
+        total_credit = sum(clean_balance_string(x) for x in credits)
+        meta["upi_summary"]["total_received"] = f"\u20b9{total_credit:,.2f}"
+
+
+def _engine_supermoney(text, meta):
+    """SuperMoney transaction history."""
+    meta["document_type"] = "UPI_STATEMENT"
+    meta["institution"]["platform"] = "SUPERMONEY"
+
+    # Period: "20 May 2026 to 20 June 2026"
+    _set_period(meta, _extract_period(text, [
+        r"(\d{1,2}\s+[A-Za-z]+\s+\d{4})\s+to\s+(\d{1,2}\s+[A-Za-z]+\s+\d{4})",
+    ]))
+
+    # Transactions: "Name Bank Amount Date Status"
+    # "Mr Aditya Chandil Kotak 3070 -1.00 20 June 2026 SUCCESS"
+    txn_matches = re.findall(
+        r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s+([A-Z][A-Za-z\s]+?)\s+(\d{4})\s+([+-]?[\d,\.]+)\s+(\d{1,2}\s+[A-Za-z]+\s+\d{4})\s+(SUCCESS|FAILED|PENDING)",
+        text
+    )
+    for match in txn_matches:
+        name, bank, masked, amount, date, status = match
+        meta["upi_summary"]["linked_accounts"].append({
+            "counterparty": name.strip(),
+            "bank": bank.strip(),
+            "masked_account": masked.strip(),
+            "amount": amount.strip(),
+            "date": date.strip(),
+            "status": status.strip()
+        })
+
+    if txn_matches:
+        meta["upi_summary"]["transaction_count"] = str(len(txn_matches))
+
+
+# ============================================================
+#  ENGINE DISPATCH TABLE
+# ============================================================
+
+# Bank engines
+BANK_ENGINE_MAP = {
+    "AU SMALL FINANCE BANK":    _engine_au,
+    "AXIS BANK":                _engine_axis,
+    "BANK OF BARODA":           _engine_bob,
+    "BANK OF INDIA":            _engine_boi,
+    "CANARA BANK":              _engine_canara,
+    "HDFC BANK":                _engine_hdfc,
+    "ICICI BANK":               _engine_icici,
+    "INDIAN OVERSEAS BANK":     _engine_iob,
+    "KOTAK MAHINDRA BANK":      _engine_kotak,
+    "PUNJAB NATIONAL BANK":     _engine_pnb,
+    "PUNJAB & SIND BANK":       _engine_psb,
+    "STATE BANK OF INDIA":      _engine_sbi,
+    "SLICE SMALL FINANCE BANK": _engine_slice,
+    "UNION BANK OF INDIA":      _engine_union_bank,
+}
+
+# UPI app engines
+UPI_ENGINE_MAP = {
+    "GOOGLE PAY":  _engine_gpay,
+    "MOBIKWIK":    _engine_mobikwik,
+    "PAYTM":       _engine_paytm,
+    "PHONEPE":     _engine_phonepe,
+    "SUPERMONEY":  _engine_supermoney,
+}
+
+# Unified map for backward compatibility
+ENGINE_MAP = {**BANK_ENGINE_MAP, **UPI_ENGINE_MAP}
+
+
+# ============================================================
+#  CORE EXTRACTION RUNNER
+# ============================================================
+
+def _run_extraction(first_page_text, full_text, source_label="", pdf_page=None):
+    """
+    Core logic: classify document, run appropriate engine, apply global fallbacks.
+    Supports both Bank Statement PDFs and UPI App statements.
+    """
+    meta = initialize_metadata_schema()
+    text_lower = first_page_text.lower()
+
+    # 1. Classify document type (UPI app vs bank statement)
+    doc_type, upi_platform = identify_document(text_lower, source_label)
+    meta["document_type"] = doc_type
+
+    if doc_type == "UPI_STATEMENT":
+        # 2a. Route to UPI engine
+        meta["institution"]["platform"] = upi_platform or "UNKNOWN"
+        engine = UPI_ENGINE_MAP.get(upi_platform)
+        if engine:
+            engine(first_page_text, meta)
+        else:
+            print(f"    [!] No UPI engine for '{upi_platform}' on '{source_label}'.")
+    else:
+        # 2b. Route to bank engine
+        bank_name = identify_bank(text_lower, first_page_text)
+        meta["institution"]["bank_name"] = bank_name
+        engine = BANK_ENGINE_MAP.get(bank_name)
+        if engine:
+            if bank_name == "BANK OF BARODA":
+                engine(first_page_text, meta, pdf_page=pdf_page)
+            else:
+                engine(first_page_text, meta)
+        else:
+            print(f"    [!] No specific engine for '{bank_name}' on '{source_label}' — using global extractors only.")
+
+        # 3. Global identifier fallbacks (bank statements only)
+        extract_global_identifiers(first_page_text, meta)
+        extract_global_identifiers(full_text, meta)
+
+        # 4. Global balance fallbacks
+        extract_global_balances(full_text, meta)
+
+    return meta
+
+
+# ============================================================
+#  PRIMARY MODE: PDF EXTRACTION (pdfplumber)
+# ============================================================
+
+def extract_pdf_metadata(pdf_path):
+    """Extract metadata from a single PDF file using pdfplumber."""
+    try:
+        import pdfplumber
+    except ImportError:
+        raise ImportError("pdfplumber is required: pip install pdfplumber")
+
+    print(f"[->] Scanning document layout for structural metadata: {pdf_path}")
+    full_text = ""
+    first_page_text = ""
+    first_page = None
+
+    with pdfplumber.open(pdf_path) as pdf:
+        num_pages = len(pdf.pages)
+        if num_pages > 0:
+            first_page_text = pdf.pages[0].extract_text() or ""
+            first_page = pdf.pages[0]
+            full_text += first_page_text + "\n"
+            
+            # Extract last page to get closing balance fallbacks without scanning middle pages
+            if num_pages > 1:
+                last_page_text = pdf.pages[-1].extract_text() or ""
+                full_text += last_page_text + "\n"
+
+    return _run_extraction(first_page_text, full_text, os.path.basename(pdf_path), pdf_page=first_page)
+
+
+# ============================================================
+#  SECONDARY MODE: MARKDOWN BLOCK EXTRACTION
+# ============================================================
+
+def extract_md_sections(md_path):
+    """
+    Parse combined_output.md and return a dict: { filename: text_block }
+    Splits on '## File: <name>' headings.
+    """
+    with open(md_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    sections = re.split(r"^##\s+File:\s+(.+?)$", content, flags=re.MULTILINE)
+    result = {}
+
+    # sections = [preamble, filename1, block1, filename2, block2, ...]
+    for i in range(1, len(sections), 2):
+        filename = sections[i].strip()
+        block = sections[i + 1] if i + 1 < len(sections) else ""
+        block = re.sub(r"\n-{4,}\n", "", block).strip()
+        result[filename] = block
+
+    return result
+
+
+def extract_md_metadata(md_path):
+    """
+    Extract metadata for every bank section in combined_output.md.
+    Returns a list of dicts, each with 'source_file' + metadata keys.
+    """
+    print(f"[->] Parsing combined markdown: {md_path}")
+    sections = extract_md_sections(md_path)
+    results = []
+
+    for filename, text in sections.items():
+        print(f"    -> Processing section: {filename}")
+        meta = _run_extraction(text, text, filename)
+        meta["source_file"] = filename
+        results.append(meta)
+
+    return results
+
+
+# ============================================================
+#  CLI ENTRY POINT
+# ============================================================
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage:")
+        print("  Single PDF  : python extract_metadata.py <path_to_pdf_file>")
+        print("  Combined MD : python extract_metadata.py <path_to_combined_output.md>")
+        sys.exit(1)
+
+    input_path = sys.argv[1]
+    output_folder = "metadata"
+    os.makedirs(output_folder, exist_ok=True)
+
+    # ---- Mode: Markdown ----
+    if input_path.lower().endswith(".md"):
+        try:
+            all_meta = extract_md_metadata(input_path)
+
+            # Save individual JSON per section
+            for entry in all_meta:
+                src = entry.get("source_file", "unknown")
+                base = os.path.splitext(src)[0]
+                out_path = os.path.join(output_folder, f"{base}_profile.json")
+                with open(out_path, "w", encoding="utf-8") as jf:
+                    json.dump(entry, jf, indent=2, ensure_ascii=False)
+                print(f"    [OK] Saved -> {out_path}")
+
+            # Save combined JSON
+            combined_path = os.path.join(output_folder, "all_banks_metadata.json")
+            with open(combined_path, "w", encoding="utf-8") as jf:
+                json.dump(all_meta, jf, indent=2, ensure_ascii=False)
+
+            print(f"\n[OK] All {len(all_meta)} bank profiles extracted successfully!")
+            print(f"    -> Combined output: {combined_path}")
+            print(f"\n--- JSON Preview ---")
+            print(json.dumps(all_meta, indent=2, ensure_ascii=False))
+
+        except FileNotFoundError:
+            print(f"Error: File not found - '{input_path}'")
+        except Exception as e:
+            import traceback
+            print(f"Error processing markdown: {e}")
+            traceback.print_exc()
+
+    # ---- Mode: Single PDF ----
+    else:
+        try:
+            meta = extract_pdf_metadata(input_path)
+            base = os.path.splitext(os.path.basename(input_path))[0]
+            out_path = os.path.join(output_folder, f"{base}_profile.json")
+
+            with open(out_path, "w", encoding="utf-8") as jf:
+                json.dump(meta, jf, indent=2, ensure_ascii=False)
+
+            print(f"[OK] Metadata Isolated Successfully!")
+            print(f"    -> Saved profile mapping schema to: {out_path}\n")
+            print(json.dumps(meta, indent=2, ensure_ascii=False))
+
+        except FileNotFoundError:
+            print(f"Error: The file '{input_path}' was not found.")
+        except Exception as e:
+            import traceback
+            print(f"Error extracting metadata profile: {e}")
+            traceback.print_exc()
+

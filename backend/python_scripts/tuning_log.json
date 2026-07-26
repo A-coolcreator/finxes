@@ -1,0 +1,21 @@
+{
+  "approved": {
+    "AU.pdf": {
+      "timestamp": "2026-07-04T02:02:31.921563",
+      "bank_name": "AU SMALL FINANCE BANK"
+    },
+    "Axis.pdf": {
+      "timestamp": "2026-07-04T02:02:32.501434",
+      "bank_name": "AXIS BANK"
+    }
+  },
+  "skipped": {},
+  "corrections": {
+    "BOB.pdf": {
+      "timestamp": "2026-07-04T02:05:07.305107",
+      "bank_name": "BANK OF BARODA",
+      "note": "should be \"name\": \"SRIDHARA KUMAR PADHY\",Branch Name",
+      "raw_header": "Account Statement from 01-12-2025 to 07-02-2026\nAccount Details\nAccount Name Branch Name\nSRIDHARA KUMAR PADHY VINCENT, BERHAMPUR\nAccount Number IFSC Code\n85650100011905 BARB0DBBERH\nAccount Type MICR Code\nSBA 760012005\nCustomer Address Branch Address\nAT/PO HALDIAPADAR RALAB ROAD TIRUPATI NAGAR 4TH LANE VINCENT SCHOOL ROAD KHOLIKOTE BERHAMPUR\nBERHAMPUR GANJAM ODISHA 760003\nBERHAMPUR 760005\nBERHAMPUR\nSerial Transaction Value Description Cheque Debit Credit Balance\nNo Date Date Number\n1 01-12-2025 O"
+    }
+  }
+}

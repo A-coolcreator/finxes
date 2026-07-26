@@ -1,0 +1,11 @@
+Rule ID,Rule name,Match field,Evidence grade,Output
+FF-001,Exact UTR match,UTR string identical on debit + credit,A,Confirmed transfer · 100%
+FF-002,Exact IMPS reference,IMPS Ref No identical,A,Confirmed transfer · 100%
+FF-003,Exact UPI RRN,UPI RRN identical,A,Confirmed transfer · 100%
+FF-004,Exact cheque number,Cheque No identical on debit + credit,A,Confirmed cheque trail
+FF-005,Exact transaction reference,Ref No identical across accounts,A,Confirmed fund link
+FF-006,Exact counterparty account,Same account appears as counterparty,A,Confirmed account link
+FF-007,Exact VPA match,Same UPI handle on both sides,A,Confirmed VPA link
+FF-008,Exact mobile number,Same mobile number cross-account,B,Entity match
+FF-009,Exact IFSC match,Same IFSC as counterparty,B,Branch-level link
+FF-010,Exact beneficiary name,Same beneficiary name string,B,Entity matched trail

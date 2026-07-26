@@ -1,0 +1,6 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+SIMPL,BNPL,Simpl,Simpl Pay Private Limited,SIMPL,BNPL_PAYMENT
+AXIO,BNPL,Axio (Capital Float),Axio Bank Limited,"AXIO, CAPITAL FLOAT",BNPL_PAYMENT
+UNI_CARDS,BNPL,Uni Cards,Uni Cards Technology Private Limited,"UNI CARDS, UNICARDS",BNPL_PAYMENT
+KREDITONE,BNPL,KreditOne,,KREDITONE,BNPL_PAYMENT
+OLAMONEY_POSTPAID,BNPL,Ola Money Postpaid,Aditya Birla Finance Limited (partner),"OLA POSTPAID, OLA MONEY POSTPAID",BNPL_PAYMENT

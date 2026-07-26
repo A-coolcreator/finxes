@@ -1,0 +1,52 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "PUNJAB NATIONAL BANK",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "SIDDHANT SINGH THAKUR",
+    "customer_id_or_crn": "UNKNOWN",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "Statement",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "UNKNOWN",
+    "email": "UNKNOWN",
+    "address_raw": "MUKAM PO MOHAD KARELI NARSINGHPURNARSIMHHAPUR",
+    "joint_holders": "UNKNOWN"
+  },
+  "account_profile": {
+    "account_number": "6422000100039278",
+    "account_type": "UNKNOWN",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "UNKNOWN",
+    "od_limit": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "PUNB0642200",
+    "micr_code": "487024002",
+    "branch_name": "KARELI, JABALPUR",
+    "branch_code": "UNKNOWN",
+    "branch_address": "KARELI DISTT NARSINGHPUR",
+    "branch_phone_number": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "01-07-2025 to 31-12-2025",
+    "start_date": "01-07-2025",
+    "end_date": "31-12-2025",
+    "generated_at": "25/06/2026 18:07:23"
+  },
+  "summary_snapshot": {
+    "opening_balance": 7174.58,
+    "closing_balance": 8464.58
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

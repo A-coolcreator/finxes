@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Threshold,Output
+FF-021,>5 credits in 1 hr,Incoming count in rolling 1hr window,>5,"Credit burst, Grade C"
+FF-022,>10 credits in 1 hr,Incoming count in rolling 1hr window,>10,"High credit burst, Grade C"
+FF-023,>20 credits in 1 hr,Incoming count in rolling 1hr window,>20,"Extreme burst, Grade B"
+FF-024,>50 credits in 1 hr,Incoming count in rolling 1hr window,>50,"Collection event, Grade B"
+FF-025,>100 credits in 24 hr,Incoming count in rolling 24hr window,>100,"Mass collection, Grade B"
+FF-026,>10 outgoing in 1 hr,Outgoing count in rolling 1hr window,>10,"Distribution burst, Grade C"
+FF-027,>25 outgoing in 1 hr,Outgoing count in rolling 1hr window,>25,"High distribution, Grade B"
+FF-028,>50 outgoing in 24 hr,Outgoing count in rolling 24hr window,>50,"Mass distribution, Grade B"
+FF-029,Credits spike 5x average,Credit count vs 30-day avg,5x peer avg,"Anomalous inflow, Grade B"
+FF-030,Debits spike 5x average,Debit count vs 30-day avg,5x peer avg,"Anomalous outflow, Grade B"

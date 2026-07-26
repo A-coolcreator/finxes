@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Threshold,Output
+FF-061,10+ unique beneficiaries,Distinct outgoing counterparties,>= 10 in 7 days,"Distribution account, Grade C"
+FF-062,20+ unique beneficiaries,Distinct outgoing counterparties,>= 20 in 7 days,"Distribution account, Grade B"
+FF-063,50+ unique beneficiaries,Distinct outgoing counterparties,>= 50 in 30 days,"High-risk distribution, Grade B"
+FF-064,Equal-value transfers,Std deviation of outgoing amounts,StdDev < 5% of mean,"Structured payout, Grade B"
+FF-065,Sequential payouts,Outgoing txns in monotonic time order,< 2 min between each,"Sequential distribution, Grade B"
+FF-066,Layered payouts,Beneficiaries are themselves collection accts,>= 3 such accounts,"Layered distribution, Grade A"
+FF-067,Multi-bank payouts,Unique bank IFSCs in outgoing,>= 5 banks,"Multi-bank spread, Grade C"
+FF-068,Same-day payouts,All outgoing on same calendar date,>= 20 transactions,"Burst distribution, Grade B"
+FF-069,Payroll-like payouts,Regular equal credits on fixed dates,Appears monthly,Exclude: likely payroll
+FF-070,Spray pattern,"1 account -> N accounts, same amount",N >= 20,"Spray distribution, Grade B"

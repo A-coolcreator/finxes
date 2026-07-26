@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Threshold,Output
+FF-081,Credit split into 2,1 large credit -> 2 near-equal debits,Within 24 hr,"2-way split, Grade C"
+FF-082,Credit split into 5,1 large credit -> 5 near-equal debits,Within 24 hr,"5-way split, Grade B"
+FF-083,Credit split into 10,1 large credit -> 10 near-equal debits,Within 24 hr,"10-way split, Grade B"
+FF-084,Credit split into 20,1 large credit -> 20 near-equal debits,Within 24 hr,"Structured split, Grade A"
+FF-085,"Repeated ₹49,000","Exact or ±₹500 below ₹50,000 threshold",>= 3 occurrences,"Below-threshold structuring, Grade B"
+FF-086,"Repeated ₹99,000",Exact or ±₹500 below ₹1L threshold,>= 3 occurrences,"Below-threshold structuring, Grade B"
+FF-087,Repeated round amounts,"Exact multiples of ₹10,000 or ₹25,000",>= 5 occurrences,"Round-amount pattern, Grade C"
+FF-088,Smurfing pattern,>= 50 accounts each depositing just below threshold,"₹49,000 per account","Smurfing, Grade A"
+FF-089,Structured cash deposits,Multiple branch cash deposits below CTR,"< ₹50,000 each, >= 5 branches","Structured cash, Grade A"
+FF-090,Structured withdrawals,Multiple ATM withdrawals below limit,"< ₹20,000 each, >= 5 ATMs same day","Structured withdrawal, Grade B"

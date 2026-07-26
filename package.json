@@ -1,0 +1,11 @@
+{
+  "name": "finexis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:ui": "npm run build --prefix finexis_ui_updated",
+    "start:backend": "npm start --prefix backend",
+    "dev:ui": "npm run dev --prefix finexis_ui_updated",
+    "test:rule-engine": "npm run test:rule-engine --prefix frontend"
+  }
+}

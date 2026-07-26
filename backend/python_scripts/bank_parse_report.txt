@@ -1,0 +1,21 @@
+=== BANK PDF PARSING REPORT ===
+
+SUCCESS: AU.pdf -> [OK] Parsing Complete! Saved 999 rows into: csv\AU.csv
+SUCCESS: Axis.pdf -> [OK] Parsing Complete! Saved 1 rows into: csv\Axis.csv
+SUCCESS: BOB.pdf -> [OK] Parsing Complete! Saved 190 rows into: csv\BOB.csv
+SUCCESS: BOI-current.pdf -> [OK] Parsing Complete! Saved 1039 rows into: csv\BOI-current.csv
+SUCCESS: BOI-savings.pdf -> [OK] Parsing Complete! Saved 22 rows into: csv\BOI-savings.csv
+SUCCESS: Canara.pdf -> [OK] Parsing Complete! Saved 770 rows into: csv\Canara.csv
+SUCCESS: HDFC.pdf -> [OK] Parsing Complete! Saved 992 rows into: csv\HDFC.csv
+SUCCESS: ICICI-savings.pdf -> [OK] Parsing Complete! Saved 96 rows into: csv\ICICI-savings.csv
+SUCCESS: ICICI_current.pdf -> [OK] Parsing Complete! Saved 5321 rows into: csv\ICICI_current.csv
+SUCCESS: INDIAN_OVERSEAS.pdf -> [OK] Parsing Complete! Saved 135 rows into: csv\INDIAN_OVERSEAS.csv
+SUCCESS: KOTAK.pdf -> [OK] Parsing Complete! Saved 605 rows into: csv\KOTAK.csv
+SUCCESS: PNB.pdf -> [OK] Parsing Complete! Saved 500 rows into: csv\PNB.csv
+SUCCESS: Punjab-and-sindh.pdf -> [OK] Parsing Complete! Saved 31 rows into: csv\Punjab-and-sindh.csv
+SUCCESS: SBI-current.pdf -> [OK] Parsing Complete! Saved 879 rows into: csv\SBI-current.csv
+SUCCESS: SBI-savings.pdf -> [OK] Parsing Complete! Saved 1022 rows into: csv\SBI-savings.csv
+SUCCESS: slice_statement_01Jun26_20Jun26.pdf -> [OK] Parsing Complete! Saved 17 rows into: csv\slice_statement_01Jun26_20Jun26.csv
+SUCCESS: UNION_BANK.pdf -> [OK] Parsing Complete! Saved 84 rows into: csv\UNION_BANK.csv
+
+Total Tested: 17

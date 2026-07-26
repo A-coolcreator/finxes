@@ -1,0 +1,381 @@
+<!doctype html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script src="src/utils/auth-guard.js"></script>
+  <title>Finexis OS | Transaction Intelligence</title>
+  <meta name="description" content="Finexis OS transaction ledger — filter, search, and analyse financial transactions for forensic investigation." />
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Blueprint fonts: Fraunces + Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="styles/finexis-core.css" />
+  <script src="src/config/tailwind-theme.js"></script>
+  
+  <style>
+    /* ── Page-level overrides on top of finexis-core.css ── */
+    /* Ledger table — show at least ~10 rows; page scrolls when content exceeds viewport */
+    .ledger-table-wrap {
+      min-height: 440px;
+    }
+
+    /* Tight utility */
+    .text-xxs { font-size: 10px; line-height: 14px; }
+
+    /* Stat number colored variants */
+    .stat-num-debit  { color: var(--flag-500); }
+    .stat-num-credit { color: var(--f-600); }
+
+    /* Even-row subtle tint */
+    .transaction-row:nth-child(even) { background: var(--paper); }
+    .transaction-row:hover td { background: var(--f-50) !important; transition: background 120ms ease; }
+    .transaction-row { cursor: pointer; }
+
+    /* Section heading */
+    .section-heading {
+      font-family: 'Fraunces', ui-serif, Georgia, serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Filter layout/styles live in styles/finexis-core.css */
+
+    /* Keyword chip */
+    .kw-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line-soft);
+      background: var(--paper);
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+      font-family: 'JetBrains Mono', monospace;
+      user-select: none;
+    }
+    .kw-chip:hover  { background: var(--f-50); border-color: var(--f-100); color: var(--f-700); }
+    .kw-chip.active { background: var(--f-500); border-color: var(--f-500); color: #fff; }
+
+    /* Active filter pill */
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--f-50);
+      border: 1px solid var(--f-100);
+      border-radius: var(--radius-full);
+      padding: 2px 8px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--f-600);
+      white-space: nowrap;
+    }
+
+    /* Pagination button */
+    .page-btn-tx {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      height: 28px;
+      padding: 0 8px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--ink-muted);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+    .page-btn-tx:hover { background: var(--paper); color: var(--ink); border-color: var(--ink-faint); }
+    .page-btn-tx.active { background: var(--f-500); color: #fff; border-color: var(--f-500); }
+    .page-btn-tx:disabled { opacity: 0.35; pointer-events: none; }
+
+    /* Flag badge */
+    .flag-badge-high {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px;
+      border-radius: var(--radius-full);
+      background: rgba(192,57,43,0.10);
+      border: 1px solid rgba(192,57,43,0.25);
+    }
+    .flag-badge-med {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px;
+      border-radius: var(--radius-full);
+      background: var(--amber-50);
+      border: 1px solid rgba(217,119,6,0.25);
+    }
+    .flag-badge-low {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px;
+      border-radius: var(--radius-full);
+      background: var(--line-soft);
+    }
+  </style>
+</head>
+
+<body class="overflow-hidden bg-[var(--paper)] text-[var(--ink)] antialiased">
+  
+  <!-- ══════════════════════════════════════════
+       APP SHELL (Flex Layout)
+  ══════════════════════════════════════════ -->
+  <div class="app-shell flex h-screen w-full overflow-hidden bg-paper">
+
+    <aside id="app-sidebar" class="app-sidebar"></aside>
+
+    <!-- ══════════════════════════════════════════
+         MAIN CONTENT CANVAS
+    ══════════════════════════════════════════ -->
+    <main class="flex-1 min-w-0 min-h-0 flex flex-col h-screen overflow-hidden">
+
+      <!-- ── Top Header Bar ── -->
+      <header class="flex items-center justify-between shrink-0"
+        style="height:56px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--line);">
+
+        <div class="flex items-center gap-4">
+          <a id="header-back-btn" href="#"
+            class="btn-ghost" style="font-size:12px;padding:6px 12px;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:14px;">arrow_back</span> Back
+          </a>
+          <div style="width:1px;height:16px;background:var(--line);"></div>
+          <h2 id="case-title-badge" class="sidebar-brand font-semibold tracking-tight" style="font-size:16px;color:var(--ink);">Case Ledger</h2>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Rail badge — eyebrow pill -->
+          <span id="rail-badge" class="eyebrow" style="font-size:10px;">ALL</span>
+          <button class="btn-ghost" style="font-size:12px;padding:6px 12px;">
+            <span class="material-symbols-outlined" style="font-size:14px;">file_download</span>
+            Export
+          </button>
+        </div>
+      </header>
+
+      <!-- ── Scrollable Content Canvas ── -->
+      <section class="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 space-y-3" style="background:var(--paper);">
+
+        <!-- ── Stat Cards (4 cols) ── -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+
+          <!-- Total Transactions -->
+          <div class="stat-card-item card-elevated">
+            <div class="flex justify-between items-start">
+              <p style="font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.16em;">Total Transactions</p>
+              <div class="icon-sm"><span class="material-symbols-outlined" style="font-size:16px;color:var(--f-500);">swap_horiz</span></div>
+            </div>
+            <p id="stat-count" class="stat-num">0</p>
+            <p style="font-size:11px;color:var(--ink-faint);font-weight:500;">filtered ledger entries</p>
+          </div>
+
+          <!-- Total Debit -->
+          <div class="stat-card-item card-elevated">
+            <div class="flex justify-between items-start">
+              <p style="font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.16em;">Total Debit</p>
+              <div class="icon-sm"><span class="material-symbols-outlined" style="font-size:16px;color:var(--flag-500);">trending_down</span></div>
+            </div>
+            <p id="stat-debit" class="stat-num stat-num-debit">₹0.00</p>
+            <p style="font-size:11px;color:var(--flag-500);font-weight:600;">total outflows</p>
+          </div>
+
+          <!-- Total Credit -->
+          <div class="stat-card-item card-elevated">
+            <div class="flex justify-between items-start">
+              <p style="font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.16em;">Total Credit</p>
+              <div class="icon-sm"><span class="material-symbols-outlined" style="font-size:16px;color:var(--f-600);">trending_up</span></div>
+            </div>
+            <p id="stat-credit" class="stat-num stat-num-credit">₹0.00</p>
+            <p style="font-size:11px;color:var(--f-600);font-weight:600;">total inflows</p>
+          </div>
+
+          <!-- Active Flags -->
+          <div class="stat-card-item card-elevated">
+            <div class="flex justify-between items-start">
+              <p style="font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.16em;">Active Flags</p>
+              <div class="icon-sm"><span class="material-symbols-outlined" style="font-size:16px;color:var(--amber-500);">warning</span></div>
+            </div>
+            <p class="stat-num" id="stat-flags" style="color:var(--amber-600);">—</p>
+            <p style="font-size:11px;color:var(--amber-600);font-weight:600;">suspicious patterns</p>
+          </div>
+        </div>
+
+        <!-- ── Filter Bar ── -->
+        <div>
+
+          <div class="filter-grid card-elevated card-elevated--static">
+
+            <!-- Entity -->
+            <div class="filter-item">
+              <label class="field-label">Entity</label>
+              <select id="person-select" class="filter-input">
+                <option value="all">All Entities (Combined)</option>
+              </select>
+            </div>
+
+            <!-- From Date -->
+            <div class="filter-item">
+              <label class="field-label">From Date</label>
+              <input type="date" id="start-date" class="filter-input" />
+            </div>
+
+            <!-- To Date -->
+            <div class="filter-item">
+              <label class="field-label">To Date</label>
+              <input type="date" id="end-date" class="filter-input" />
+            </div>
+
+            <!-- Category -->
+            <div class="filter-item">
+              <label class="field-label">Category</label>
+              <select id="category-filter" class="filter-input">
+                <option value="all">All Categories</option>
+                <option value="upi">UPI</option>
+                <option value="imps">IMPS</option>
+                <option value="neft">NEFT</option>
+                <option value="card">Card / POS</option>
+                <option value="cash">Cash</option>
+                <option value="crypto">Crypto</option>
+                <option value="aeps">AEPS</option>
+                <option value="enach">E-NACH / NACH</option>
+              </select>
+            </div>
+
+            <!-- DR/CR Toggle -->
+            <div class="filter-item">
+              <label class="field-label">DR / CR</label>
+              <div class="dr-cr-group">
+                <button type="button" id="filter-dr" class="dr-cr-btn">DR</button>
+                <button type="button" id="filter-cr" class="dr-cr-btn">CR</button>
+                <button type="button" id="filter-all" class="dr-cr-btn active">ALL</button>
+              </div>
+            </div>
+
+            <!-- Search Description -->
+            <div class="filter-item search-item">
+              <label class="field-label">Search Description</label>
+              <div>
+                <span class="material-symbols-outlined search-icon">search</span>
+                <input type="text" id="search-input" placeholder="Description, ref, merchant…"
+                  class="filter-input search-input-pad" />
+              </div>
+            </div>
+
+            <!-- Reset -->
+            <div class="filter-item reset-item">
+              <label class="field-label" style="opacity:0;">·</label>
+              <button type="button" id="reset-filters" class="btn-ghost">Reset</button>
+            </div>
+          </div>
+
+          <!-- Active Filters Row -->
+          <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="show-flagged-only"
+                style="width:12px;height:12px;accent-color:var(--f-500);" />
+              <span style="font-size:10.5px;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.10em;">Show High-Value Only (&gt;₹50K)</span>
+            </label>
+            <div style="width:1px;height:12px;background:var(--line);"></div>
+            <div id="active-filters-area" style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:10.5px;color:var(--ink-faint);font-style:italic;">No active filters</span>
+            </div>
+          </div>
+
+          <!-- Keyword Chips -->
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft);display:flex;flex-direction:column;gap:8px;">
+            <span style="font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:var(--tracking-widest2);">Quick Keyword Filters</span>
+            <div id="keyword-chips-container" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+        </div>
+
+        <!-- ── Transactions Table ── -->
+        <div class="card-elevated card-elevated--static" style="border-radius:var(--radius-lg);">
+
+          <!-- Table header bar -->
+          <div style="padding:10px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--paper);">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <h3 class="section-heading">Core Transaction Ledger</h3>
+              <span id="tx-count-badge" class="eyebrow" style="font-size:9px;padding:2px 9px;">0 TRANS.</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:11px;color:var(--ink-faint);font-weight:500;" id="showing-tx-range">Showing 0 of 0</span>
+              <button style="font-size:11px;font-weight:600;color:var(--ink-muted);display:flex;align-items:center;gap:5px;background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:var(--radius-sm);transition:color 150ms ease;" onmouseover="this.style.color='var(--f-500)'" onmouseout="this.style.color='var(--ink-muted)'">
+                <span class="material-symbols-outlined" style="font-size:14px;">file_download</span> Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Table scroll wrapper -->
+          <div class="ledger-table-wrap overflow-x-auto custom-scrollbar">
+            <table style="width:100%;text-align:left;border-collapse:collapse;min-width:1400px;">
+              <thead style="position:sticky;top:0;z-index:20;">
+                <tr style="background:var(--paper);border-bottom:1px solid var(--line);">
+                  <th class="table-th" style="width:108px;">Date</th>
+                  <th class="table-th">Severity</th>
+                  <th class="table-th">Description</th>
+                  <th class="table-th">Ref / Chq No.</th>
+                  <th class="table-th">Category</th>
+                  <th id="col-debit-header" class="table-th" style="text-align:right;color:var(--flag-500);">Debit (₹)</th>
+                  <th id="col-credit-header" class="table-th" style="text-align:right;color:var(--f-600);">Credit (₹)</th>
+                  <th class="table-th" style="text-align:right;">Balance (₹)</th>
+                  <th class="table-th" style="text-align:center;">Flag</th>
+                  <th class="table-th" style="color:var(--amber-600);">Keywords</th>
+                  <th class="table-th" style="color:#3B82F6;">Phone No.</th>
+                  <th class="table-th" style="color:#7C3AED;">UPI ID</th>
+                  <th class="table-th" style="color:var(--f-500);">IFSC</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-table-body" style="font-size:12px;font-family:'Inter',sans-serif;">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div style="padding:10px 20px;border-top:1px solid var(--line);background:var(--paper);display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11px;color:var(--ink-faint);font-weight:500;font-family:'JetBrains Mono',monospace;" id="page-num-indicator">Page 1 of 1</span>
+            </div>
+            <div style="display:flex;gap:4px;align-items:center;">
+              <button id="prev-page-btn" class="page-btn-tx" disabled>← Prev</button>
+              <div id="page-numbers" style="display:flex;gap:4px;"></div>
+              <button id="next-page-btn" class="page-btn-tx">Next →</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { attachTransactionsListInteractions } from "./src/interactions/transactions-list.js?v=17";
+    import { initSidebar } from "./src/interactions/sidebar.js";
+
+    initSidebar();
+    attachTransactionsListInteractions();
+
+    // Keep tx-count-badge in sync with stat-count
+    const statCount = document.getElementById('stat-count');
+    const txBadge   = document.getElementById('tx-count-badge');
+    const observer  = new MutationObserver(() => {
+      if (txBadge) txBadge.textContent = statCount.textContent + ' TRANS.';
+    });
+    if (statCount) observer.observe(statCount, { childList: true, characterData: true, subtree: true });
+  </script>
+</body>
+</html>

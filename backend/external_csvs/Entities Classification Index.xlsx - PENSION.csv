@@ -1,0 +1,5 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+NPS,PENSION,National Pension System,NPS Trust / PFRDA,"NPS, NATIONAL PENSION, CRA NSDL",PENSION_CONTRIBUTION
+PPF,PENSION,Public Provident Fund,"Ministry of Finance, Govt. of India","PPF, PUBLIC PROVIDENT FUND",PENSION_CONTRIBUTION
+APY,PENSION,Atal Pension Yojana,Pension Fund Regulatory and Development Authority (PFRDA),"APY, ATAL PENSION",PENSION_CONTRIBUTION
+EPFO_PENSION,PENSION,EPFO Pension,Employees Provident Fund Organisation,"EPFO PENSION, EPS",PENSION_CONTRIBUTION

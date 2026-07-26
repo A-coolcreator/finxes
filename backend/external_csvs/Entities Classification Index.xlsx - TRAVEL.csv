@@ -1,0 +1,10 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+MAKEMYTRIP,TRAVEL,MakeMyTrip,MakeMyTrip (India) Private Limited,"MAKEMYTRIP, MMT",DIGITAL_PAYMENT
+GOIBIBO,TRAVEL,Goibibo,MakeMyTrip Limited (parent; via Ibibo Group),GOIBIBO,DIGITAL_PAYMENT
+REDBUS,TRAVEL,redBus,MakeMyTrip Limited (parent; via Ibibo Group),REDBUS,DIGITAL_PAYMENT
+IXIGO,TRAVEL,ixigo,Le Travenues Technology Limited,IXIGO,DIGITAL_PAYMENT
+EASEMYTRIP,TRAVEL,EaseMyTrip,Easy Trip Planners Limited,EASEMYTRIP,DIGITAL_PAYMENT
+YATRA,TRAVEL,Yatra,Yatra Online Limited,YATRA,DIGITAL_PAYMENT
+CLEARTRIP,TRAVEL,Cleartrip,Cleartrip Private Limited,CLEARTRIP,DIGITAL_PAYMENT
+IRCTC,TRAVEL,IRCTC,Indian Railway Catering and Tourism Corporation Limited,IRCTC,DIGITAL_PAYMENT
+ABHIBUS,TRAVEL,AbhiBus,,ABHIBUS,DIGITAL_PAYMENT

@@ -1,0 +1,7 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+AMAZON_GIFT,GIFT_CARD,Amazon Gift Card,Amazon Seller Services Private Limited,"AMAZON GIFT CARD, AMAZON GC",GIFT_CARD_HIGH_RISK
+FLIPKART_VOUCHER,GIFT_CARD,Flipkart Voucher,Flipkart Internet Private Limited,"FLIPKART VOUCHER, FLIPKART GC",GIFT_CARD_HIGH_RISK
+WOOHOO,GIFT_CARD,Woohoo,QwikCilver Solutions Private Limited (Tata Group),"WOOHOO, QWIKCILVER",GIFT_CARD_HIGH_RISK
+PINE_PERKS,GIFT_CARD,Pine Perks / PinePerks,Pine Labs Private Limited,"PINE PERKS, PINELABS GIFT",GIFT_CARD_HIGH_RISK
+GOOGLE_PLAY_GIFT,GIFT_CARD,Google Play Gift Card,Google LLC,"GOOGLE PLAY GIFT, GOOGLE PLAY CARD",GIFT_CARD_HIGH_RISK
+ITUNES_GIFT,GIFT_CARD,iTunes / Apple Gift Card,Apple Inc.,"ITUNES GIFT, APPLE GIFT CARD",GIFT_CARD_HIGH_RISK

@@ -1,0 +1,52 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "UNION BANK OF INDIA",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "LAKSHIT VERMA",
+    "customer_id_or_crn": "603665478",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "7****",
+    "email": "Currency",
+    "address_raw": "UNKNOWN",
+    "joint_holders": "UNKNOWN"
+  },
+  "account_profile": {
+    "account_number": "592302010007236",
+    "account_type": "Savings Account",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "UNKNOWN",
+    "od_limit": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "UBIN0559237",
+    "micr_code": "UNKNOWN",
+    "branch_name": "SHOP NO 8&9",
+    "branch_code": "UNKNOWN",
+    "branch_address": "SHOP NO 8&9 Statement Date 20-06-2026 18:04 SUMANSURABHI Statement Period 01-04-2026 to 20-06-2026 Date Transaction Id Remarks Amount( ) Balance( ) 02-04-2026 Y60543899 UPIAR/441177325136/DR/Repaka K/YESB/paytm.s1l5de3@ 45.00(Dr) 28169.60(Cr) 02-04-2026 Y60583468 UPIAR/326080483718/DR/MR JALA /YESB/ Q908450467@yb 83.00(Dr) 28086.60(Cr) 02-04-2026 Y93739753 UPIAR/303632545006/DR/ PhonePe/YESB/SV251211224730 5140.00(Dr) 22946.60(Cr) 02-04-2026 Y96028732 UPIAR/604966625468/DR/ PhonePe/YESB/SV251211224730 6420.00(Dr) 16526.60(Cr) 02-04-2026 Y96639642 UPIAB/744745340512/CR/Lakshit /AUBL/acelakshitverm 3000.00(Cr) 19526.60(Cr) 02-04-2026 Y97043531 UPIAR/322272202205/DR/ Fibe/UTIB/fibe.cf@axisba 13634.00(Dr) 5892.60(Cr) 03-04-2026 S19172775 NACH/10/3308413368/IDFC FIRST 835.00(Dr) 5057.60(Cr) 03-04-2026 S25206264 592302010007236:Int.Pd:01-01-2026 to 31-03-2026 147.00(Cr) 5204.60(Cr) 03-04-2026 S30087744 UPIAR/447718536396/DR/KONDA SR/YESB/ Q416774236@yb 45.00(Dr) 5159.60(Cr) 03-04-2026 S30190760 UPIAR/202933633604/DR/KONDA SR/YESB/ Q416774236@yb 10.00(Dr) 5149.60(Cr) 03-04-2026 S30195954 UPIAR/657732545403/DR/MR JALA /YESB/ Q908450467@yb 80.00(Dr) 5069.60(Cr) 03-04-2026 S31672667 UPIAB/991318227967/CR/Lakshit /AUBL/acelakshitverm 120.00(Cr) 5189.60(Cr) 03-04-2026 S32393777 NACH/10/3306933932/IDFC FIRST 1647.00(Dr) 3542.60(Cr) 03-04-2026 S33625988 NACH/10/3307929238/IDFC FIRST 2637.00(Dr) 905.60(Cr) 04-04-2026 T24500326 IMPSAB/609444402872/SPYINT TECHNOLOGIES/9303556894 4000.00(Cr) 4905.60(Cr) Page 1 of 4",
+    "branch_phone_number": "UNKNOWN"
+  },
+  "statement_details": {
+    "period_raw": "01-04-2026 to 20-06-2026",
+    "start_date": "01-04-2026",
+    "end_date": "20-06-2026",
+    "generated_at": "20-06-2026 18:04"
+  },
+  "summary_snapshot": {
+    "opening_balance": 28169.6,
+    "closing_balance": 4905.6
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

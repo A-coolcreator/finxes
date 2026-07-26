@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="src/utils/auth-guard.js"></script>
+    <title>Finexis Intelligence Engine - Fund Flow Graph</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="src/config/tailwind-theme.js"></script>
+    <link rel="stylesheet" href="styles/finexis-core.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .node-glow:hover {
+            filter: drop-shadow(0 0 8px rgba(14, 110, 94, 0.6));
+        }
+
+        .edge-risk-high {
+            stroke: #DC2626;
+            filter: drop-shadow(0 0 4px rgba(220, 38, 38, 0.8));
+            stroke-dasharray: 5;
+            animation: flow 2s linear infinite;
+        }
+
+        @keyframes flow {
+            from {
+                stroke-dashoffset: 20;
+            }
+
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .canvas-bg {
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+
+</head>
+
+<body class="bg-paper text-ink font-body-md overflow-hidden h-screen flex flex-col">
+    <!-- TopNavBar -->
+    <header
+        class="app-header flex justify-between items-center w-full px-6 h-16 bg-surface border-b border-border-subtle z-50 shrink-0">
+        <div class="flex items-center gap-8">
+            <span
+                class="font-headline-lg text-headline-lg font-bold text-primary dark:text-inverse-primary">Finexis</span>
+            <div class="hidden md:flex items-center gap-6">
+                <nav class="flex gap-4">
+                    <button
+                        class="px-3 py-2 text-primary dark:text-inverse-primary border-b-2 border-primary font-label-md text-label-md cursor-pointer">Workspace</button>
+                    <button
+                        class="px-3 py-2 text-on-surface-variant dark:text-outline hover:bg-surface-muted transition-colors font-label-md text-label-md cursor-pointer">Reports</button>
+                    <button
+                        class="px-3 py-2 text-on-surface-variant dark:text-outline hover:bg-surface-muted transition-colors font-label-md text-label-md cursor-pointer">Audit
+                        Logs</button>
+                </nav>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-outline">search</span>
+                <input
+                    class="pl-10 pr-4 py-2 bg-surface-container border border-outline-variant rounded-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-primary w-64"
+                    placeholder="Search accounts, UPI IDs..." type="text" />
+            </div>
+            <button
+                class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md hover:opacity-90 transition-opacity">
+                <span class="material-symbols-outlined text-[18px]">export_notes</span>
+                Export Case
+            </button>
+            <div class="flex gap-2">
+                <span
+                    class="material-symbols-outlined p-2 cursor-pointer text-outline hover:bg-surface-muted rounded-full">notifications</span>
+                <span
+                    class="material-symbols-outlined p-2 cursor-pointer text-outline hover:bg-surface-muted rounded-full">settings</span>
+            </div>
+            <div
+                class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline-variant">
+                <img class="w-full h-full object-cover"
+                    data-alt="A professional headshot of a financial investigator, neutral lighting, corporate office background, high detail, sharp focus, wearing a charcoal suit."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC92uDExRxAFY0n7Tlody4Ly0HJuaVbikCD6n5VvH5Sqxiw3dJ6WlQ_Bt8NXcemnoGB0ryUUgPyAMcVZMHZb-B0RSyywZ94Stpjas2DF3DPVUmBlx39mlygzzDJBdzg2AW2MDcKDrAevt0zn3m2G2Msk5UDrpJLOPhLXmwtrW6Bl1df5FtqV7SKtA_XWdmw_VGcDSYHxRh6olycoOHlBzHZhoBOupUcHQz6gvQTTHjkwdo50JHHgu2H3PulVYfdXcHgQkfaw3T8jICL" />
+            </div>
+        </div>
+    </header>
+    <div class="flex flex-1 relative overflow-hidden">
+        <aside id="app-sidebar" class="app-sidebar card-elevated card-elevated--sidebar"></aside>
+        <!-- Main Workspace Canvas -->
+        <main class="flex-1 relative bg-surface-container canvas-bg overflow-hidden">
+            <!-- Floating Top Toolbar -->
+            <div class="absolute top-6 left-6 right-6 flex justify-between pointer-events-none z-30">
+                <div class="flex gap-3 pointer-events-auto">
+                    <div class="glass-panel card-elevated border border-outline-variant p-1 rounded-lg flex">
+                        <button class="px-4 py-1.5 bg-primary text-on-primary rounded font-label-md text-label-md">2D
+                            Graph</button>
+                        <button
+                            class="px-4 py-1.5 text-on-surface-variant hover:bg-surface-container-highest rounded font-label-md text-label-md transition-all">3D
+                            Force</button>
+                    </div>
+                    <div class="glass-panel card-elevated border border-outline-variant p-1 rounded-lg flex">
+                        <button
+                            class="p-1.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all">
+                            <span class="material-symbols-outlined">layers</span>
+                        </button>
+                        <button
+                            class="p-1.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all">
+                            <span class="material-symbols-outlined">filter_list</span>
+                        </button>
+                        <button
+                            class="p-1.5 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all">
+                            <span class="material-symbols-outlined">restart_alt</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="pointer-events-auto">
+                    <div
+                        class="glass-panel card-elevated border border-outline-variant p-3 rounded-lg flex flex-col gap-2 items-end">
+                        <div class="flex items-center gap-2">
+                            <span class="font-label-sm text-label-sm text-outline">VIEWING CASE:</span>
+                            <span class="font-label-sm text-label-sm font-bold text-on-surface">OP-SHADOW-2024</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="text-right">
+                                <div class="text-[10px] text-outline uppercase font-bold">Total Volume</div>
+                                <div class="font-label-md text-label-md text-primary">$1.42M</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] text-outline uppercase font-bold">Hop Count</div>
+                                <div class="font-label-md text-label-md text-on-surface">14 Max</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Graph Canvas Rendering (SVG Simulation) -->
+            <div class="absolute inset-0 flex items-center justify-center p-20 select-none">
+                <svg class="drop-shadow-xl" height="100%" viewbox="0 0 1000 600" width="100%">
+                    <!-- Connections (Edges) -->
+                    <path d="M 100 300 Q 250 150 400 200" fill="none" opacity="0.6" stroke="#94a3b8" stroke-width="2">
+                    </path>
+                    <path d="M 100 300 Q 250 450 400 400" fill="none" opacity="0.6" stroke="#94a3b8" stroke-width="2">
+                    </path>
+                    <path d="M 400 200 L 700 150" fill="none" opacity="0.6" stroke="#94a3b8" stroke-width="2"></path>
+                    <!-- High Risk Flows (Animated) -->
+                    <path class="edge-risk-high" d="M 400 400 Q 550 450 700 450" fill="none" stroke-width="4"></path>
+                    <path class="edge-risk-high" d="M 700 450 L 900 300" fill="none" stroke-width="4"></path>
+                    <path d="M 400 400 L 700 350" fill="none" opacity="0.6" stroke="#94a3b8" stroke-width="2"></path>
+                    <!-- Nodes -->
+                    <!-- Root Node -->
+                    <circle class="node-glow cursor-pointer" cx="100" cy="300" fill="#0E6E5E" r="16"></circle>
+                    <text fill="#3e4947" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="100"
+                        y="335">SOURCE_AC_721</text>
+                    <!-- Mid Nodes -->
+                    <circle class="node-glow cursor-pointer" cx="400" cy="200" fill="#5b5e66" r="12"></circle>
+                    <text fill="#3e4947" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="400"
+                        y="230">UPI_PAY_922</text>
+                    <circle class="node-glow cursor-pointer" cx="400" cy="400" fill="#5b5e66" r="12"></circle>
+                    <text fill="#3e4947" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="400"
+                        y="430">MERCHANT_X</text>
+                    <!-- Target Nodes -->
+                    <circle class="node-glow cursor-pointer" cx="700" cy="150" fill="#5b5e66" r="12"></circle>
+                    <text fill="#3e4947" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="700"
+                        y="180">COLLECT_01</text>
+                    <circle class="node-glow cursor-pointer" cx="700" cy="350" fill="#5b5e66" r="12"></circle>
+                    <text fill="#3e4947" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="700"
+                        y="380">VAULT_B</text>
+                    <circle class="node-glow cursor-pointer" cx="700" cy="450" fill="#ba1a1a" r="14"></circle>
+                    <text fill="#ba1a1a" font-family="JetBrains Mono" font-size="10" font-weight="bold"
+                        text-anchor="middle" x="700" y="485">HIGH_RISK_L2</text>
+                    <!-- Destination -->
+                    <circle class="node-glow cursor-pointer" cx="900" cy="300" fill="#2d3130" r="20"></circle>
+                    <text fill="#181c1c" font-family="JetBrains Mono" font-size="11" font-weight="bold"
+                        text-anchor="middle" x="900" y="340">OFFSHORE_EXCH</text>
+                </svg>
+            </div>
+            <!-- Floating Controls Bottom Left -->
+            <div class="absolute bottom-6 left-6 flex flex-col gap-3 pointer-events-none">
+                <div
+                    class="glass-panel card-elevated border border-outline-variant p-1 rounded-lg flex flex-col pointer-events-auto">
+                    <button
+                        class="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                    <div class="h-[1px] bg-outline-variant mx-2"></div>
+                    <button
+                        class="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all">
+                        <span class="material-symbols-outlined">remove</span>
+                    </button>
+                </div>
+                <button
+                    class="glass-panel card-elevated border border-outline-variant p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-highest pointer-events-auto transition-all">
+                    <span class="material-symbols-outlined">fullscreen</span>
+                </button>
+            </div>
+            <!-- Path Detail Sidebar (Right) -->
+            <div
+                class="absolute top-0 right-0 h-full w-80 glass-panel card-elevated card-elevated--sidebar border-l border-outline-variant flex flex-col z-30 transition-transform duration-300">
+                <div class="p-6 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="font-headline-md text-headline-md text-on-surface">Trail Details</h2>
+                        <span
+                            class="material-symbols-outlined cursor-pointer text-outline hover:text-on-surface">close</span>
+                    </div>
+                    <div class="space-y-6 flex-1">
+                        <!-- Selected Path Stats -->
+                        <div class="card-elevated card-elevated--static card-elevated--tinted p-4 bg-error-container/20 border border-error/20 rounded-lg">
+                            <div class="flex items-center gap-2 mb-2 text-error">
+                                <span class="material-symbols-outlined text-[20px]"
+                                    style="font-variation-settings: 'FILL' 1;">warning</span>
+                                <span class="font-label-md text-label-md font-bold">Critical Path Detected</span>
+                            </div>
+                            <p class="text-body-sm text-on-surface-variant mb-4">Multiple rapid transfers observed
+                                between unverified shell entities.</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="text-[10px] text-outline uppercase font-bold">Risk Score</div>
+                                    <div class="text-headline-md text-error font-black">94<span
+                                            class="text-body-sm font-normal text-outline">/100</span></div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] text-outline uppercase font-bold">Velocity</div>
+                                    <div class="font-label-md text-label-md text-on-surface">High (6m)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Hop Breakdown -->
+                        <div>
+                            <div class="text-label-md font-bold mb-4 flex items-center justify-between">
+                                <span>Hop Analysis (4 Steps)</span>
+                                <span class="text-primary text-[11px] cursor-pointer hover:underline">View
+                                    Timeline</span>
+                            </div>
+                            <div class="space-y-4 relative">
+                                <div class="absolute left-[7px] top-2 bottom-2 w-[2px] bg-outline-variant"></div>
+                                <div class="relative pl-6">
+                                    <div
+                                        class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-primary border-2 border-white">
+                                    </div>
+                                    <div class="font-label-sm text-label-sm font-bold">SOURCE_AC_721</div>
+                                    <div class="text-[11px] text-outline">Balance: $520,000.00</div>
+                                </div>
+                                <div class="relative pl-6">
+                                    <div
+                                        class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-secondary border-2 border-white">
+                                    </div>
+                                    <div class="font-label-sm text-label-sm font-bold">MERCHANT_X</div>
+                                    <div class="text-[11px] text-on-surface-variant">Transfer: $12,400.00</div>
+                                </div>
+                                <div class="relative pl-6">
+                                    <div
+                                        class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-error border-2 border-white animate-pulse">
+                                    </div>
+                                    <div class="font-label-sm text-label-sm font-bold">HIGH_RISK_L2</div>
+                                    <div class="text-[11px] text-error font-bold">Suspicious Activity</div>
+                                </div>
+                                <div class="relative pl-6">
+                                    <div
+                                        class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-inverse-surface border-2 border-white">
+                                    </div>
+                                    <div class="font-label-sm text-label-sm font-bold">OFFSHORE_EXCH</div>
+                                    <div class="text-[11px] text-outline">Final Destination</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Action Footer -->
+                    <div class="pt-6 border-t border-outline-variant space-y-3">
+                        <button
+                            class="w-full py-3 bg-inverse-surface text-white rounded font-label-md hover:opacity-90 transition-all">Freeze
+                            Target Accounts</button>
+                        <button
+                            class="w-full py-3 border border-outline-variant text-on-surface-variant rounded font-label-md hover:bg-surface-container transition-all">Generate
+                            Evidence Pack</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Legend Overlay -->
+            <div class="absolute bottom-6 right-6 z-30">
+                <div class="glass-panel card-elevated border border-outline-variant p-4 rounded-lg">
+                    <div class="text-[10px] text-outline font-bold uppercase mb-3">Graph Legend</div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-primary"></div>
+                            <span class="text-[11px] text-on-surface-variant">Source Node</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-error"></div>
+                            <span class="text-[11px] text-on-surface-variant">Risk Flagged</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-secondary"></div>
+                            <span class="text-[11px] text-on-surface-variant">Intermediate Entity</span>
+                        </div>
+                        <div class="flex items-center gap-3 mt-3 pt-2 border-t border-outline-variant">
+                            <div class="w-6 h-[2px] bg-error"></div>
+                            <span class="text-[11px] text-on-surface-variant">High-Volume Flow</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script type="module">
+        import { initSidebar } from "./src/interactions/sidebar.js";
+        import { attachFundFlowInteractions } from "./src/interactions/fund-flow.js";
+
+        initSidebar();
+        attachFundFlowInteractions();
+    </script>
+</body>
+
+</html>

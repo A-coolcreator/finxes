@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Threshold,Output
+FF-041,>90% funds forwarded,(Total debits / Total credits) x 100,> 90%,"Pass-through account, Grade B"
+FF-042,>95% funds forwarded,(Total debits / Total credits) x 100,> 95%,"High pass-through, Grade B"
+FF-043,>98% funds forwarded,(Total debits / Total credits) x 100,> 98%,"Near-zero retention, Grade A"
+FF-044,Balance near zero daily,End-of-day balance,< ₹500 on >=15 days/month,"Daily sweep, Grade B"
+FF-045,Credit then immediate debit,Credit -> Debit same narration,Same amount ±1%,"Mirror transaction, Grade B"
+FF-046,No retention behavior,Avg balance / Avg monthly credit,< 1%,"No retention, Grade B"
+FF-047,No spending behavior,Merchant / utility debits,Zero or <₹500/month,"No consumption, Grade C"
+FF-048,No salary detected,No credit tagged salary/payroll,Over 6-month window,"Salary-less account, Grade C"
+FF-049,No utility bills,No BBPS / utility narrations,Over 3-month window,"No utility pattern, Grade D"
+FF-050,No merchant spends,No POS / merchant MCC,Over 3-month window,"No merchant pattern, Grade D"

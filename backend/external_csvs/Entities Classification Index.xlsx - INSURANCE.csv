@@ -1,0 +1,10 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+LIC,INSURANCE,LIC,Life Insurance Corporation of India,"LIC, LIC PREMIUM",DIGITAL_PAYMENT
+POLICYBAZAAR,INSURANCE,PolicyBazaar,PB Fintech Limited,POLICYBAZAAR,DIGITAL_PAYMENT
+ACKO,INSURANCE,Acko,Acko General Insurance Limited,ACKO,DIGITAL_PAYMENT
+DIGIT,INSURANCE,Digit Insurance,Go Digit General Insurance Limited,"DIGIT, GO DIGIT",DIGITAL_PAYMENT
+NIVA_BUPA,INSURANCE,Niva Bupa,Niva Bupa Health Insurance Company Limited,"NIVA BUPA, MAX BUPA",DIGITAL_PAYMENT
+STAR_HEALTH,INSURANCE,Star Health,Star Health and Allied Insurance Company Limited,STAR HEALTH,DIGITAL_PAYMENT
+BAJAJ_ALLIANZ,INSURANCE,Bajaj Allianz,Bajaj Allianz General Insurance Company Limited,BAJAJ ALLIANZ,DIGITAL_PAYMENT
+TATA_AIG,INSURANCE,Tata AIG,Tata AIG General Insurance Company Limited,TATA AIG,DIGITAL_PAYMENT
+HDFC_ERGO,INSURANCE,HDFC ERGO,HDFC ERGO General Insurance Company Limited,HDFC ERGO,DIGITAL_PAYMENT

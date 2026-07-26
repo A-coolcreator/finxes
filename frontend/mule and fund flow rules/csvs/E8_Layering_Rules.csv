@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Hops / Tolerance,Output
+FF-071,2-hop trail,A -> B -> C same/similar amount,"2 hops, ±5% amount","2-layer trail, Grade B"
+FF-072,3-hop trail,A -> B -> C -> D,"3 hops, ±5%","3-layer trail, Grade B"
+FF-073,5-hop trail,A -> B -> ... -> F,"5 hops, ±10%","Deep layering, Grade A"
+FF-074,10-hop trail,A -> ... -> K,10 hops,"Extreme layering, Grade A"
+FF-075,Same amount propagates,Exact amount matches across hops,100% match,"Amount-preserved trail, Grade A"
+FF-076,Similar amount propagates,Amount decays <=10% per hop,<= 10% decay,"Amount-approximate trail, Grade B"
+FF-077,Rapid hop transitions,Avg time between hops,< 30 min,"Rapid layering, Grade B"
+FF-078,Multiple intermediary accts,Intermediate accounts are new/dormant,>= 3 such accts,"Shell intermediaries, Grade B"
+FF-079,Multi-bank layering,Hops cross >= 3 different banks,>= 3 banks,"Cross-bank layering, Grade B"
+FF-080,Layer depth score,Composite: hops x velocity x amount match,Score >= 70,"Layered fund flow, Grade B"

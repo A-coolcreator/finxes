@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Window,Output
+FF-091,A -> B -> A,Direct circular: funds return to sender,Any window,"Direct circular flow, Grade A"
+FF-092,A -> B -> C -> A,3-node circular loop,Any window,"Triangular loop, Grade A"
+FF-093,A -> B -> C -> D -> A,4-node circular loop,Any window,"4-node loop, Grade A"
+FF-094,Round trip within 24 hr,Any circular pattern,<= 24 hr,"Rapid round-trip, Grade A"
+FF-095,Round trip within 7 days,Any circular pattern,<= 7 days,"Weekly round-trip, Grade A"
+FF-096,Round trip within 30 days,Any circular pattern,<= 30 days,"Monthly round-trip, Grade B"
+FF-097,Same amount returns,Returned amount exact,100% match,"Amount-identical round-trip, Grade A"
+FF-098,Similar amount returns,Returned amount approximate,±5%,"Amount-approximate loop, Grade B"
+FF-099,Circular network,Multiple accounts form closed directed graph,>= 3 accounts,"Circular network, Grade A"
+FF-100,Multiple circular loops,Same account in >= 2 separate loops,Any window,"Multi-loop entity, Grade A"

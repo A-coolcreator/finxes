@@ -1,0 +1,6 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+EDUVANZ,EDUCATION_FEE,Eduvanz,Eduvanz Financing Private Limited,EDUVANZ,DIGITAL_PAYMENT
+AVANSE,EDUCATION_FEE,Avanse,Avanse Financial Services Limited,AVANSE,DIGITAL_PAYMENT
+PROPELLD,EDUCATION_FEE,Propelld,Propelld Tech Private Limited,PROPELLD,DIGITAL_PAYMENT
+SCHOOL_FEE,EDUCATION_FEE,School / University Fee,(Varies by institution),"SCHOOL FEE, TUITION FEE, ADMISSION FEE, COLLEGE FEE",DIGITAL_PAYMENT
+VIDYA_LAKSHMI,EDUCATION_FEE,Vidya Lakshmi Portal,Govt. of India (Education Loan Portal),"VIDYA LAKSHMI, EDUCATION LOAN",DIGITAL_PAYMENT

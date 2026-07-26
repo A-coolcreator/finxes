@@ -1,0 +1,8 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+DMART,GROCERY_RETAIL,D-Mart,Avenue Supermarts Limited,"DMART, D MART",DIGITAL_PAYMENT
+RELIANCE_FRESH,GROCERY_RETAIL,Reliance Fresh / Smart,Reliance Retail Limited,"RELIANCE FRESH, RELIANCE SMART",DIGITAL_PAYMENT
+BIGBAZAAR,GROCERY_RETAIL,Big Bazaar / Easyday,Future Retail Limited,"BIG BAZAAR, EASYDAY",DIGITAL_PAYMENT
+STAR_BAZAAR,GROCERY_RETAIL,Star Bazaar,Trent Limited (Tata Group),STAR BAZAAR,DIGITAL_PAYMENT
+METRO_CASH,GROCERY_RETAIL,Metro Cash & Carry,Metro Cash & Carry India Private Limited,"METRO CASH, METRO CC",DIGITAL_PAYMENT
+SPENCERS,GROCERY_RETAIL,Spencer's Retail,Spencer's Retail Limited,SPENCERS,DIGITAL_PAYMENT
+LULUS,GROCERY_RETAIL,Lulu Hypermarket,LuLu International Shopping Malls,"LULU, LULU HYPERMARKET",DIGITAL_PAYMENT

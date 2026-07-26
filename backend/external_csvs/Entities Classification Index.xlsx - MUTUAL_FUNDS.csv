@@ -1,0 +1,11 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+CAMS,MUTUAL_FUND,CAMS,Computer Age Management Services Limited,"CAMS, CAMS MF",DIGITAL_PAYMENT
+KFINTECH,MUTUAL_FUND,KFintech,KFin Technologies Limited,"KFINTECH, KFIN",DIGITAL_PAYMENT
+HDFC_MF,MUTUAL_FUND,HDFC Mutual Fund,HDFC Asset Management Company Limited,"HDFC MF, HDFC MUTUAL FUND",DIGITAL_PAYMENT
+SBI_MF,MUTUAL_FUND,SBI Mutual Fund,SBI Funds Management Limited,"SBI MF, SBI MUTUAL FUND",DIGITAL_PAYMENT
+ICICI_MF,MUTUAL_FUND,ICICI Prudential MF,ICICI Prudential Asset Management Company Limited,"ICICI MF, ICICI PRUDENTIAL MF",DIGITAL_PAYMENT
+NIPPON_MF,MUTUAL_FUND,Nippon India MF,Nippon Life India Asset Management Limited,"NIPPON MF, NIPPON INDIA MF",DIGITAL_PAYMENT
+MIRAE_MF,MUTUAL_FUND,Mirae Asset MF,Mirae Asset Investment Managers (India) Private Limited,"MIRAE MF, MIRAE ASSET",DIGITAL_PAYMENT
+AXIS_MF,MUTUAL_FUND,Axis Mutual Fund,Axis Asset Management Company Limited,"AXIS MF, AXIS MUTUAL FUND",DIGITAL_PAYMENT
+KOTAK_MF,MUTUAL_FUND,Kotak Mahindra MF,Kotak Mahindra Asset Management Company Limited,KOTAK MF,DIGITAL_PAYMENT
+DSP_MF,MUTUAL_FUND,DSP Mutual Fund,DSP Investment Managers Private Limited,"DSP MF, DSP MUTUAL FUND",DIGITAL_PAYMENT

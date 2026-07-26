@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <script src="src/utils/auth-guard.js"></script>
+    <title>Finexis OS | Transaction Intelligence</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link rel="stylesheet" href="styles/finexis-core.css" />
+    <script src="src/config/tailwind-theme.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .transaction-row:nth-child(even) {
+            background-color: #F8F9FA;
+        }
+
+        .text-xxs {
+            font-size: 10px;
+        }
+
+        .table-container {
+            max-height: calc(100vh - 380px);
+        }
+    </style>
+</head>
+
+<body class="bg-paper text-ink overflow-hidden selection:bg-forensic-100">
+    <div class="app-shell flex h-screen w-full overflow-hidden">
+    <aside id="app-sidebar" class="app-sidebar"></aside>
+    <div class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
+    <!-- Top App Bar -->
+    <header class="app-header flex justify-between items-center w-full h-16 px-6 bg-surface border-b border-border-subtle shrink-0">
+        <div class="flex items-center gap-8">
+            <span class="text-headline-lg font-headline-lg font-black text-primary">Finexis OS</span>
+            <nav class="hidden md:flex gap-6">
+                <a class="text-on-surface-variant font-label-md hover:text-primary transition-all"
+                    href="#">Directives</a>
+                <a class="text-on-surface-variant font-label-md hover:text-primary transition-all" href="#">Reports</a>
+                <a class="text-on-surface-variant font-label-md hover:text-primary transition-all" href="#">Archives</a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative group">
+                <span
+                    class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">search</span>
+                <input
+                    class="bg-surface-container-low border border-border-subtle rounded-lg pl-10 pr-4 py-1.5 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-primary transition-all focus:w-80"
+                    placeholder="Global transaction search..." type="text">
+            </div>
+            <button
+                class="bg-primary px-4 py-1.5 rounded text-on-primary text-label-md font-bold hover:opacity-90">Export
+                Intelligence</button>
+            <span class="material-symbols-outlined text-secondary cursor-pointer">help</span>
+            <span class="material-symbols-outlined text-secondary cursor-pointer">account_circle</span>
+        </div>
+    </header>
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-6 bg-paper">
+        <div class="p-4 flex flex-col gap-4">
+            <!-- Robust Filter Bar -->
+            <section class="card-elevated card-elevated--static rounded-lg p-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-outline uppercase">Date Range</label>
+                        <input
+                            class="w-full text-xs border-border-subtle rounded p-1.5 bg-surface-container-low focus:ring-primary"
+                            type="date">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-outline uppercase">Type</label>
+                        <select
+                            class="w-full text-xs border-border-subtle rounded p-1.5 bg-surface-container-low focus:ring-primary">
+                            <option>All Types</option>
+                            <option>Transfer</option>
+                            <option>Payment</option>
+                            <option>Cash</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-outline uppercase">Category</label>
+                        <select
+                            class="w-full text-xs border-border-subtle rounded p-1.5 bg-surface-container-low focus:ring-primary">
+                            <option>All Categories</option>
+                            <option>Retail</option>
+                            <option>Offshore</option>
+                            <option>Utilities</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-outline uppercase">Channel</label>
+                        <select
+                            class="w-full text-xs border-border-subtle rounded p-1.5 bg-surface-container-low focus:ring-primary">
+                            <option>All Channels</option>
+                            <option>UPI</option>
+                            <option>NEFT</option>
+                            <option>IMPS</option>
+                            <option>RTGS</option>
+                            <option>ATM</option>
+                            <option>POS</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-outline uppercase">DR/CR</label>
+                        <div class="flex border border-border-subtle rounded overflow-hidden h-[34px]">
+                            <button class="flex-1 text-[10px] font-bold bg-surface hover:bg-surface-variant">DR</button>
+                            <button
+                                class="flex-1 text-[10px] font-bold bg-surface hover:bg-surface-variant border-x border-border-subtle">CR</button>
+                            <button class="flex-1 text-[10px] font-bold bg-primary text-on-primary">ALL</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-outline uppercase">Amount Range</label>
+                        <input
+                            class="w-full text-xs border-border-subtle rounded p-1.5 bg-surface-container-low focus:ring-primary"
+                            placeholder="Min - Max" type="text">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-outline uppercase">Account</label>
+                        <select
+                            class="w-full text-xs border-border-subtle rounded p-1.5 bg-surface-container-low focus:ring-primary">
+                            <option>All Accounts</option>
+                            <option>Main Corp (8821)</option>
+                            <option>Escrow (0012)</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2 h-[34px]">
+                        <button
+                            class="flex-1 flex items-center justify-center gap-1 bg-surface-container-high text-on-surface text-[10px] font-bold rounded border border-border-subtle hover:bg-surface-variant">
+                            <span class="material-symbols-outlined text-sm">filter_alt</span>
+                        </button>
+                        <button
+                            class="flex-1 flex items-center justify-center gap-1 bg-primary text-on-primary text-[10px] font-bold rounded hover:opacity-90">
+                            APPLY
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input class="rounded border-outline text-primary focus:ring-primary h-3.5 w-3.5"
+                            type="checkbox">
+                        <span class="text-xxs font-bold text-secondary uppercase">Show Flagged Only</span>
+                    </label>
+                    <div class="h-4 w-px bg-border-subtle"></div>
+                    <div class="flex gap-2">
+                        <span
+                            class="px-2 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold rounded-full border border-red-200">SUSPICIOUS
+                            VELOCITY</span>
+                        <span
+                            class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[9px] font-bold rounded-full border border-orange-200">CROSS-BORDER</span>
+                    </div>
+                </div>
+            </section>
+            <!-- Transaction Data Table Section -->
+            <section
+                class="card-elevated card-elevated--static rounded-lg overflow-hidden flex flex-col">
+                <!-- Header with Action Bar -->
+                <div class="px-6 py-3 border-b border-border-subtle flex justify-between items-center bg-surface-muted">
+                    <div class="flex items-center gap-4">
+                        <h3 class="text-label-md font-bold text-on-surface">CORE TRANSACTION LEDGER</h3>
+                        <div class="flex gap-2">
+                            <span
+                                class="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">1,243
+                                TRANS.</span>
+                            <span class="bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded-full font-bold">42
+                                ALERTS</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xxs font-bold text-outline uppercase">Display</span>
+                            <select
+                                class="text-xxs border border-border-subtle rounded p-1 bg-surface focus:ring-primary">
+                                <option>Compact</option>
+                                <option>Standard</option>
+                                <option>Detailed</option>
+                            </select>
+                        </div>
+                        <button
+                            class="text-label-sm font-bold text-secondary flex items-center gap-1 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-sm">file_download</span>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <!-- Table Area -->
+                <div class="overflow-x-auto table-container">
+                    <table class="w-full text-left border-collapse min-w-[1600px]">
+                        <thead class="sticky top-0 z-20">
+                            <tr class="bg-surface-container-low border-b border-border-subtle">
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">Date
+                                </th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">
+                                    Value Date</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">Type
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight w-64">
+                                    Description (Raw + Cleaned)</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">
+                                    Transaction ID</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">
+                                    Category</th>
+                                <th
+                                    class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight text-right">
+                                    Debit</th>
+                                <th
+                                    class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight text-right">
+                                    Credit</th>
+                                <th
+                                    class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight text-right">
+                                    Balance</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">IFSC
+                                </th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">UPI
+                                    / VPA</th>
+                                <th class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight">
+                                    Account</th>
+                                <th
+                                    class="px-4 py-3 text-[10px] font-bold text-secondary uppercase tracking-tight text-center">
+                                    Flags</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-subtle text-body-sm">
+                            <!-- Row 1: UPI -->
+                            <tr
+                                class="transaction-row hover:bg-primary-container/5 transition-colors group cursor-pointer">
+                                <td class="px-4 py-3 font-label-md">2023-11-24</td>
+                                <td class="px-4 py-3 font-label-md text-outline">2023-11-24</td>
+                                <td class="px-4 py-3">
+                                    <span
+                                        class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[9px] font-bold rounded">UPI</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="font-bold text-xxs truncate uppercase">
+                                        UPI/9321110023/P2A/TRANSFER/K-GROUP</div>
+                                    <div class="text-xxs text-primary font-medium">K-Group Logistics Transfer</div>
+                                </td>
+                                <td class="px-4 py-3 font-mono text-[10px] text-outline">TXN99281X01</td>
+                                <td class="px-4 py-3"><span class="text-xxs font-medium">Logistics</span></td>
+                                <td class="px-4 py-3 text-right font-bold text-red-600">$442,000.00</td>
+                                <td class="px-4 py-3 text-right font-bold text-status-success">-</td>
+                                <td class="px-4 py-3 text-right font-mono text-xxs font-bold">$1,210,442.00</td>
+                                <td class="px-4 py-3 font-mono text-xxs">SBIN0001234</td>
+                                <td class="px-4 py-3 text-xxs">kgroup@okaxis</td>
+                                <td class="px-4 py-3 text-xxs font-bold">...8821</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-center gap-1">
+                                        <span class="material-symbols-outlined text-red-500 text-sm"
+                                            title="High Risk Score">warning</span>
+                                        <span class="material-symbols-outlined text-orange-500 text-sm"
+                                            title="Suspicious Pattern">psychology</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 2: NEFT -->
+                            <tr
+                                class="transaction-row hover:bg-primary-container/5 transition-colors group cursor-pointer">
+                                <td class="px-4 py-3 font-label-md">2023-11-24</td>
+                                <td class="px-4 py-3 font-label-md text-outline">2023-11-25</td>
+                                <td class="px-4 py-3">
+                                    <span
+                                        class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded">NEFT</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="font-bold text-xxs truncate uppercase">NEFT/N3242/REF:SALARY_NOV23</div>
+                                    <div class="text-xxs text-primary font-medium">Corporate Salary Inbound</div>
+                                </td>
+                                <td class="px-4 py-3 font-mono text-[10px] text-outline">NEF77281S99</td>
+                                <td class="px-4 py-3"><span class="text-xxs font-medium">Payroll</span></td>
+                                <td class="px-4 py-3 text-right font-bold text-red-600">-</td>
+                                <td class="px-4 py-3 text-right font-bold text-status-success">$15,400.00</td>
+                                <td class="px-4 py-3 text-right font-mono text-xxs font-bold">$1,652,442.00</td>
+                                <td class="px-4 py-3 font-mono text-xxs">HDFC0000001</td>
+                                <td class="px-4 py-3 text-xxs">-</td>
+                                <td class="px-4 py-3 text-xxs font-bold">...0012</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-center">
+                                        <span class="material-symbols-outlined text-outline text-sm">verified</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 3: SWIFT -->
+                            <tr
+                                class="transaction-row hover:bg-primary-container/5 transition-colors group cursor-pointer">
+                                <td class="px-4 py-3 font-label-md">2023-11-23</td>
+                                <td class="px-4 py-3 font-label-md text-outline">2023-11-23</td>
+                                <td class="px-4 py-3">
+                                    <span
+                                        class="px-2 py-0.5 bg-purple-100 text-purple-700 text-[9px] font-bold rounded">SWIFT</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="font-bold text-xxs truncate uppercase">SWIFT/OUR/SG/ZEPHYR_HOLDINGS
+                                    </div>
+                                    <div class="text-xxs text-primary font-medium">Zephyr Holdings BVI Shell</div>
+                                </td>
+                                <td class="px-4 py-3 font-mono text-[10px] text-outline">SWF00912Z12</td>
+                                <td class="px-4 py-3"><span class="text-xxs font-medium">Offshore</span></td>
+                                <td class="px-4 py-3 text-right font-bold text-red-600">$890,200.00</td>
+                                <td class="px-4 py-3 text-right font-bold text-status-success">-</td>
+                                <td class="px-4 py-3 text-right font-mono text-xxs font-bold">$762,242.00</td>
+                                <td class="px-4 py-3 font-mono text-xxs">CITI0022091</td>
+                                <td class="px-4 py-3 text-xxs">-</td>
+                                <td class="px-4 py-3 text-xxs font-bold">...8821</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-center gap-1">
+                                        <span class="material-symbols-outlined text-red-600 text-sm"
+                                            title="Sanction Risk">public</span>
+                                        <span class="material-symbols-outlined text-red-500 text-sm"
+                                            title="Alert">notifications_active</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Row 4: ATM -->
+                            <tr
+                                class="transaction-row hover:bg-primary-container/5 transition-colors group cursor-pointer">
+                                <td class="px-4 py-3 font-label-md">2023-11-23</td>
+                                <td class="px-4 py-3 font-label-md text-outline">2023-11-23</td>
+                                <td class="px-4 py-3">
+                                    <span
+                                        class="px-2 py-0.5 bg-gray-100 text-gray-700 text-[9px] font-bold rounded">ATM</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="font-bold text-xxs truncate uppercase">ATM/WDL/MUMBAI/POS-01</div>
+                                    <div class="text-xxs text-primary font-medium">Cash Withdrawal - Mumbai Central
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 font-mono text-[10px] text-outline">ATM3349910</td>
+                                <td class="px-4 py-3"><span class="text-xxs font-medium">Cash</span></td>
+                                <td class="px-4 py-3 text-right font-bold text-red-600">$1,200.00</td>
+                                <td class="px-4 py-3 text-right font-bold text-status-success">-</td>
+                                <td class="px-4 py-3 text-right font-mono text-xxs font-bold">$761,042.00</td>
+                                <td class="px-4 py-3 font-mono text-xxs">-</td>
+                                <td class="px-4 py-3 text-xxs">-</td>
+                                <td class="px-4 py-3 text-xxs font-bold">...0012</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-center">
+                                        <span class="material-symbols-outlined text-outline text-sm">location_on</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Additional Specific Channel Pills Display (Mock Data) -->
+                            <tr
+                                class="transaction-row hover:bg-primary-container/5 transition-colors group cursor-pointer">
+                                <td class="px-4 py-3 font-label-md">2023-11-22</td>
+                                <td class="px-4 py-3 font-label-md text-outline">2023-11-22</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex flex-wrap gap-1">
+                                        <span
+                                            class="px-1.5 py-0.5 bg-teal-100 text-teal-700 text-[8px] font-bold rounded">RTGS</span>
+                                        <span
+                                            class="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-[8px] font-bold rounded">IMPS</span>
+                                        <span
+                                            class="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 text-[8px] font-bold rounded">POS</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="text-xxs italic text-outline">Channel visibility demo...</div>
+                                </td>
+                                <td class="px-4 py-3 font-mono text-[10px] text-outline">-</td>
+                                <td class="px-4 py-3"><span class="text-xxs font-medium">Demo</span></td>
+                                <td class="px-4 py-3 text-right">-</td>
+                                <td class="px-4 py-3 text-right">-</td>
+                                <td class="px-4 py-3 text-right font-mono text-xxs font-bold">$761,042.00</td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3">-</td>
+                                <td class="px-4 py-3"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination Footer -->
+                <div class="px-6 py-4 border-t border-border-subtle bg-surface flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <span class="text-label-sm text-secondary">Showing 1–50 of 1,243 transactions</span>
+                        <div class="h-4 w-px bg-border-subtle"></div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xxs font-bold text-outline uppercase">Rows per page</span>
+                            <select
+                                class="text-xxs border border-border-subtle rounded p-1 bg-surface focus:ring-primary">
+                                <option>25</option>
+                                <option selected="">50</option>
+                                <option>100</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button
+                            class="p-1.5 border border-border-subtle rounded text-secondary hover:bg-surface-container transition-colors disabled:opacity-30"
+                            disabled="">
+                            <span class="material-symbols-outlined text-sm">first_page</span>
+                        </button>
+                        <button
+                            class="p-1.5 border border-border-subtle rounded text-secondary hover:bg-surface-container transition-colors disabled:opacity-30"
+                            disabled="">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </button>
+                        <div class="flex gap-1">
+                            <button
+                                class="w-8 h-8 flex items-center justify-center border border-primary bg-primary text-on-primary text-xs font-bold rounded">1</button>
+                            <button
+                                class="w-8 h-8 flex items-center justify-center border border-border-subtle hover:bg-surface-container text-xs font-bold rounded">2</button>
+                            <button
+                                class="w-8 h-8 flex items-center justify-center border border-border-subtle hover:bg-surface-container text-xs font-bold rounded">3</button>
+                            <span class="w-8 h-8 flex items-center justify-center text-xs text-outline">...</span>
+                            <button
+                                class="w-8 h-8 flex items-center justify-center border border-border-subtle hover:bg-surface-container text-xs font-bold rounded">25</button>
+                        </div>
+                        <button
+                            class="p-1.5 border border-border-subtle rounded text-secondary hover:bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </button>
+                        <button
+                            class="p-1.5 border border-border-subtle rounded text-secondary hover:bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-sm">last_page</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <script>
+        // Micro-interactions for table rows
+        document.querySelectorAll('.transaction-row').forEach(row => {
+            row.addEventListener('click', () => {
+                console.log('Opening full transaction breakdown...');
+                row.classList.add('bg-primary-container/20');
+                setTimeout(() => row.classList.remove('bg-primary-container/20'), 300);
+            });
+        });
+
+        // Global search focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.classList.add('ring-2', 'ring-primary/20');
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.classList.remove('ring-2', 'ring-primary/20');
+            });
+        }
+    </script>
+  <script type="module">
+    import { initSidebar } from "./src/interactions/sidebar.js";
+    initSidebar();
+  </script>
+</body>
+
+</html>

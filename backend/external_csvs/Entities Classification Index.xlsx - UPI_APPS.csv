@@ -1,0 +1,14 @@
+Store,Category,Trade Name,Legal Name,Narration Variants,Risk Type
+GOOGLE_PAY,UPI_APP,Google Pay,Google India Digital Services Private Limited,"GOOGLEPAY, GPAY, G-PAY, GOOGLE PAY",DIGITAL_PAYMENT
+PHONEPE,UPI_APP,PhonePe,PhonePe Private Limited,"PHONEPE, PHONE PE, PPAY",DIGITAL_PAYMENT
+PAYTM,UPI_APP,Paytm,One97 Communications Limited,"PAYTM, PAYTM UPI",DIGITAL_PAYMENT
+BHIM,UPI_APP,BHIM,National Payments Corporation of India (NPCI),"BHIM, BHIM UPI",DIGITAL_PAYMENT
+AMAZON_PAY,UPI_APP,Amazon Pay,Amazon Pay (India) Private Limited,"AMAZONPAY, AMAZON PAY",DIGITAL_PAYMENT
+WHATSAPP_PAY,UPI_APP,WhatsApp Pay,WhatsApp Inc.,WHATSAPP PAY,DIGITAL_PAYMENT
+CRED,UPI_APP,CRED,Dreamplug Technologies Private Limited,CRED UPI,DIGITAL_PAYMENT
+SUPERMONEY,UPI_APP,SuperMoney,,SUPERMONEY,DIGITAL_PAYMENT
+MOBIKWIK,UPI_APP,MobiKwik,One MobiKwik Systems Limited,MOBIKWIK,DIGITAL_PAYMENT
+FREECHARGE,UPI_APP,FreeCharge,FreeCharge Payment Technologies Private Limited,FREECHARGE,DIGITAL_PAYMENT
+SLICE,UPI_APP,slice,,SLICE,DIGITAL_PAYMENT
+JUPITER,UPI_APP,Jupiter,Amica Financial Technologies Private Limited,JUPITER,DIGITAL_PAYMENT
+FI_MONEY,UPI_APP,Fi Money,Epifi Technologies Private Limited,FI MONEY,DIGITAL_PAYMENT

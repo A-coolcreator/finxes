@@ -1,0 +1,1039 @@
+Sheets in file: ['INDEX', 'UPI_APPS', 'PAYMENT_GATEWAY', 'AEPS', 'ATM', 'MERCHANT_POS', 'ECOMMERCE', 'FOOD_DELIVERY', 'MOBILITY', 'LOAN_APPS', 'NBFC', 'SALARY', 'TICKET_APPS', 'TRAVEL', 'HOTEL_APPS', 'QUICK_COMMERCE', 'RECHARGE', 'DATING_APPS', 'MATRIMONIAL', 'RELIGIOUS_APPS', 'STOCK_BROKING', 'PG_APPS', 'BANK_TRANSFER', 'GOVT_PAYMENT', 'ILLEGAL_BETTING', 'REMITTANCE', 'MUTUAL_FUNDS', 'LOTTERY', 'PENSION', 'GIFT_CARDS', 'C2C_MARKETPLACE', 'VEHICLE_RENTAL', 'TOLL_PAYMENT', 'FUEL', 'UTILITY', 'TELECOM_POSTPAID', 'P2P_LENDING', 'BNPL', 'CREDIT_CARDS', 'MICROFINANCE', 'EDUCATION_FEE', 'HEALTHCARE', 'FITNESS', 'GROCERY_RETAIL', 'ELECTRONICS', 'JEWELLERY', 'OTT', 'REAL_ESTATE', 'DIGITAL_GOLD', 'B2B', 'LOGISTICS', 'ASTROLOGY', 'CRYPTO', 'REAL_MONEY_GAMING', 'INSURANCE', 'EDTECH', 'BBPS', 'SALON', 'CASUAL_GAMING', 'CREATOR_ECONOMY', 'CLOUD_SERVICES', 'EARNED_WAGE', 'AGRITECH', 'CHIT_FUNDS', 'COOP_BANKS']
+
+================================================================================
+SHEET NAME: INDEX
+================================================================================
+Shape: (65, 4)
+Columns: ['Entities', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3']
+
+First 100 rows:
+         Entities         Unnamed: 1 Unnamed: 2                                        Unnamed: 3
+       Sheet Name      Category Code  # Records                                       Description
+         UPI_APPS            UPI_APP        NaN            Unified Payment Interface applications
+  PAYMENT_GATEWAY    PAYMENT_GATEWAY         12                Online payment processing gateways
+             AEPS               AEPS          1        Aadhaar Enabled Payment System / BC agents
+              ATM                ATM          1                    ATM cash withdrawal narrations
+     MERCHANT_POS       MERCHANT_POS          1           Point-of-sale / card swipe transactions
+        ECOMMERCE          ECOMMERCE          9             Online retail and ecommerce platforms
+    FOOD_DELIVERY      FOOD_DELIVERY          8                 Food delivery and restaurant apps
+         MOBILITY           MOBILITY          5                     Cab and ride-sharing services
+        LOAN_APPS           LOAN_APP         12               Digital lending / loan apps (NBFCs)
+             NBFC               NBFC         10                   Non-Banking Financial Companies
+           SALARY             SALARY          1              Salary and payroll credit narrations
+      TICKET_APPS         TICKET_APP          4                    Movie and event ticketing apps
+           TRAVEL             TRAVEL          9                          Travel booking platforms
+       HOTEL_APPS          HOTEL_APP          6                       Hotel booking apps and OTAs
+   QUICK_COMMERCE     QUICK_COMMERCE          7                10-30 min grocery / quick commerce
+         RECHARGE           RECHARGE          7                    Telecom prepaid recharge / DTH
+      DATING_APPS         DATING_APP          7                        Online dating applications
+      MATRIMONIAL    MATRIMONIAL_APP          4               Matrimonial / matchmaking platforms
+   RELIGIOUS_APPS      RELIGIOUS_APP          5         Religious / devotional apps and donations
+    STOCK_BROKING      STOCK_BROKING         12               Stock broking and trading platforms
+          PG_APPS             PG_APP          6                Paying guest / co-living platforms
+    BANK_TRANSFER      BANK_TRANSFER          7 Generic fund transfer narrations (NEFT/RTGS/IMPS)
+     GOVT_PAYMENT       GOVT_PAYMENT          9             Government and tax payment narrations
+  ILLEGAL_BETTING    ILLEGAL_BETTING          8    Offshore illegal betting platforms (HIGH RISK)
+       REMITTANCE         REMITTANCE          7                 International remittance services
+     MUTUAL_FUNDS        MUTUAL_FUND         10                     Mutual fund and SIP platforms
+          LOTTERY            LOTTERY          4                            State lottery payments
+          PENSION            PENSION          4              Pension and retirement contributions
+       GIFT_CARDS          GIFT_CARD          6        Gift card / voucher purchases (FRAUD RISK)
+  C2C_MARKETPLACE    C2C_MARKETPLACE          6                    C2C / second-hand marketplaces
+   VEHICLE_RENTAL     VEHICLE_RENTAL          4               Self-drive vehicle rental platforms
+     TOLL_PAYMENT       TOLL_PAYMENT          4                          FASTag and toll payments
+             FUEL               FUEL          5                Fuel / petrol station transactions
+          UTILITY            UTILITY          8          Electricity, gas and water utility bills
+ TELECOM_POSTPAID   TELECOM_POSTPAID          6               Postpaid mobile and broadband bills
+      P2P_LENDING        P2P_LENDING          4                    Peer-to-peer lending platforms
+             BNPL               BNPL          5                        Buy Now Pay Later services
+     CREDIT_CARDS        CREDIT_CARD          9                       Credit card bill repayments
+     MICROFINANCE       MICROFINANCE          6                  Microfinance institutions (MFIs)
+    EDUCATION_FEE      EDUCATION_FEE          5                   School / university fee portals
+       HEALTHCARE         HEALTHCARE          7                 Pharmacy and healthcare platforms
+          FITNESS            FITNESS          4                         Fitness and wellness apps
+   GROCERY_RETAIL     GROCERY_RETAIL          7          Physical supermarkets and grocery chains
+      ELECTRONICS ELECTRONICS_RETAIL          5                Consumer electronics retail chains
+        JEWELLERY          JEWELLERY          6             Jewellery and gold retail (AML WATCH)
+              OTT                OTT         10           OTT streaming and subscription services
+      REAL_ESTATE        REAL_ESTATE          5             Property listing and rental platforms
+     DIGITAL_GOLD       DIGITAL_GOLD          4                   Digital gold purchase platforms
+              B2B                B2B          4              B2B wholesale and business platforms
+        LOGISTICS          LOGISTICS          7                   Courier and logistics companies
+        ASTROLOGY          ASTROLOGY          4                     Astrology / consultation apps
+           CRYPTO    CRYPTO_EXCHANGE          6              Cryptocurrency exchanges (HIGH RISK)
+REAL_MONEY_GAMING  REAL_MONEY_GAMING          7   Banned real-money gaming platforms (PROHIBITED)
+        INSURANCE          INSURANCE          9                        Insurance premium payments
+           EDTECH             EDTECH          8                EdTech / online learning platforms
+             BBPS       BILL_PAYMENT          1   Bharat BillPay System (BBPS) generic narrations
+            SALON              SALON          5                     Salon and beauty service apps
+    CASUAL_GAMING      CASUAL_GAMING          5                      Legal casual / mobile gaming
+  CREATOR_ECONOMY    CREATOR_ECONOMY          5         Creator economy and subscription payments
+   CLOUD_SERVICES     CLOUD_SERVICES          5      Cloud storage and productivity subscriptions
+      EARNED_WAGE EARNED_WAGE_ACCESS          4               Earned wage access / salary advance
+         AGRITECH           AGRITECH          5                Agriculture and agritech platforms
+       CHIT_FUNDS          CHIT_FUND          4                               Chit fund companies
+       COOP_BANKS          COOP_BANK          3                Co-operative banks (ELEVATED RISK)
+
+================================================================================
+SHEET NAME: UPI_APPS
+================================================================================
+Shape: (13, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+       Store Category   Trade Name                                      Legal Name                 Narration Variants       Risk Type
+  GOOGLE_PAY  UPI_APP   Google Pay   Google India Digital Services Private Limited GOOGLEPAY, GPAY, G-PAY, GOOGLE PAY DIGITAL_PAYMENT
+     PHONEPE  UPI_APP      PhonePe                         PhonePe Private Limited            PHONEPE, PHONE PE, PPAY DIGITAL_PAYMENT
+       PAYTM  UPI_APP        Paytm                    One97 Communications Limited                   PAYTM, PAYTM UPI DIGITAL_PAYMENT
+        BHIM  UPI_APP         BHIM   National Payments Corporation of India (NPCI)                     BHIM, BHIM UPI DIGITAL_PAYMENT
+  AMAZON_PAY  UPI_APP   Amazon Pay              Amazon Pay (India) Private Limited              AMAZONPAY, AMAZON PAY DIGITAL_PAYMENT
+WHATSAPP_PAY  UPI_APP WhatsApp Pay                                   WhatsApp Inc.                       WHATSAPP PAY DIGITAL_PAYMENT
+        CRED  UPI_APP         CRED          Dreamplug Technologies Private Limited                           CRED UPI DIGITAL_PAYMENT
+  SUPERMONEY  UPI_APP   SuperMoney                                             NaN                         SUPERMONEY DIGITAL_PAYMENT
+    MOBIKWIK  UPI_APP     MobiKwik                    One MobiKwik Systems Limited                           MOBIKWIK DIGITAL_PAYMENT
+  FREECHARGE  UPI_APP   FreeCharge FreeCharge Payment Technologies Private Limited                         FREECHARGE DIGITAL_PAYMENT
+       SLICE  UPI_APP        slice                                             NaN                              SLICE DIGITAL_PAYMENT
+     JUPITER  UPI_APP      Jupiter    Amica Financial Technologies Private Limited                            JUPITER DIGITAL_PAYMENT
+    FI_MONEY  UPI_APP     Fi Money              Epifi Technologies Private Limited                           FI MONEY DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: PAYMENT_GATEWAY
+================================================================================
+Shape: (12, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store        Category            Trade Name                                  Legal Name                     Narration Variants       Risk Type
+ RAZORPAY PAYMENT_GATEWAY              Razorpay           Razorpay Software Private Limited RAZORPAY, RAZORPAYX, RAZORPAY SOFTWARE DIGITAL_PAYMENT
+ CASHFREE PAYMENT_GATEWAY              Cashfree     Cashfree Payments India Private Limited                               CASHFREE DIGITAL_PAYMENT
+     PAYU PAYMENT_GATEWAY                  PayU               PayU Payments Private Limited                    PAYU, PAYU PAYMENTS DIGITAL_PAYMENT
+ PAYTM_PG PAYMENT_GATEWAY Paytm Payment Gateway             Paytm Payments Services Limited        PAYTM PG, PAYTM PAYMENT GATEWAY DIGITAL_PAYMENT
+ CCAVENUE PAYMENT_GATEWAY              CCAvenue               Avenues India Private Limited                               CCAVENUE DIGITAL_PAYMENT
+ BILLDESK PAYMENT_GATEWAY              BillDesk                                         NaN                    BILLDESK, BILL DESK DIGITAL_PAYMENT
+   JUSPAY PAYMENT_GATEWAY                Juspay         Juspay Technologies Private Limited                                 JUSPAY DIGITAL_PAYMENT
+ EASEBUZZ PAYMENT_GATEWAY              Easebuzz                    Easebuzz Private Limited                               EASEBUZZ DIGITAL_PAYMENT
+   AIRPAY PAYMENT_GATEWAY                Airpay     Airpay Payment Services Private Limited                                 AIRPAY DIGITAL_PAYMENT
+PINE_LABS PAYMENT_GATEWAY             Pine Labs                   Pine Labs Private Limited                               PINELABS DIGITAL_PAYMENT
+ATOM_TECH PAYMENT_GATEWAY     Atom Technologies           Atom Technologies Private Limited                               ATOMTECH DIGITAL_PAYMENT
+     OPEN PAYMENT_GATEWAY                  Open Open Financial Technologies Private Limited             OPEN MONEY, OPEN FINANCIAL DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: AEPS
+================================================================================
+Shape: (1, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+             Store Category                            Trade Name                                    Legal Name                                                                                                     Narration Variants             Risk Type
+AEPS_AGENT_BANKING     AEPS AEPS (Aadhaar Enabled Payment System) National Payments Corporation of India (NPCI) AEPS, AADHARPAY, AADHAAR PAY, NPCI AEPS, MICRO ATM, BC AGENT, BANK MITRA, CSP, CUSTOMER SERVICE POINT, AADHAAR ENABLED AEPS_CASH_TRANSACTION
+
+================================================================================
+SHEET NAME: ATM
+================================================================================
+Shape: (1, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+              Store Category          Trade Name  Legal Name                                                                                   Narration Variants       Risk Type
+ATM_CASH_WITHDRAWAL      ATM ATM Cash Withdrawal         NaN ATM WDL, ATM CASH, ATM WITHDRAWAL, CASH WDL, CASH DISPENSER, ATM TRANS, NFS ATM, VISA ATM, RUPAY ATM CASH_WITHDRAWAL
+
+================================================================================
+SHEET NAME: MERCHANT_POS
+================================================================================
+Shape: (1, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+                   Store     Category                      Trade Name  Legal Name                                                                        Narration Variants    Risk Type
+MERCHANT_POS_TRANSACTION MERCHANT_POS Point of Sale (POS) Transaction         NaN POS, EPOS, SWIPE, MERCHANT POS, CARD SWIPE, VISA POS, MASTER POS, RUPAY POS, POS PURCHASE CARD_PAYMENT
+
+================================================================================
+SHEET NAME: ECOMMERCE
+================================================================================
+Shape: (9, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+   Store  Category Trade Name                             Legal Name Narration Variants       Risk Type
+  AMAZON ECOMMERCE     Amazon Amazon Seller Services Private Limited       AMAZON, AMZN DIGITAL_PAYMENT
+FLIPKART ECOMMERCE   Flipkart      Flipkart Internet Private Limited    FLIPKART, FKART DIGITAL_PAYMENT
+  MYNTRA ECOMMERCE     Myntra         Myntra Designs Private Limited             MYNTRA DIGITAL_PAYMENT
+    AJIO ECOMMERCE       AJIO                Reliance Retail Limited               AJIO DIGITAL_PAYMENT
+  MEESHO ECOMMERCE     Meesho  Fashnear Technologies Private Limited             MEESHO DIGITAL_PAYMENT
+  SHOPSY ECOMMERCE     Shopsy                                    NaN             SHOPSY DIGITAL_PAYMENT
+SNAPDEAL ECOMMERCE   Snapdeal        Jasper Infotech Private Limited           SNAPDEAL DIGITAL_PAYMENT
+   NYKAA ECOMMERCE      Nykaa        FSN E-Commerce Ventures Limited              NYKAA DIGITAL_PAYMENT
+FIRSTCRY ECOMMERCE   FirstCry            Brainbees Solutions Limited           FIRSTCRY DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: FOOD_DELIVERY
+================================================================================
+Shape: (8, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store      Category       Trade Name                              Legal Name Narration Variants       Risk Type
+   SWIGGY FOOD_DELIVERY           Swiggy                          Swiggy Limited             SWIGGY DIGITAL_PAYMENT
+INSTAMART FOOD_DELIVERY Swiggy Instamart                          Swiggy Limited          INSTAMART DIGITAL_PAYMENT
+   ZOMATO FOOD_DELIVERY           Zomato                         Eternal Limited             ZOMATO DIGITAL_PAYMENT
+  BLINKIT FOOD_DELIVERY          Blinkit          Blink Commerce Private Limited            BLINKIT DIGITAL_PAYMENT
+    ZEPTO FOOD_DELIVERY            Zepto Kiranakart Technologies Private Limited              ZEPTO DIGITAL_PAYMENT
+  EATCLUB FOOD_DELIVERY          EatClub                                     NaN            EATCLUB DIGITAL_PAYMENT
+  DOMINOS FOOD_DELIVERY   Domino's Pizza              Jubilant FoodWorks Limited            DOMINOS DIGITAL_PAYMENT
+ PIZZAHUT FOOD_DELIVERY        Pizza Hut                                     NaN           PIZZAHUT DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: MOBILITY
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+      Store Category  Trade Name                                     Legal Name Narration Variants       Risk Type
+       UBER MOBILITY        Uber             Uber India Systems Private Limited               UBER DIGITAL_PAYMENT
+        OLA MOBILITY         Ola               ANI Technologies Private Limited                OLA DIGITAL_PAYMENT
+     RAPIDO MOBILITY      Rapido Roppen Transportation Services Private Limited             RAPIDO DIGITAL_PAYMENT
+   BLUSMART MOBILITY    BluSmart              BluSmart Mobility Private Limited           BLUSMART DIGITAL_PAYMENT
+NAMMA_YATRI MOBILITY Namma Yatri        Moving Tech Innovations Private Limited        NAMMA YATRI DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: LOAN_APPS
+================================================================================
+Shape: (12, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store Category                  Trade Name                                              Legal Name Narration Variants       Risk Type
+KREDITBEE LOAN_APP                   KreditBee              Finnovation Tech Solutions Private Limited          KREDITBEE DIGITAL_PAYMENT
+MONEYVIEW LOAN_APP                   Moneyview                      Whizdm Innovations Private Limited          MONEYVIEW DIGITAL_PAYMENT
+    CASHE LOAN_APP                       CASHe                   Bhanix Finance and Investment Limited              CASHE DIGITAL_PAYMENT
+     FIBE LOAN_APP Fibe (formerly EarlySalary)                    EarlySalary Services Private Limited  FIBE, EARLYSALARY DIGITAL_PAYMENT
+     NAVI LOAN_APP                        Navi                                    Navi Finserv Limited               NAVI DIGITAL_PAYMENT
+  LAZYPAY LOAN_APP                     LazyPay                    PayU Finance (India) Private Limited            LAZYPAY DIGITAL_PAYMENT
+  MPOKKET LOAN_APP                     mPokket              mPokket Financial Services Private Limited    MPKKET, MPOKKET DIGITAL_PAYMENT
+   BRANCH LOAN_APP                      Branch Branch International Financial Services Private Limited             BRANCH DIGITAL_PAYMENT
+   KISSHT LOAN_APP                      Kissht              ONEMi Technology Solutions Private Limited             KISSHT DIGITAL_PAYMENT
+ SNAPMINT LOAN_APP                    Snapmint                                                     NaN           SNAPMINT DIGITAL_PAYMENT
+ PAYSENSE LOAN_APP                    PaySense                 PaySense Services India Private Limited           PAYSENSE DIGITAL_PAYMENT
+ STASHFIN LOAN_APP                    StashFin                  Akara Capital Advisors Private Limited           STASHFIN DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: NBFC
+================================================================================
+Shape: (10, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store Category            Trade Name                                           Legal Name Narration Variants       Risk Type
+   BAJAJ_FINANCE     NBFC         Bajaj Finance                                Bajaj Finance Limited      BAJAJ FINANCE DIGITAL_PAYMENT
+    TATA_CAPITAL     NBFC          Tata Capital                                 Tata Capital Limited       TATA CAPITAL DIGITAL_PAYMENT
+      LT_FINANCE     NBFC           L&T Finance                                  L&T Finance Limited        L&T FINANCE DIGITAL_PAYMENT
+ SHRIRAM_FINANCE     NBFC       Shriram Finance                              Shriram Finance Limited    SHRIRAM FINANCE DIGITAL_PAYMENT
+         MUTHOOT     NBFC       Muthoot Finance                              Muthoot Finance Limited            MUTHOOT DIGITAL_PAYMENT
+      MANAPPURAM     NBFC    Manappuram Finance                           Manappuram Finance Limited         MANAPPURAM DIGITAL_PAYMENT
+   CHOLAMANDALAM     NBFC Cholamandalam Finance Cholamandalam Investment and Finance Company Limited      CHOLAMANDALAM DIGITAL_PAYMENT
+    HDFC_CREDILA     NBFC          HDFC Credila              HDFC Credila Financial Services Limited       HDFC CREDILA DIGITAL_PAYMENT
+MAHINDRA_FINANCE     NBFC      Mahindra Finance       Mahindra & Mahindra Financial Services Limited   MAHINDRA FINANCE DIGITAL_PAYMENT
+ PIRAMAL_FINANCE     NBFC       Piramal Finance          Piramal Capital and Housing Finance Limited    PIRAMAL FINANCE DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: SALARY
+================================================================================
+Shape: (1, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store Category              Trade Name  Legal Name                                                               Narration Variants     Risk Type
+SALARY_CREDIT   SALARY Salary / Payroll Credit         NaN SALARY, SAL, PAYROLL, PAY, WAGES, EMPLOYEE PAY, MONTHLY PAY, PAYSLIP, SAL CREDIT SALARY_CREDIT
+
+================================================================================
+SHEET NAME: TICKET_APPS
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+     Store   Category Trade Name                            Legal Name  Narration Variants       Risk Type
+BOOKMYSHOW TICKET_APP BookMyShow Bigtree Entertainment Private Limited          BOOKMYSHOW DIGITAL_PAYMENT
+   INSIDER TICKET_APP Insider.in                                   NaN INSIDER, INSIDER.IN DIGITAL_PAYMENT
+  DISTRICT TICKET_APP   District                       Eternal Limited            DISTRICT DIGITAL_PAYMENT
+ KYAZOONGA TICKET_APP  Kyazoonga                                   NaN           KYAZOONGA DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: TRAVEL
+================================================================================
+Shape: (9, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+     Store Category Trade Name                                              Legal Name Narration Variants       Risk Type
+MAKEMYTRIP   TRAVEL MakeMyTrip                      MakeMyTrip (India) Private Limited    MAKEMYTRIP, MMT DIGITAL_PAYMENT
+   GOIBIBO   TRAVEL    Goibibo            MakeMyTrip Limited (parent; via Ibibo Group)            GOIBIBO DIGITAL_PAYMENT
+    REDBUS   TRAVEL     redBus            MakeMyTrip Limited (parent; via Ibibo Group)             REDBUS DIGITAL_PAYMENT
+     IXIGO   TRAVEL      ixigo                         Le Travenues Technology Limited              IXIGO DIGITAL_PAYMENT
+EASEMYTRIP   TRAVEL EaseMyTrip                              Easy Trip Planners Limited         EASEMYTRIP DIGITAL_PAYMENT
+     YATRA   TRAVEL      Yatra                                    Yatra Online Limited              YATRA DIGITAL_PAYMENT
+ CLEARTRIP   TRAVEL  Cleartrip                               Cleartrip Private Limited          CLEARTRIP DIGITAL_PAYMENT
+     IRCTC   TRAVEL      IRCTC Indian Railway Catering and Tourism Corporation Limited              IRCTC DIGITAL_PAYMENT
+   ABHIBUS   TRAVEL    AbhiBus                                                     NaN            ABHIBUS DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: HOTEL_APPS
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+      Store  Category  Trade Name              Legal Name Narration Variants       Risk Type
+        OYO HOTEL_APP         OYO    Oravel Stays Limited     OYO, OYO ROOMS DIGITAL_PAYMENT
+     TREEBO HOTEL_APP      Treebo                     NaN             TREEBO DIGITAL_PAYMENT
+  FABHOTELS HOTEL_APP   FabHotels                     NaN          FABHOTELS DIGITAL_PAYMENT
+BOOKING_COM HOTEL_APP Booking.com        Booking.com B.V.        BOOKING.COM DIGITAL_PAYMENT
+     AIRBNB HOTEL_APP      Airbnb            Airbnb, Inc.             AIRBNB DIGITAL_PAYMENT
+      AGODA HOTEL_APP       Agoda Agoda Company Pte. Ltd.              AGODA DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: QUICK_COMMERCE
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store       Category       Trade Name                                   Legal Name Narration Variants       Risk Type
+       BIGBASKET QUICK_COMMERCE        BigBasket Supermarket Grocery Supplies Private Limited  BIGBASKET, BB NOW DIGITAL_PAYMENT
+FLIPKART_MINUTES QUICK_COMMERCE Flipkart Minutes            Flipkart Internet Private Limited   FLIPKART MINUTES DIGITAL_PAYMENT
+         JIOMART QUICK_COMMERCE          JioMart                      Reliance Retail Limited            JIOMART DIGITAL_PAYMENT
+         BLINKIT QUICK_COMMERCE          Blinkit               Blink Commerce Private Limited            BLINKIT DIGITAL_PAYMENT
+       INSTAMART QUICK_COMMERCE Swiggy Instamart                               Swiggy Limited          INSTAMART DIGITAL_PAYMENT
+           ZEPTO QUICK_COMMERCE            Zepto      Kiranakart Technologies Private Limited              ZEPTO DIGITAL_PAYMENT
+           DUNZO QUICK_COMMERCE            Dunzo                Dunzo Digital Private Limited              DUNZO DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: RECHARGE
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store Category         Trade Name                    Legal Name        Narration Variants       Risk Type
+   AIRTEL RECHARGE             Airtel         Bharti Airtel Limited   AIRTEL, AIRTEL RECHARGE DIGITAL_PAYMENT
+      JIO RECHARGE                Jio Reliance Jio Infocomm Limited         JIO, JIO RECHARGE DIGITAL_PAYMENT
+       VI RECHARGE Vi (Vodafone Idea)         Vodafone Idea Limited VI, VI RECHARGE, VODAFONE DIGITAL_PAYMENT
+     BSNL RECHARGE               BSNL  Bharat Sanchar Nigam Limited       BSNL, BSNL RECHARGE DIGITAL_PAYMENT
+TATA_PLAY RECHARGE    Tata Play (DTH)             Tata Play Limited       TATA PLAY, TATA SKY DIGITAL_PAYMENT
+  DISH_TV RECHARGE            Dish TV         Dish TV India Limited                   DISH TV DIGITAL_PAYMENT
+   SUNDIN RECHARGE   Sun Direct (DTH) Sun Direct TV Private Limited                SUN DIRECT DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: DATING_APPS
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+     Store   Category Trade Name       Legal Name Narration Variants       Risk Type
+    TINDER DATING_APP     Tinder Match Group, LLC             TINDER DIGITAL_PAYMENT
+    BUMBLE DATING_APP     Bumble      Bumble Inc.             BUMBLE DIGITAL_PAYMENT
+     HINGE DATING_APP      Hinge Match Group, LLC              HINGE DIGITAL_PAYMENT
+TRULYMADLY DATING_APP TrulyMadly              NaN         TRULYMADLY DIGITAL_PAYMENT
+     AISLE DATING_APP      Aisle              NaN              AISLE DIGITAL_PAYMENT
+QUACKQUACK DATING_APP QuackQuack              NaN         QUACKQUACK DIGITAL_PAYMENT
+    WOOAPP DATING_APP        Woo              NaN                WOO DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: MATRIMONIAL
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+          Store        Category      Trade Name                                 Legal Name Narration Variants       Risk Type
+BHARATMATRIMONY MATRIMONIAL_APP BharatMatrimony                      Matrimony.com Limited    BHARATMATRIMONY DIGITAL_PAYMENT
+         SHAADI MATRIMONIAL_APP      Shaadi.com People Interactive (India) Private Limited SHAADI, SHAADI.COM DIGITAL_PAYMENT
+    JEEVANSATHI MATRIMONIAL_APP     Jeevansathi                  Info Edge (India) Limited        JEEVANSATHI DIGITAL_PAYMENT
+    SIMPLYMARRY MATRIMONIAL_APP     SimplyMarry                     Times Internet Limited        SIMPLYMARRY DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: RELIGIOUS_APPS
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+          Store      Category              Trade Name                              Legal Name                                             Narration Variants       Risk Type
+     SRI_MANDIR RELIGIOUS_APP              Sri Mandir                           AppsForBharat                                                     SRI MANDIR DIGITAL_PAYMENT
+        DEVDHAM RELIGIOUS_APP                 DevDham Aadhyatmik Technologies Private Limited                                                        DEVDHAM DIGITAL_PAYMENT
+SHEMAROO_BHAKTI RELIGIOUS_APP         Shemaroo Bhakti          Shemaroo Entertainment Limited                                                SHEMAROO BHAKTI DIGITAL_PAYMENT
+      ASTROSAGE RELIGIOUS_APP               AstroSage                                     NaN                                                      ASTROSAGE DIGITAL_PAYMENT
+TEMPLE_DONATION RELIGIOUS_APP Temple Trust / Donation                                     NaN TEMPLE DONATION, TIRUMALA, SIDDHIVINAYAK, SHIRDI, VAISHNO DEVI DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: STOCK_BROKING
+================================================================================
+Shape: (12, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store      Category       Trade Name                               Legal Name       Narration Variants       Risk Type
+         ZERODHA STOCK_BROKING          Zerodha                  Zerodha Broking Limited                  ZERODHA DIGITAL_PAYMENT
+           GROWW STOCK_BROKING            Groww    Billionbrains Garage Ventures Limited                    GROWW DIGITAL_PAYMENT
+          UPSTOX STOCK_BROKING           Upstox    RKSV Securities India Private Limited                   UPSTOX DIGITAL_PAYMENT
+       ANGEL_ONE STOCK_BROKING        Angel One                        Angel One Limited ANGEL ONE, ANGEL BROKING DIGITAL_PAYMENT
+          5PAISA STOCK_BROKING           5paisa                   5paisa Capital Limited                   5PAISA DIGITAL_PAYMENT
+     PAYTM_MONEY STOCK_BROKING      Paytm Money                      Paytm Money Limited              PAYTM MONEY DIGITAL_PAYMENT
+    ICICI_DIRECT STOCK_BROKING     ICICI Direct                 ICICI Securities Limited             ICICI DIRECT DIGITAL_PAYMENT
+ HDFC_SECURITIES STOCK_BROKING  HDFC Securities                  HDFC Securities Limited          HDFC SECURITIES DIGITAL_PAYMENT
+KOTAK_SECURITIES STOCK_BROKING Kotak Securities                 Kotak Securities Limited         KOTAK SECURITIES DIGITAL_PAYMENT
+   MOTILAL_OSWAL STOCK_BROKING    Motilal Oswal Motilal Oswal Financial Services Limited            MOTILAL OSWAL DIGITAL_PAYMENT
+       SHAREKHAN STOCK_BROKING        Sharekhan                        Sharekhan Limited                SHAREKHAN DIGITAL_PAYMENT
+            DHAN STOCK_BROKING             Dhan Raise Financial Services Private Limited                     DHAN DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: PG_APPS
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store Category    Trade Name                     Legal Name Narration Variants       Risk Type
+STANZA_LIVING   PG_APP Stanza Living DTwelve Spaces Private Limited      STANZA LIVING DIGITAL_PAYMENT
+         ZOLO   PG_APP          Zolo                            NaN   ZOLO, ZOLO STAYS DIGITAL_PAYMENT
+       COLIVE   PG_APP        Colive                            NaN             COLIVE DIGITAL_PAYMENT
+     NESTAWAY   PG_APP      NestAway                            NaN           NESTAWAY DIGITAL_PAYMENT
+        HOUSR   PG_APP         Housr                            NaN              HOUSR DIGITAL_PAYMENT
+     OYO_LIFE   PG_APP      OYO Life           Oravel Stays Limited           OYO LIFE DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: BANK_TRANSFER
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store      Category               Trade Name  Legal Name                            Narration Variants     Risk Type
+NEFT_TRANSFER BANK_TRANSFER            NEFT Transfer         NaN                        NEFT, NEFT CR, NEFT DR BANK_TRANSFER
+RTGS_TRANSFER BANK_TRANSFER            RTGS Transfer         NaN                        RTGS, RTGS CR, RTGS DR BANK_TRANSFER
+IMPS_TRANSFER BANK_TRANSFER            IMPS Transfer         NaN                        IMPS, IMPS CR, IMPS DR BANK_TRANSFER
+ UPI_TRANSFER BANK_TRANSFER   UPI Transfer (Generic)         NaN                  UPI CR, UPI DR, UPI TRANSFER BANK_TRANSFER
+       CHEQUE BANK_TRANSFER              Cheque / DD         NaN                 CHEQUE, CHQ, DD, DEMAND DRAFT BANK_TRANSFER
+SELF_TRANSFER BANK_TRANSFER Self / Internal Transfer         NaN SELF TRANSFER, INTERNAL TRANSFER, OWN ACCOUNT BANK_TRANSFER
+FUND_TRANSFER BANK_TRANSFER    Generic Fund Transfer         NaN                FUND TRANSFER, FT, BY TRANSFER BANK_TRANSFER
+
+================================================================================
+SHEET NAME: GOVT_PAYMENT
+================================================================================
+Shape: (9, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store     Category                Trade Name                            Legal Name                         Narration Variants    Risk Type
+  GST_PAYMENT GOVT_PAYMENT               GST Payment Goods and Services Tax Network (GSTN)                     GST, GSTN, GST PAYMENT GOVT_PAYMENT
+   INCOME_TAX GOVT_PAYMENT     Income Tax (e-Filing) Income Tax Department, Govt. of India  INCOME TAX, TDS, ADVANCE TAX, ITR, TRACES GOVT_PAYMENT
+      EPFO_PF GOVT_PAYMENT                 EPFO / PF Employees Provident Fund Organisation              EPFO, PF, EPF, PROVIDENT FUND GOVT_PAYMENT
+  MCA_PAYMENT GOVT_PAYMENT           MCA21 / ROC Fee         Ministry of Corporate Affairs                        MCA, MCA21, ROC FEE GOVT_PAYMENT
+     ECHALLAN GOVT_PAYMENT  E-Challan (Traffic/Govt)         Govt. of India / State Govts. ECHALLAN, E CHALLAN, TRAFFIC FINE, CHALLAN GOVT_PAYMENT
+ CUSTOMS_DUTY GOVT_PAYMENT              Customs Duty                  CBIC, Govt. of India             CUSTOMS, CUSTOMS DUTY, ICEGATE GOVT_PAYMENT
+   STAMP_DUTY GOVT_PAYMENT Stamp Duty / Registration                     State Governments               STAMP DUTY, REGISTRATION FEE GOVT_PAYMENT
+PASSPORT_VISA GOVT_PAYMENT      Passport / Visa Fees          Ministry of External Affairs                    PASSPORT, VISA FEE, MEA GOVT_PAYMENT
+MUNICIPAL_TAX GOVT_PAYMENT  Municipal / Property Tax                Municipal Corporations     PROPERTY TAX, HOUSE TAX, MUNICIPAL TAX GOVT_PAYMENT
+
+================================================================================
+SHEET NAME: ILLEGAL_BETTING
+================================================================================
+Shape: (8, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store        Category Trade Name                                         Legal Name Narration Variants         Risk Type
+    1XBET ILLEGAL_BETTING      1xBet          1X Corp N.V. (offshore; illegal in India)      1XBET, 1X BET ILLEGAL_HIGH_RISK
+    STAKE ILLEGAL_BETTING      Stake      Medium Rare N.V. (offshore; illegal in India)              STAKE ILLEGAL_HIGH_RISK
+PARIMATCH ILLEGAL_BETTING  Parimatch        Parimatch Tech (offshore; illegal in India)          PARIMATCH ILLEGAL_HIGH_RISK
+   BETWAY ILLEGAL_BETTING     Betway           Super Group (offshore; illegal in India)             BETWAY ILLEGAL_HIGH_RISK
+  DAFABET ILLEGAL_BETTING    Dafabet              AsianBGE (offshore; illegal in India)            DAFABET ILLEGAL_HIGH_RISK
+  MOSTBET ILLEGAL_BETTING    MostBet           Bizbon N.V. (offshore; illegal in India)            MOSTBET ILLEGAL_HIGH_RISK
+BETWINNER ILLEGAL_BETTING  BetWinner Marikit Holdings Ltd. (offshore; illegal in India)          BETWINNER ILLEGAL_HIGH_RISK
+   MELBET ILLEGAL_BETTING     Melbet                                                NaN             MELBET ILLEGAL_HIGH_RISK
+
+================================================================================
+SHEET NAME: REMITTANCE
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store   Category    Trade Name                    Legal Name Narration Variants             Risk Type
+         WISE REMITTANCE          Wise         Wise Payments Limited WISE, TRANSFERWISE CROSS_BORDER_TRANSFER
+WESTERN_UNION REMITTANCE Western Union     The Western Union Company      WESTERN UNION CROSS_BORDER_TRANSFER
+    MONEYGRAM REMITTANCE     MoneyGram MoneyGram International, Inc.          MONEYGRAM CROSS_BORDER_TRANSFER
+      REMITLY REMITTANCE       Remitly                 Remitly, Inc.            REMITLY CROSS_BORDER_TRANSFER
+     INSTAREM REMITTANCE      InstaReM                Nium Pte. Ltd.           INSTAREM CROSS_BORDER_TRANSFER
+      PAYSEND REMITTANCE       Paysend         Paysend Group Limited            PAYSEND CROSS_BORDER_TRANSFER
+         XOOM REMITTANCE          Xoom        Xoom, a PayPal Service               XOOM CROSS_BORDER_TRANSFER
+
+================================================================================
+SHEET NAME: MUTUAL_FUNDS
+================================================================================
+Shape: (10, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store    Category          Trade Name                                              Legal Name            Narration Variants       Risk Type
+     CAMS MUTUAL_FUND                CAMS                Computer Age Management Services Limited                 CAMS, CAMS MF DIGITAL_PAYMENT
+ KFINTECH MUTUAL_FUND            KFintech                               KFin Technologies Limited                KFINTECH, KFIN DIGITAL_PAYMENT
+  HDFC_MF MUTUAL_FUND    HDFC Mutual Fund                   HDFC Asset Management Company Limited     HDFC MF, HDFC MUTUAL FUND DIGITAL_PAYMENT
+   SBI_MF MUTUAL_FUND     SBI Mutual Fund                            SBI Funds Management Limited       SBI MF, SBI MUTUAL FUND DIGITAL_PAYMENT
+ ICICI_MF MUTUAL_FUND ICICI Prudential MF       ICICI Prudential Asset Management Company Limited ICICI MF, ICICI PRUDENTIAL MF DIGITAL_PAYMENT
+NIPPON_MF MUTUAL_FUND     Nippon India MF              Nippon Life India Asset Management Limited    NIPPON MF, NIPPON INDIA MF DIGITAL_PAYMENT
+ MIRAE_MF MUTUAL_FUND      Mirae Asset MF Mirae Asset Investment Managers (India) Private Limited         MIRAE MF, MIRAE ASSET DIGITAL_PAYMENT
+  AXIS_MF MUTUAL_FUND    Axis Mutual Fund                   Axis Asset Management Company Limited     AXIS MF, AXIS MUTUAL FUND DIGITAL_PAYMENT
+ KOTAK_MF MUTUAL_FUND   Kotak Mahindra MF         Kotak Mahindra Asset Management Company Limited                      KOTAK MF DIGITAL_PAYMENT
+   DSP_MF MUTUAL_FUND     DSP Mutual Fund                 DSP Investment Managers Private Limited       DSP MF, DSP MUTUAL FUND DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: LOTTERY
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store Category                 Trade Name                                                 Legal Name             Narration Variants       Risk Type
+  KERALA_LOTTERY  LOTTERY       Kerala State Lottery Kerala State Lotteries (Dept. of Finance, Govt. of Kerala)     KERALA LOTTERY, KL LOTTERY LOTTERY_PAYMENT
+  SIKKIM_LOTTERY  LOTTERY             Sikkim Lottery            Directorate of State Lotteries, Govt. of Sikkim                 SIKKIM LOTTERY LOTTERY_PAYMENT
+NAGALAND_LOTTERY  LOTTERY           Nagaland Lottery                    Directorate of Nagaland State Lotteries NAGALAND LOTTERY, DEAR LOTTERY LOTTERY_PAYMENT
+  BHUTAN_LOTTERY  LOTTERY Bhutan Lottery (Resellers)                                                        NaN                 BHUTAN LOTTERY LOTTERY_PAYMENT
+
+================================================================================
+SHEET NAME: PENSION
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+       Store Category              Trade Name                                                Legal Name              Narration Variants            Risk Type
+         NPS  PENSION National Pension System                                         NPS Trust / PFRDA NPS, NATIONAL PENSION, CRA NSDL PENSION_CONTRIBUTION
+         PPF  PENSION   Public Provident Fund                       Ministry of Finance, Govt. of India      PPF, PUBLIC PROVIDENT FUND PENSION_CONTRIBUTION
+         APY  PENSION     Atal Pension Yojana Pension Fund Regulatory and Development Authority (PFRDA)               APY, ATAL PENSION PENSION_CONTRIBUTION
+EPFO_PENSION  PENSION            EPFO Pension                     Employees Provident Fund Organisation               EPFO PENSION, EPS PENSION_CONTRIBUTION
+
+================================================================================
+SHEET NAME: GIFT_CARDS
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store  Category               Trade Name                                        Legal Name                 Narration Variants           Risk Type
+     AMAZON_GIFT GIFT_CARD         Amazon Gift Card            Amazon Seller Services Private Limited        AMAZON GIFT CARD, AMAZON GC GIFT_CARD_HIGH_RISK
+FLIPKART_VOUCHER GIFT_CARD         Flipkart Voucher                 Flipkart Internet Private Limited      FLIPKART VOUCHER, FLIPKART GC GIFT_CARD_HIGH_RISK
+          WOOHOO GIFT_CARD                   Woohoo QwikCilver Solutions Private Limited (Tata Group)                 WOOHOO, QWIKCILVER GIFT_CARD_HIGH_RISK
+      PINE_PERKS GIFT_CARD   Pine Perks / PinePerks                         Pine Labs Private Limited          PINE PERKS, PINELABS GIFT GIFT_CARD_HIGH_RISK
+GOOGLE_PLAY_GIFT GIFT_CARD    Google Play Gift Card                                        Google LLC GOOGLE PLAY GIFT, GOOGLE PLAY CARD GIFT_CARD_HIGH_RISK
+     ITUNES_GIFT GIFT_CARD iTunes / Apple Gift Card                                        Apple Inc.       ITUNES GIFT, APPLE GIFT CARD GIFT_CARD_HIGH_RISK
+
+================================================================================
+SHEET NAME: C2C_MARKETPLACE
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+  Store        Category Trade Name                               Legal Name Narration Variants       Risk Type
+    OLX C2C_MARKETPLACE        OLX                                      NaN                OLX  C2C_FRAUD_RISK
+  QUIKR C2C_MARKETPLACE      Quikr              Quikr India Private Limited              QUIKR  C2C_FRAUD_RISK
+CASHIFY C2C_MARKETPLACE    Cashify   Manak Waste Management Private Limited            CASHIFY DIGITAL_PAYMENT
+ SPINNY C2C_MARKETPLACE     Spinny Shriram Automall India Limited (partner)             SPINNY DIGITAL_PAYMENT
+ CARS24 C2C_MARKETPLACE     CARS24          CARS24 Services Private Limited             CARS24 DIGITAL_PAYMENT
+  DROOM C2C_MARKETPLACE      Droom         Droom Technology Private Limited              DROOM DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: VEHICLE_RENTAL
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+  Store       Category Trade Name                             Legal Name Narration Variants       Risk Type
+ZOOMCAR VEHICLE_RENTAL    Zoomcar          Zoomcar India Private Limited            ZOOMCAR DIGITAL_PAYMENT
+   REVV VEHICLE_RENTAL       Revv              Revv Cars Private Limited               REVV DIGITAL_PAYMENT
+ BOUNCE VEHICLE_RENTAL     Bounce Wicked Ride Adventures Private Limited             BOUNCE DIGITAL_PAYMENT
+DRIVEZY VEHICLE_RENTAL    Drivezy                Drivezy Private Limited            DRIVEZY DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: TOLL_PAYMENT
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+       Store     Category           Trade Name                                    Legal Name                      Narration Variants       Risk Type
+      FASTAG TOLL_PAYMENT FASTag / NETC FASTag National Payments Corporation of India (NPCI) FASTAG, NETC FASTAG, IHMCL, NHAI FASTAG DIGITAL_PAYMENT
+PAYTM_FASTAG TOLL_PAYMENT         Paytm FASTag                  One97 Communications Limited                            PAYTM FASTAG DIGITAL_PAYMENT
+ HDFC_FASTAG TOLL_PAYMENT          HDFC FASTag                             HDFC Bank Limited                             HDFC FASTAG DIGITAL_PAYMENT
+  SBI_FASTAG TOLL_PAYMENT           SBI FASTag                           State Bank of India                              SBI FASTAG DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: FUEL
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', ' ', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store              Trade Name                              Legal Name             Narration Variants       Risk Type
+         IOCL FUEL         Indian Oil          Indian Oil Corporation Limited       IOCL, INDIAN OIL, INDANE DIGITAL_PAYMENT
+         BPCL FUEL               BPCL    Bharat Petroleum Corporation Limited         BPCL, BHARAT PETROLEUM DIGITAL_PAYMENT
+         HPCL FUEL               HPCL Hindustan Petroleum Corporation Limited      HPCL, HINDUSTAN PETROLEUM DIGITAL_PAYMENT
+RELIANCE_FUEL FUEL Reliance Petroleum             Reliance Industries Limited RELIANCE FUEL, RELIANCE PETROL DIGITAL_PAYMENT
+       NAYARA FUEL      Nayara Energy                   Nayara Energy Limited                         NAYARA DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: UTILITY
+================================================================================
+Shape: (8, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+     Store Category                    Trade Name                                          Legal Name          Narration Variants       Risk Type
+    BESCOM  UTILITY          BESCOM (Electricity)        Bangalore Electricity Supply Company Limited                      BESCOM UTILITY_PAYMENT
+    MSEDCL  UTILITY          MSEDCL (Electricity) Maharashtra State Electricity Distribution Co. Ltd.                MSEDCL, MSEB UTILITY_PAYMENT
+TATA_POWER  UTILITY                    Tata Power                          Tata Power Company Limited                  TATA POWER UTILITY_PAYMENT
+ADANI_ELEC  UTILITY             Adani Electricity                    Adani Electricity Mumbai Limited           ADANI ELECTRICITY UTILITY_PAYMENT
+      TNEB  UTILITY TNEB (Tamil Nadu Electricity)  Tamil Nadu Generation and Distribution Corporation              TNEB, TANGEDCO UTILITY_PAYMENT
+       IGL  UTILITY        Indraprastha Gas (IGL)                            Indraprastha Gas Limited     IGL, GAS BILL, PNG BILL UTILITY_PAYMENT
+       MGL  UTILITY           Mahanagar Gas (MGL)                               Mahanagar Gas Limited          MGL, MAHANAGAR GAS UTILITY_PAYMENT
+WATER_BILL  UTILITY       Water / Municipal Water                          Various State Water Boards WATER BILL, MUNICIPAL WATER UTILITY_PAYMENT
+
+================================================================================
+SHEET NAME: TELECOM_POSTPAID
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+          Store         Category         Trade Name                             Legal Name           Narration Variants       Risk Type
+AIRTEL_POSTPAID TELECOM_POSTPAID    Airtel Postpaid                  Bharti Airtel Limited AIRTEL POSTPAID, AIRTEL BILL DIGITAL_PAYMENT
+      JIO_FIBER TELECOM_POSTPAID JioFiber Broadband          Reliance Jio Infocomm Limited          JIO FIBER, JIOFIBER DIGITAL_PAYMENT
+ BSNL_BROADBAND TELECOM_POSTPAID     BSNL Broadband           Bharat Sanchar Nigam Limited               BSNL BROADBAND DIGITAL_PAYMENT
+   ACT_FIBERNET TELECOM_POSTPAID       ACT Fibernet Atria Convergence Technologies Limited  ACT FIBERNET, ACT BROADBAND DIGITAL_PAYMENT
+        HATHWAY TELECOM_POSTPAID  Hathway Broadband      Hathway Cable and Datacom Limited                      HATHWAY DIGITAL_PAYMENT
+        EXCITEL TELECOM_POSTPAID  Excitel Broadband     Excitel Broadbands Private Limited                      EXCITEL DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: P2P_LENDING
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+       Store    Category  Trade Name                                    Legal Name        Narration Variants           Risk Type
+    FAIRCENT P2P_LENDING    Faircent Fairassets Technologies India Private Limited                  FAIRCENT P2P_LENDING_PAYMENT
+  LENDENCLUB P2P_LENDING  LenDenClub             Innofin Solutions Private Limited                LENDENCLUB P2P_LENDING_PAYMENT
+  LIQUILOANS P2P_LENDING  LiquiLoans                       NDX P2P Private Limited                LIQUILOANS P2P_LENDING_PAYMENT
+RUPEE_CIRCLE P2P_LENDING RupeeCircle                Ruptok Fintech Private Limited RUPEE CIRCLE, RUPEECIRCLE P2P_LENDING_PAYMENT
+
+================================================================================
+SHEET NAME: BNPL
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+            Store Category           Trade Name                             Legal Name               Narration Variants    Risk Type
+            SIMPL     BNPL                Simpl              Simpl Pay Private Limited                            SIMPL BNPL_PAYMENT
+             AXIO     BNPL Axio (Capital Float)                      Axio Bank Limited              AXIO, CAPITAL FLOAT BNPL_PAYMENT
+        UNI_CARDS     BNPL            Uni Cards   Uni Cards Technology Private Limited              UNI CARDS, UNICARDS BNPL_PAYMENT
+        KREDITONE     BNPL            KreditOne                                    NaN                        KREDITONE BNPL_PAYMENT
+OLAMONEY_POSTPAID     BNPL   Ola Money Postpaid Aditya Birla Finance Limited (partner) OLA POSTPAID, OLA MONEY POSTPAID BNPL_PAYMENT
+
+================================================================================
+SHEET NAME: CREDIT_CARDS
+================================================================================
+Shape: (9, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+      Store    Category            Trade Name                             Legal Name             Narration Variants             Risk Type
+    HDFC_CC CREDIT_CARD HDFC Bank Credit Card                      HDFC Bank Limited HDFC CREDIT CARD, HDFC CC BILL CREDIT_CARD_REPAYMENT
+   SBI_CARD CREDIT_CARD              SBI Card SBI Cards and Payment Services Limited          SBI CARD, SBI CC BILL CREDIT_CARD_REPAYMENT
+   ICICI_CC CREDIT_CARD     ICICI Credit Card                     ICICI Bank Limited    ICICI CREDIT CARD, ICICI CC CREDIT_CARD_REPAYMENT
+    AXIS_CC CREDIT_CARD Axis Bank Credit Card                      Axis Bank Limited      AXIS CREDIT CARD, AXIS CC CREDIT_CARD_REPAYMENT
+       AMEX CREDIT_CARD      American Express         American Express Banking Corp.         AMEX, AMERICAN EXPRESS CREDIT_CARD_REPAYMENT
+   KOTAK_CC CREDIT_CARD     Kotak Credit Card            Kotak Mahindra Bank Limited              KOTAK CREDIT CARD CREDIT_CARD_REPAYMENT
+INDUSIND_CC CREDIT_CARD  IndusInd Credit Card                  IndusInd Bank Limited           INDUSIND CREDIT CARD CREDIT_CARD_REPAYMENT
+     YES_CC CREDIT_CARD  Yes Bank Credit Card                       Yes Bank Limited                YES CREDIT CARD CREDIT_CARD_REPAYMENT
+    ONECARD CREDIT_CARD               OneCard       FPL Technologies Private Limited              ONECARD, ONE CARD CREDIT_CARD_REPAYMENT
+
+================================================================================
+SHEET NAME: MICROFINANCE
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+      Store     Category          Trade Name                                Legal Name           Narration Variants       Risk Type
+BANDHAN_MFI MICROFINANCE  Bandhan Bank / MFI                      Bandhan Bank Limited BANDHAN MFI, BANDHAN FINANCE DIGITAL_PAYMENT
+   SPANDANA MICROFINANCE   Spandana Sphoorty       Spandana Sphoorty Financial Limited                     SPANDANA DIGITAL_PAYMENT
+     AROHAN MICROFINANCE    Arohan Financial Arohan Financial Services Private Limited                       AROHAN DIGITAL_PAYMENT
+    UJJIVAN MICROFINANCE     Ujjivan Finance        Ujjivan Financial Services Limited                      UJJIVAN DIGITAL_PAYMENT
+    CASHPOR MICROFINANCE             CASHPOR                      CASHPOR Micro Credit                      CASHPOR DIGITAL_PAYMENT
+ FUSION_MFI MICROFINANCE Fusion Microfinance               Fusion Microfinance Limited   FUSION MFI, FUSION FINANCE DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: EDUCATION_FEE
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store      Category              Trade Name                             Legal Name                                  Narration Variants       Risk Type
+      EDUVANZ EDUCATION_FEE                 Eduvanz      Eduvanz Financing Private Limited                                             EDUVANZ DIGITAL_PAYMENT
+       AVANSE EDUCATION_FEE                  Avanse      Avanse Financial Services Limited                                              AVANSE DIGITAL_PAYMENT
+     PROPELLD EDUCATION_FEE                Propelld          Propelld Tech Private Limited                                            PROPELLD DIGITAL_PAYMENT
+   SCHOOL_FEE EDUCATION_FEE School / University Fee                (Varies by institution) SCHOOL FEE, TUITION FEE, ADMISSION FEE, COLLEGE FEE DIGITAL_PAYMENT
+VIDYA_LAKSHMI EDUCATION_FEE    Vidya Lakshmi Portal Govt. of India (Education Loan Portal)                       VIDYA LAKSHMI, EDUCATION LOAN DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: HEALTHCARE
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+     Store   Category Trade Name                                Legal Name          Narration Variants       Risk Type
+ PHARMEASY HEALTHCARE  PharmEasy                      API Holdings Limited                   PHARMEASY DIGITAL_PAYMENT
+  TATA_1MG HEALTHCARE   Tata 1mg          1mg Technologies Private Limited               1MG, TATA 1MG DIGITAL_PAYMENT
+   NETMEDS HEALTHCARE    Netmeds Dadha Pharma Distribution Private Limited                     NETMEDS DIGITAL_PAYMENT
+    PRACTO HEALTHCARE     Practo       Practo Technologies Private Limited                      PRACTO DIGITAL_PAYMENT
+APOLLO_247 HEALTHCARE Apollo 247                   Apollo HealthCo Limited APOLLO 247, APOLLO PHARMACY DIGITAL_PAYMENT
+HEALTHIANS HEALTHCARE Healthians            Healthians.com Private Limited                  HEALTHIANS DIGITAL_PAYMENT
+   LYBRATE HEALTHCARE    Lybrate             Lybrate India Private Limited                     LYBRATE DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: FITNESS
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+      Store Category  Trade Name                         Legal Name Narration Variants       Risk Type
+    CULTFIT  FITNESS    Cult.fit Curefit Healthcare Private Limited  CULTFIT, CULT.FIT DIGITAL_PAYMENT
+    FITPASS  FITNESS     Fitpass   Fitpass Wellness Private Limited            FITPASS DIGITAL_PAYMENT
+HEALTHIFYME  FITNESS HealthifyMe        Zuventus Healthcare Limited        HEALTHIFYME DIGITAL_PAYMENT
+    GYMPASS  FITNESS     Gympass            Gympass do Brasil Ltda.            GYMPASS DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: GROCERY_RETAIL
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+         Store       Category             Trade Name                               Legal Name             Narration Variants       Risk Type
+         DMART GROCERY_RETAIL                 D-Mart                Avenue Supermarts Limited                  DMART, D MART DIGITAL_PAYMENT
+RELIANCE_FRESH GROCERY_RETAIL Reliance Fresh / Smart                  Reliance Retail Limited RELIANCE FRESH, RELIANCE SMART DIGITAL_PAYMENT
+     BIGBAZAAR GROCERY_RETAIL   Big Bazaar / Easyday                    Future Retail Limited            BIG BAZAAR, EASYDAY DIGITAL_PAYMENT
+   STAR_BAZAAR GROCERY_RETAIL            Star Bazaar               Trent Limited (Tata Group)                    STAR BAZAAR DIGITAL_PAYMENT
+    METRO_CASH GROCERY_RETAIL     Metro Cash & Carry Metro Cash & Carry India Private Limited           METRO CASH, METRO CC DIGITAL_PAYMENT
+      SPENCERS GROCERY_RETAIL       Spencer's Retail                 Spencer's Retail Limited                       SPENCERS DIGITAL_PAYMENT
+         LULUS GROCERY_RETAIL       Lulu Hypermarket        LuLu International Shopping Malls         LULU, LULU HYPERMARKET DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: ELECTRONICS
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store           Category         Trade Name                                Legal Name                Narration Variants       Risk Type
+           CROMA ELECTRONICS_RETAIL              Croma      Infiniti Retail Limited (Tata Group)                             CROMA DIGITAL_PAYMENT
+     VIJAY_SALES ELECTRONICS_RETAIL        Vijay Sales       Vijay Sales (India) Private Limited                       VIJAY SALES DIGITAL_PAYMENT
+RELIANCE_DIGITAL ELECTRONICS_RETAIL   Reliance Digital                   Reliance Retail Limited                  RELIANCE DIGITAL DIGITAL_PAYMENT
+   SAMSUNG_STORE ELECTRONICS_RETAIL Samsung Smart Café Samsung India Electronics Private Limited SAMSUNG STORE, SAMSUNG SMART CAFE DIGITAL_PAYMENT
+     APPLE_STORE ELECTRONICS_RETAIL     Apple / iStore               Apple India Private Limited               APPLE STORE, ISTORE DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: JEWELLERY
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store  Category              Trade Name                       Legal Name Narration Variants           Risk Type
+         TANISHQ JEWELLERY                 Tanishq            Titan Company Limited            TANISHQ HIGH_VALUE_PURCHASE
+    MALABAR_GOLD JEWELLERY Malabar Gold & Diamonds        Malabar Gold and Diamonds       MALABAR GOLD HIGH_VALUE_PURCHASE
+KALYAN_JEWELLERS JEWELLERY        Kalyan Jewellers   Kalyan Jewellers India Limited   KALYAN JEWELLERS HIGH_VALUE_PURCHASE
+     PC_JEWELLER JEWELLERY             PC Jeweller              PC Jeweller Limited        PC JEWELLER HIGH_VALUE_PURCHASE
+     SEN_CO_GOLD JEWELLERY              Senco Gold               Senco Gold Limited         SENCO GOLD HIGH_VALUE_PURCHASE
+     JOY_ALUKKAS JEWELLERY              Joyalukkas Joyalukkas India Private Limited         JOYALUKKAS HIGH_VALUE_PURCHASE
+
+================================================================================
+SHEET NAME: OTT
+================================================================================
+Shape: (10, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+          Store Category         Trade Name                                          Legal Name                             Narration Variants       Risk Type
+        NETFLIX      OTT            Netflix                                       Netflix, Inc.                                        NETFLIX DIGITAL_PAYMENT
+    PRIME_VIDEO      OTT Amazon Prime Video                                    Amazon.com, Inc.                      PRIME VIDEO, AMAZON PRIME DIGITAL_PAYMENT
+     JIOHOTSTAR      OTT         JioHotstar                       JioStar India Private Limited HOTSTAR, JIOHOTSTAR, JIOCINEMA, DISNEY HOTSTAR DIGITAL_PAYMENT
+        SPOTIFY      OTT            Spotify                                          Spotify AB                                        SPOTIFY DIGITAL_PAYMENT
+        SONYLIV      OTT            SonyLIV            Culver Max Entertainment Private Limited                              SONYLIV, SONY LIV DIGITAL_PAYMENT
+YOUTUBE_PREMIUM      OTT    YouTube Premium                                          Google LLC                                YOUTUBE PREMIUM DIGITAL_PAYMENT
+       APPLE_TV      OTT          Apple TV+                                          Apple Inc.                        APPLE TV, APPLE TV PLUS DIGITAL_PAYMENT
+       MXPLAYER      OTT          MX Player                              Times Internet Limited                            MXPLAYER, MX PLAYER DIGITAL_PAYMENT
+      ALTBALAJI      OTT          ALTBalaji                            Balaji Telefilms Limited                                      ALTBALAJI DIGITAL_PAYMENT
+        HUNGAMA      OTT            Hungama Hungama Digital Media Entertainment Private Limited                                        HUNGAMA DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: REAL_ESTATE
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+           Store    Category  Trade Name                                      Legal Name Narration Variants       Risk Type
+NINETYNINE_ACRES REAL_ESTATE     99acres                       Info Edge (India) Limited            99ACRES DIGITAL_PAYMENT
+         HOUSING REAL_ESTATE Housing.com                       REA India Private Limited        HOUSING.COM DIGITAL_PAYMENT
+        NOBROKER REAL_ESTATE    NoBroker NoBroker Technologies Solutions Private Limited           NOBROKER DIGITAL_PAYMENT
+     MAGICBRICKS REAL_ESTATE MagicBricks                          Times Internet Limited        MAGICBRICKS DIGITAL_PAYMENT
+     COMMONFLOOR REAL_ESTATE CommonFloor                     Quikr India Private Limited        COMMONFLOOR DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: DIGITAL_GOLD
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store     Category     Trade Name                         Legal Name  Narration Variants       Risk Type
+ SAFEGOLD DIGITAL_GOLD       SafeGold Digital Gold India Private Limited            SAFEGOLD DIGITAL_PAYMENT
+  AUGMONT DIGITAL_GOLD        Augmont   Augmont Goldtech Private Limited             AUGMONT DIGITAL_PAYMENT
+MMTC_PAMP DIGITAL_GOLD      MMTC-PAMP    MMTC-PAMP India Private Limited MMTC PAMP, MMTCPAMP DIGITAL_PAYMENT
+ GOLDBEES DIGITAL_GOLD GoldBees (ETF) Nippon Life India Asset Management            GOLDBEES DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: B2B
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store Category Trade Name                       Legal Name Narration Variants       Risk Type
+    UDAAN      B2B      Udaan RNF Technologies Private Limited              UDAAN DIGITAL_PAYMENT
+INDIAMART      B2B  IndiaMART      IndiaMART InterMESH Limited          INDIAMART DIGITAL_PAYMENT
+JUMBOTAIL      B2B  Jumbotail        JS Retail Private Limited          JUMBOTAIL DIGITAL_PAYMENT
+   VYAPAR      B2B     Vyapar Simple Soft Tech Private Limited             VYAPAR DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: LOGISTICS
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+     Store  Category      Trade Name                                   Legal Name  Narration Variants       Risk Type
+ DELHIVERY LOGISTICS       Delhivery                            Delhivery Limited           DELHIVERY DIGITAL_PAYMENT
+    PORTER LOGISTICS          Porter         Smartshift Logistics Private Limited              PORTER DIGITAL_PAYMENT
+      DTDC LOGISTICS            DTDC                         DTDC Express Limited                DTDC DIGITAL_PAYMENT
+  BLUEDART LOGISTICS       Blue Dart                    Blue Dart Express Limited BLUEDART, BLUE DART DIGITAL_PAYMENT
+     EKART LOGISTICS Ekart Logistics        Ekart Logistics (Flipkart subsidiary)               EKART DIGITAL_PAYMENT
+ SHADOWFAX LOGISTICS       Shadowfax       Shadowfax Technologies Private Limited           SHADOWFAX DIGITAL_PAYMENT
+XPRESSBEES LOGISTICS      Xpressbees Busybees Logistics Solutions Private Limited          XPRESSBEES DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: ASTROLOGY
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store  Category    Trade Name                              Legal Name Narration Variants       Risk Type
+    ASTROTALK ASTROLOGY     AstroTalk             Astro Tarot Private Limited          ASTROTALK DIGITAL_PAYMENT
+   INSTAASTRO ASTROLOGY    InstaAstro                                     NaN         INSTAASTRO DIGITAL_PAYMENT
+ANYTIME_ASTRO ASTROLOGY Anytime Astro                                     NaN      ANYTIME ASTRO DIGITAL_PAYMENT
+GANESHASPEAKS ASTROLOGY GaneshaSpeaks Astro-Vision Futuretech Private Limited      GANESHASPEAKS DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: CRYPTO
+================================================================================
+Shape: (6, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+     Store        Category Trade Name                                                                    Legal Name           Narration Variants        Risk Type
+    WAZIRX CRYPTO_EXCHANGE     WazirX Zanmai Labs Private Limited (Indian entity; Singapore parent: Zettai Pte Ltd)                       WAZIRX CRYPTO_HIGH_RISK
+   COINDCX CRYPTO_EXCHANGE    CoinDCX                                           Neblio Technologies Private Limited                      COINDCX CRYPTO_HIGH_RISK
+COINSWITCH CRYPTO_EXCHANGE CoinSwitch                                                            Bitcipher Labs LLP COINSWITCH, COINSWITCH KUBER CRYPTO_HIGH_RISK
+    ZEBPAY CRYPTO_EXCHANGE     ZebPay                                                                           NaN                       ZEBPAY CRYPTO_HIGH_RISK
+    MUDREX CRYPTO_EXCHANGE     Mudrex                                                                   Mudrex Inc.                       MUDREX CRYPTO_HIGH_RISK
+  BUYUCOIN CRYPTO_EXCHANGE   BuyUcoin                                                                           NaN                     BUYUCOIN CRYPTO_HIGH_RISK
+
+================================================================================
+SHEET NAME: REAL_MONEY_GAMING
+================================================================================
+Shape: (7, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+      Store          Category                        Trade Name                              Legal Name      Narration Variants                    Risk Type
+    DREAM11 REAL_MONEY_GAMING     Dream11 (BANNED - Real Money)         Dream11 Fantasy Private Limited                 DREAM11 PROHIBITED_REAL_MONEY_GAMING
+        MPL REAL_MONEY_GAMING         MPL (BANNED - Real Money)                   Mobile Premier League                     MPL PROHIBITED_REAL_MONEY_GAMING
+RUMMYCIRCLE REAL_MONEY_GAMING RummyCircle / My11Circle (BANNED)               Games24x7 Private Limited RUMMYCIRCLE, MY11CIRCLE PROHIBITED_REAL_MONEY_GAMING
+ GAMESKRAFT REAL_MONEY_GAMING               Gameskraft (BANNED) Gameskraft Technologies Private Limited   GAMESKRAFT, RUMMYTIME PROHIBITED_REAL_MONEY_GAMING
+ POKERBAAZI REAL_MONEY_GAMING               PokerBaazi (BANNED)    Moonshine Technology Private Limited              POKERBAAZI PROHIBITED_REAL_MONEY_GAMING
+      WINZO REAL_MONEY_GAMING                    WinZO (BANNED)      Tictok Skill Games Private Limited                   WINZO PROHIBITED_REAL_MONEY_GAMING
+      ZUPEE REAL_MONEY_GAMING                    Zupee (BANNED)               Cashgrail Private Limited                   ZUPEE PROHIBITED_REAL_MONEY_GAMING
+
+================================================================================
+SHEET NAME: INSURANCE
+================================================================================
+Shape: (9, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store  Category      Trade Name                                       Legal Name  Narration Variants       Risk Type
+          LIC INSURANCE             LIC              Life Insurance Corporation of India    LIC, LIC PREMIUM DIGITAL_PAYMENT
+ POLICYBAZAAR INSURANCE    PolicyBazaar                               PB Fintech Limited        POLICYBAZAAR DIGITAL_PAYMENT
+         ACKO INSURANCE            Acko                   Acko General Insurance Limited                ACKO DIGITAL_PAYMENT
+        DIGIT INSURANCE Digit Insurance               Go Digit General Insurance Limited     DIGIT, GO DIGIT DIGITAL_PAYMENT
+    NIVA_BUPA INSURANCE       Niva Bupa       Niva Bupa Health Insurance Company Limited NIVA BUPA, MAX BUPA DIGITAL_PAYMENT
+  STAR_HEALTH INSURANCE     Star Health Star Health and Allied Insurance Company Limited         STAR HEALTH DIGITAL_PAYMENT
+BAJAJ_ALLIANZ INSURANCE   Bajaj Allianz  Bajaj Allianz General Insurance Company Limited       BAJAJ ALLIANZ DIGITAL_PAYMENT
+     TATA_AIG INSURANCE        Tata AIG       Tata AIG General Insurance Company Limited            TATA AIG DIGITAL_PAYMENT
+    HDFC_ERGO INSURANCE       HDFC ERGO      HDFC ERGO General Insurance Company Limited           HDFC ERGO DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: EDTECH
+================================================================================
+Shape: (8, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+         Store Category                Trade Name                                          Legal Name Narration Variants                  Risk Type
+         BYJUS   EDTECH BYJU'S (Under Insolvency)                     Think and Learn Private Limited      BYJUS, BYJU'S DIGITAL_PAYMENT_DISTRESSED
+     UNACADEMY   EDTECH                 Unacademy            Sorting Hat Technologies Private Limited          UNACADEMY            DIGITAL_PAYMENT
+ PHYSICSWALLAH   EDTECH             PhysicsWallah                      Physics Wallah Private Limited  PHYSICSWALLAH, PW            DIGITAL_PAYMENT
+       VEDANTU   EDTECH                   Vedantu                 Vedantu Innovations Private Limited            VEDANTU            DIGITAL_PAYMENT
+         TOPPR   EDTECH                     Toppr                  Toppr Technologies Private Limited              TOPPR            DIGITAL_PAYMENT
+   SIMPLILEARN   EDTECH               Simplilearn                           Simplilearn Americas Inc.        SIMPLILEARN            DIGITAL_PAYMENT
+        UPGRAD   EDTECH                    upGrad Climb Online Content & Technologies Private Limited             UPGRAD            DIGITAL_PAYMENT
+GREAT_LEARNING   EDTECH            Great Learning                Mobishaala Education Private Limited     GREAT LEARNING            DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: BBPS
+================================================================================
+Shape: (1, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+Store     Category            Trade Name                  Legal Name                      Narration Variants       Risk Type
+ BBPS BILL_PAYMENT Bharat BillPay (BBPS) NPCI Bharat BillPay Limited BBPS, BHARAT BILLPAY, BBPS BILL PAYMENT DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: SALON
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+         Store Category             Trade Name                            Legal Name        Narration Variants       Risk Type
+   NYKAA_SALON    SALON      Nykaa Salon / FSN       FSN E-Commerce Ventures Limited               NYKAA SALON DIGITAL_PAYMENT
+   LAKME_SALON    SALON            Lakmé Salon      HUL (Hindustan Unilever Limited)               LAKME SALON DIGITAL_PAYMENT
+NATURALS_SALON    SALON         Naturals Salon     Naturals Learning Private Limited            NATURALS SALON DIGITAL_PAYMENT
+          YELO    SALON                   Yelo                             Yelo Inc.                      YELO DIGITAL_PAYMENT
+   URBANSALOON    SALON Urban Company (Beauty) Urban Company (India) Private Limited URBAN CLAP, URBAN COMPANY DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: CASUAL_GAMING
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+            Store      Category                        Trade Name                           Legal Name  Narration Variants       Risk Type
+            STEAM CASUAL_GAMING                             Steam                    Valve Corporation               STEAM DIGITAL_PAYMENT
+GOOGLE_PLAY_GAMES CASUAL_GAMING                 Google Play Games                           Google LLC   GOOGLE PLAY GAMES DIGITAL_PAYMENT
+    BATTLEGROUNDS CASUAL_GAMING Battlegrounds Mobile India (BGMI)                         Krafton Inc. BGMI, BATTLEGROUNDS DIGITAL_PAYMENT
+           GARENA CASUAL_GAMING                  Garena Free Fire        Garena Online Private Limited   GARENA, FREE FIRE DIGITAL_PAYMENT
+             LOCO CASUAL_GAMING                              Loco Pocket Aces Pictures Private Limited                LOCO DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: CREATOR_ECONOMY
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+             Store        Category             Trade Name                             Legal Name                             Narration Variants       Risk Type
+YOUTUBE_MEMBERSHIP CREATOR_ECONOMY     YouTube Membership                             Google LLC YOUTUBE MEMBERSHIP, YOUTUBE CHANNEL MEMBERSHIP DIGITAL_PAYMENT
+           PATREON CREATOR_ECONOMY                Patreon                          Patreon, Inc.                                        PATREON DIGITAL_PAYMENT
+      BUYMEACOFFEE CREATOR_ECONOMY        Buy Me a Coffee                   Buy Me A Coffee Inc.                                   BUYMEACOFFEE DIGITAL_PAYMENT
+    RAZORPAY_PAGES CREATOR_ECONOMY Razorpay Payment Pages      Razorpay Software Private Limited                                 RAZORPAY PAGES DIGITAL_PAYMENT
+         INSTAMOJO CREATOR_ECONOMY              Instamojo Instamojo Technologies Private Limited                                      INSTAMOJO DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: CLOUD_SERVICES
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store       Category          Trade Name                Legal Name              Narration Variants       Risk Type
+   GOOGLE_ONE CLOUD_SERVICES          Google One                Google LLC      GOOGLE ONE, GOOGLE STORAGE DIGITAL_PAYMENT
+       ICLOUD CLOUD_SERVICES              iCloud                Apple Inc.            ICLOUD, APPLE ICLOUD DIGITAL_PAYMENT
+MICROSOFT_365 CLOUD_SERVICES       Microsoft 365     Microsoft Corporation MICROSOFT 365, OFFICE 365, MSFT DIGITAL_PAYMENT
+      DROPBOX CLOUD_SERVICES             Dropbox             Dropbox, Inc.                         DROPBOX DIGITAL_PAYMENT
+          AWS CLOUD_SERVICES Amazon Web Services Amazon Web Services, Inc.                 AWS, AMAZON AWS DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: EARNED_WAGE
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store           Category Trade Name                              Legal Name Narration Variants       Risk Type
+   REFYNE EARNED_WAGE_ACCESS     Refyne      Refyne Cloud India Private Limited             REFYNE DIGITAL_PAYMENT
+   WAGELY EARNED_WAGE_ACCESS     Wagely                                     NaN             WAGELY DIGITAL_PAYMENT
+     JIFY EARNED_WAGE_ACCESS       Jify Jify Financial Services Private Limited               JIFY DIGITAL_PAYMENT
+FLEXMONEY EARNED_WAGE_ACCESS  FlexMoney  FlexMoney Technologies Private Limited          FLEXMONEY DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: AGRITECH
+================================================================================
+Shape: (5, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+    Store Category Trade Name                                                      Legal Name Narration Variants       Risk Type
+   DEHAAT AGRITECH     DeHaat                            Gramininfra Services Private Limited             DEHAAT DIGITAL_PAYMENT
+    BIJAK AGRITECH      Bijak                                  Bijak Agritech Private Limited              BIJAK DIGITAL_PAYMENT
+JAI_KISAN AGRITECH  Jai Kisan                                  Avant Agritech Private Limited          JAI KISAN DIGITAL_PAYMENT
+SAMUNNATI AGRITECH  Samunnati Samunnati Financial Intermediation and Services Private Limited          SAMUNNATI DIGITAL_PAYMENT
+NINJACART AGRITECH  Ninjacart                       Beehyv Software Solutions Private Limited          NINJACART DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: CHIT_FUNDS
+================================================================================
+Shape: (4, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store  Category                 Trade Name                                 Legal Name      Narration Variants       Risk Type
+SHRIRAM_CHITS CHIT_FUND              Shriram Chits      Shriram Chits (India) Private Limited           SHRIRAM CHITS DIGITAL_PAYMENT
+   MARGADARSI CHIT_FUND       Margadarsi Chit Fund       Margadarsi Chit Fund Private Limited              MARGADARSI DIGITAL_PAYMENT
+         KSFE CHIT_FUND                       KSFE Kerala State Financial Enterprises Limited                    KSFE DIGITAL_PAYMENT
+ MYSORE_SALES CHIT_FUND Mysore Sales International         Mysore Sales International Limited MYSORE SALES, MSIL CHIT DIGITAL_PAYMENT
+
+================================================================================
+SHEET NAME: COOP_BANKS
+================================================================================
+Shape: (3, 6)
+Columns: ['Store', 'Category', 'Trade Name', 'Legal Name', 'Narration Variants', 'Risk Type']
+
+First 100 rows:
+        Store  Category                      Trade Name                                       Legal Name                    Narration Variants           Risk Type
+     PMC_BANK COOP_BANK Punjab & Maharashtra Co-op Bank Punjab and Maharashtra Co-operative Bank Limited                              PMC BANK HIGH_RISK_COOP_BANK
+   URBAN_COOP COOP_BANK        Generic Urban Co-op Bank                                         (Varies) URBAN COOP, CO-OP BANK, SAHAKARI BANK HIGH_RISK_COOP_BANK
+DISTRICT_COOP COOP_BANK     District Central Co-op Bank                             (Varies by district)                   DCCB, DISTRICT COOP HIGH_RISK_COOP_BANK
+

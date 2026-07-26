@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Threshold,Output
+FF-051,10+ unique senders,Distinct counterparty account count,>= 10 in 7 days,"Collection account, Grade C"
+FF-052,20+ unique senders,Distinct counterparty account count,>= 20 in 7 days,"Collection account, Grade B"
+FF-053,50+ unique senders,Distinct counterparty account count,>= 50 in 30 days,"High-risk collection, Grade B"
+FF-054,100+ unique senders,Distinct counterparty account count,>= 100 in 30 days,"Mass collection hub, Grade A"
+FF-055,High fan-in ratio,Unique senders / total transactions,Fan-in ratio > 0.8,"Collection dominant, Grade B"
+FF-056,Small deposit pattern,Avg incoming amount,"₹500-₹50,000","Small-ticket collection, Grade C"
+FF-057,Similar deposit values,Std deviation of incoming amounts,StdDev < 10% of mean,"Structured amounts, Grade B"
+FF-058,Same-day deposits,Credits clustered in single day,>= 20 on same calendar date,"Burst collection, Grade B"
+FF-059,Multi-state deposits,Unique states of sender addresses,>= 5 states,"Geographic spread, Grade C"
+FF-060,Victim-tagged senders,Senders appear in NCRP tagged list,Any match,"Victim collection, Grade A"

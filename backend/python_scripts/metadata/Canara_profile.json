@@ -1,0 +1,49 @@
+{
+  "document_type": "BANK_STATEMENT",
+  "institution": {
+    "bank_name": "CANARA BANK",
+    "platform": "UNKNOWN",
+    "country": "IN"
+  },
+  "account_holder": {
+    "name": "VAISHALI PATEL",
+    "customer_id_or_crn": "XXXXXXX78",
+    "customer_type": "UNKNOWN",
+    "ckyc_number": "UNKNOWN",
+    "pan_number": "UNKNOWN",
+    "mobile_number": "+919343855229",
+    "email": "UNKNOWN",
+    "address_raw": "D O CHANDRAKANT PATEL 448 BEHIND DAK BANGALO VILLAGE NIWALI BUJURG TEH NIWALI NIWALI BARWANI MADHYA PRADESH"
+  },
+  "account_profile": {
+    "account_number": "XXXXXXXXX5420",
+    "account_type": "UNKNOWN",
+    "account_status": "UNKNOWN",
+    "currency": "INR",
+    "nominee_registered": "UNKNOWN"
+  },
+  "routing_identifiers": {
+    "ifsc_code": "CNRB0003387",
+    "micr_code": "UNKNOWN",
+    "branch_name": "BARWANI",
+    "branch_code": "3387",
+    "branch_address": "H.NO.1, WARD NO 16, JAWAHAR MARG, BARWANI MADHYA PRADESH"
+  },
+  "statement_details": {
+    "period_raw": "01-Sep-2023 to 27-Feb-2024",
+    "start_date": "01-Sep-2023",
+    "end_date": "27-Feb-2024",
+    "generated_at": "UNKNOWN"
+  },
+  "summary_snapshot": {
+    "opening_balance": 245708.0,
+    "closing_balance": 144698.56
+  },
+  "upi_summary": {
+    "total_sent": "UNKNOWN",
+    "total_received": "UNKNOWN",
+    "transaction_count": "UNKNOWN",
+    "wallet_balance": "UNKNOWN",
+    "linked_accounts": []
+  }
+}

@@ -1,0 +1,22 @@
+---
+inclusion: fileMatch
+fileMatchPattern: ['**/*.{html,js,css}']
+---
+
+# Frontend Conventions
+
+## Shared shell
+- Sidebar mount: `<aside id="app-sidebar" class="app-sidebar"></aside>` hydrated by `src/interactions/sidebar.js`.
+- Shared CSS: `styles/finexis-core.css`, `styles/tokens.css`.
+- Tailwind theme: `src/config/tailwind-theme.js` (CDN Tailwind on workspace pages).
+- Layout classes: `.app-shell`, `.app-header`, `.app-content`.
+
+## File roles
+- `*.html` — page markup + inline page-specific styles only.
+- `src/interactions/*.js` — page behavior (import from HTML `<script type="module">`).
+- `src/services/*.js` — API calls to `backend/server.js`.
+- `styles/` — shared tokens, components, `.card-elevated`, sidebar styles.
+
+## Styling tasks
+- Prefer CSS classes in `styles/finexis-core.css` over per-page JS style injection.
+- Brand green: `#0E6E5E` / deep `#0A4F44`; active mint: `#ECFDF5`.

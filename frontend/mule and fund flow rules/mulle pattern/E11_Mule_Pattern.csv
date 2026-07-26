@@ -1,0 +1,11 @@
+Rule ID,Rule name,Condition,Threshold/Window,Output
+MULE-001,High Pass-Through,(Total debits / Total credits) x 100,> 95%,"Pass-through entity, Grade A"
+MULE-002,Rapid In-and-Out,Avg time between credit and debit,< 1 hr,"Rapid forward, Grade A"
+MULE-003,Zero Utility Spend,No utility/BBPS/merchant payments,3-month window,"No genuine activity, Grade B"
+MULE-004,Fan-in to Fan-out,Multiple unique senders followed by immediate distribution,>= 5 senders -> >= 3 beneficiaries,"Conduit behavior, Grade A"
+MULE-005,Suspect Counterparties,Transactions with known collection/distribution nodes,>= 1 match,"Associated with network, Grade A"
+MULE-006,Below Threshold Structuring,Incoming or outgoing amounts just below limits,"₹49,000 threshold","Structuring, Grade B"
+MULE-007,Shell Characteristics,"Low average balance, no salary",Avg balance < 1% of credits,"Shell account, Grade B"
+MULE-008,Cross-bank hops,Rapid transfer to different bank,Immediate,"Layering node, Grade B"
+MULE-009,Burst Activity,Sudden spike in volume,>10x peer avg,"Anomalous spike, Grade A"
+MULE-010,Location Mismatch,"Account opened in state A, transactions from state B",> 500 km difference,"Geo-anomaly, Grade C"
