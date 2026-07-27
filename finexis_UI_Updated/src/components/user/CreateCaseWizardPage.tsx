@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Check, UploadCloud, CheckCircle2, Loader2 } from "lucide-react";
+import { Check, UploadCloud, CheckCircle2, Loader2, Plus, User, X } from "lucide-react";
 import Topbar from "./Topbar";
 import Badge from "../admin/Badge";
 import { useCaseContext } from "../../context/CaseContext";
@@ -49,33 +49,84 @@ const readFilesAsBase64 = (files: File[]) =>
     )
   );
 
+interface PersonUploadData {
+  personName: string;
+  files: File[];
+}
+
 export default function CreateCaseWizardPage() {
   const { openCase, refreshCases } = useCaseContext();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState("");
   const [caseNumber, setCaseNumber] = useState(`CS-${Date.now().toString().slice(-4)}`);
   const [subtitle, setSubtitle] = useState("");
   const [status, setStatus] = useState("ACTIVE");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [persons, setPersons] = useState<PersonUploadData[]>([{ personName: "", files: [] }]);
   const [createdCase, setCreatedCase] = useState<CaseRecord | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const addPerson = () => {
+    setPersons((prev) => [...prev, { personName: "", files: [] }]);
+  };
+
+  const removePerson = (index: number) => {
+    setPersons((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePersonNameChange = (index: number, name: string) => {
+    setPersons((prev) => {
+      const updated = [...prev];
+      updated[index].personName = name;
+      return updated;
+    });
+  };
+
+  const handleFilesChange = (index: number, files: File[]) => {
+    setPersons((prev) => {
+      const updated = [...prev];
+      updated[index].files = files;
+      return updated;
+    });
+  };
+
+  const openFileInput = (index: number) => {
+    fileInputRefs.current[index]?.click();
+  };
+
+  const getTotalFilesCount = () => {
+    return persons.reduce((sum, p) => sum + p.files.length, 0);
+  };
+
   const submitCase = async () => {
-    console.log(`[FRONTEND-LOG] [submitCase] Started. title="${title}", caseNumber="${caseNumber}", selectedFilesCount=${selectedFiles.length}`);
+    console.log(`[FRONTEND-LOG] [submitCase] Started. title="${title}", caseNumber="${caseNumber}", personsCount=${persons.length}`);
     setProcessing(true);
     setError(null);
     setStep(2);
     try {
-      const files = selectedFiles.length ? await readFilesAsBase64(selectedFiles) : [];
-      console.log(`[FRONTEND-LOG] [submitCase] Encoded ${files.length} files to base64. Calling caseService.createCase...`);
+      // Read all files for all persons
+      const personData = await Promise.all(
+        persons.map(async (person) => {
+          const files = person.files.length ? await readFilesAsBase64(person.files) : [];
+          // Add personName to each file object
+          return {
+            personName: person.personName || `Person ${persons.indexOf(person) + 1}`,
+            files: files.map(f => ({ ...f, personName: person.personName || `Person ${persons.indexOf(person) + 1}` }))
+          };
+        })
+      );
+
+      console.log(`[FRONTEND-LOG] [submitCase] Encoded files for ${personData.length} persons. Calling caseService.createCase...`);
+      // Flatten personData to single files array with personName attached
+      const allFilesWithPerson = personData.flatMap(p => p.files);
       const record = await caseService.createCase({
         caseNumber,
         title: title || caseNumber,
         subtitle,
         status,
-        files,
+        files: allFilesWithPerson,
+        personData
       });
       console.log(`[FRONTEND-LOG] [submitCase] caseService.createCase succeeded. Response:`, record);
       setCreatedCase(record);
@@ -128,24 +179,81 @@ export default function CreateCaseWizardPage() {
           )}
 
           {step === 1 && (
-            <div className="space-y-5">
-              <h2 className="font-display text-[16px] font-semibold text-ink">Upload files</h2>
-              <input ref={fileInputRef} type="file" multiple accept=".pdf,.csv,.xlsx,.xls,.zip" className="hidden" onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))} />
-              <div className="rounded-xl border-2 border-dashed border-line bg-paper px-6 py-12 text-center">
-                <UploadCloud size={28} className="mx-auto text-forensic-500" />
-                <p className="mt-3 text-[13.5px] font-medium text-ink">Drag & drop PDF statements here, or browse</p>
-                <button onClick={() => fileInputRef.current?.click()} className="mt-4 rounded-lg bg-forensic-500 px-4 py-2 text-[13px] font-semibold text-white hover:bg-forensic-600 transition-colors">Browse files</button>
+            <div className="space-y-6">
+              <h2 className="font-display text-[16px] font-semibold text-ink">Upload files by person</h2>
+              
+              {persons.map((person, index) => (
+                <div key={index} className="rounded-lg border border-line bg-paper p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <User size={16} className="text-forensic-500" />
+                      <label className="block text-[13px] font-medium text-ink">Person name</label>
+                    </div>
+                    {persons.length > 1 && (
+                      <button
+                        onClick={() => removePerson(index)}
+                        className="text-ink-faint hover:text-red-500 transition-colors"
+                        title="Remove person"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                  
+                  <input
+                    className={inputClass}
+                    value={person.personName}
+                    onChange={(e) => handlePersonNameChange(index, e.target.value)}
+                    placeholder="e.g. Lakshit Verma"
+                  />
+
+                  <div>
+                    <label className="block text-[13px] font-medium text-ink mb-2">Upload PDFs for this person</label>
+                    <input
+                      ref={(el) => (fileInputRefs.current[index] = el)}
+                      type="file"
+                      multiple
+                      accept=".pdf,.csv,.xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => handleFilesChange(index, Array.from(e.target.files || []))}
+                    />
+                    
+                    {person.files.length > 0 ? (
+                      <ul className="divide-y divide-line-soft rounded-lg border border-line-soft">
+                        {person.files.map((file, fIdx) => (
+                          <li key={`${file.name}-${fIdx}`} className="flex items-center justify-between px-3.5 py-2.5 text-[13px] text-ink">
+                            <div className="flex items-center gap-2">
+                              <Badge tone="green">PDF</Badge>
+                              {file.name}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <button
+                        onClick={() => openFileInput(index)}
+                        className="w-full rounded-lg border border-dashed border-line bg-surface px-4 py-6 text-[13px] text-ink-muted hover:bg-paper hover:border-forensic-300 transition-colors"
+                      >
+                        <UploadCloud size={24} className="mx-auto mb-2 text-forensic-400" />
+                        Click to upload PDFs for {person.personName || "this person"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={addPerson}
+                className="flex items-center gap-2 rounded-lg border border-line bg-paper px-4 py-3 text-[13px] font-medium text-ink hover:bg-forensic-50 hover:border-forensic-200 transition-colors"
+              >
+                <Plus size={16} className="text-forensic-500" />
+                Add another person
+              </button>
+
+              <div className="rounded-lg bg-forensic-50/50 px-4 py-3 text-[12.5px] text-forensic-700">
+                Total files to upload: <span className="font-semibold">{getTotalFilesCount()}</span> across{" "}
+                <span className="font-semibold">{persons.length}</span> person(s)
               </div>
-              {selectedFiles.length > 0 && (
-                <ul className="divide-y divide-line-soft rounded-lg border border-line-soft">
-                  {selectedFiles.map((file) => (
-                    <li key={file.name} className="flex items-center justify-between px-3.5 py-2.5 text-[13px] text-ink">
-                      {file.name}
-                      <Badge tone="green">Ready</Badge>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           )}
 
@@ -153,7 +261,9 @@ export default function CreateCaseWizardPage() {
             <div className="space-y-5 text-center py-8">
               <Loader2 size={28} className="mx-auto text-forensic-500 animate-spin" />
               <h2 className="font-display text-[16px] font-semibold text-ink">Creating case and parsing statements…</h2>
-              <p className="text-[13px] text-ink-muted">Calling POST /api/cases with uploaded PDFs (same flow as legacy case manager).</p>
+              <p className="text-[13px] text-ink-muted">
+                Processing {persons.length} person(s) with {getTotalFilesCount()} PDF file(s).
+              </p>
             </div>
           )}
 

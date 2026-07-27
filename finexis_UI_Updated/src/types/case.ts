@@ -16,4 +16,5 @@ export interface CreateCasePayload {
   subtitle?: string;
   status?: string;
   files?: Array<{ filename: string; content: string }>;
+  personData?: Array<{ personName: string; files: Array<{ filename: string; content: string }> }>;
 }

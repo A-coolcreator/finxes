@@ -251,10 +251,10 @@ function parseGeminiOutput(stdout) {
 }
 
 app.post("/api/cases", async (req, res) => {
-  const { caseNumber, title, subtitle, status, personName, files } = req.body || {};
+  const { caseNumber, title, subtitle, status, files, personData } = req.body || {};
   console.log(`\n==================================================`);
   console.log(`[BACKEND-LOG] POST /api/cases called`);
-  console.log(`[BACKEND-LOG] caseNumber: "${caseNumber}", title: "${title}", status: "${status}", filesCount: ${files ? files.length : 0}`);
+  console.log(`[BACKEND-LOG] caseNumber: "${caseNumber}", title: "${title}", status: "${status}", filesCount: ${files ? files.length : 0}, personDataCount: ${personData ? personData.length : 0}`);
   logToFile(`POST /api/cases called. caseNumber=${caseNumber}, title=${title}, filesCount=${files ? files.length : 0}`);
 
   if (!caseNumber || !title || !status) {
@@ -279,13 +279,18 @@ app.post("/api/cases", async (req, res) => {
     console.log(`[BACKEND-LOG] Created Case Record: ID=${record.id}, CaseNo=${record.caseNumber}`);
     let totalTransactionsCount = 0;
 
-    if (files && Array.isArray(files) && files.length > 0) {
+    // Support both old 'files' array and new 'personData' structure
+    const filesToProcess = files || [];
+    const personFiles = personData ? personData.flatMap(p => p.files) : [];
+
+    if (filesToProcess.length > 0 || personFiles.length > 0) {
+      const allFiles = [...filesToProcess, ...personFiles];
       const pythonCmd = process.platform === "win32" ? "python" : "python3";
 
-      for (let idx = 0; idx < files.length; idx++) {
-        const fileObj = files[idx];
+      for (let idx = 0; idx < allFiles.length; idx++) {
+        const fileObj = allFiles[idx];
         const base64Str = fileObj.base64 || fileObj.content;
-        console.log(`\n--- [BACKEND-LOG] Processing File [${idx + 1}/${files.length}]: "${fileObj.filename}" ---`);
+        console.log(`\n--- [BACKEND-LOG] Processing File [${idx + 1}/${allFiles.length}]: "${fileObj.filename}" ---`);
 
         if (!fileObj.filename || !base64Str) {
           console.warn(`[BACKEND-LOG] WARNING: Skipping file index ${idx} due to missing filename or base64 data.`);
