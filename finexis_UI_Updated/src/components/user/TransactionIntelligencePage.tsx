@@ -7,7 +7,7 @@ import DateRangePicker from "./DateRangePicker";
 import MultiSelectDropdown from "./MultiSelectDropdown";
 import TablePagination, { paginateRows } from "./TablePagination";
 import { TransactionMetricsCards } from "./TransactionMetricsCards";
-import { KeywordChipsBar } from "./KeywordChipsBar";
+// import { KeywordChipsBar } from "./KeywordChipsBar";
 import Badge from "../admin/Badge";
 import { useCaseContext } from "../../context/CaseContext";
 import { 

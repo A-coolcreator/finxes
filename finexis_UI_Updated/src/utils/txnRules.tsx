@@ -480,10 +480,10 @@ export const extractTxnDetails = (txn: TransactionRow) => {
         console.log(`[TXN-RULE-LOG] [${txnId}] Regex pattern "${chip.regex.toString()}" matched in desc: "${desc.substring(0, 80)}..." -> CHIP: ${chip.label}`);
       }
     } else {
-      matched = chip.keywords.some(kw => matchesFullWord(desc, kw));
+      const matchedKeyword = chip.keywords.find(kw => matchesFullWord(desc, kw));
+      matched = Boolean(matchedKeyword);
       if (matched && typeof window !== "undefined") {
-        const matchedKeyword = chip.keywords.find(kw => matchesFullWord(desc, kw));
-        console.log(`[TXN-RULE-LOG] [${txnId}] Keyword pattern "${matchedKeyword || kw}" matched in desc: "${desc.substring(0, 80)}..." -> CHIP: ${chip.label}`);
+        console.log(`[TXN-RULE-LOG] [${txnId}] Keyword pattern "${matchedKeyword}" matched in desc: "${desc.substring(0, 80)}..." -> CHIP: ${chip.label}`);
       }
     }
     return matched;

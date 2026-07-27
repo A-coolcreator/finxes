@@ -25,7 +25,11 @@ const inHours = (a, b, hours) => {
   return da && db && db >= da && db - da <= hours * 60 * 60 * 1000;
 };
 const between = (value, min, max) => value >= min && value <= max;
-const any = (value, terms) => terms.some(term => value.includes(term));
+const any = (value, terms) => {
+  const normalized = clean(value);
+  return terms.some(term => normalized.includes(term));
+};
+
 const unique = values => [...new Set(values.filter(Boolean))];
 
 /** DOCX §0.1 header aliases. New banks are data additions, not parser rewrites. */
@@ -91,8 +95,11 @@ export const DIGITAL_CATEGORY_RULES = [
   ["INVESTMENT_WEALTH", "LOW", "zerodha groww kuvera coin by zerodha paytm money angel one iifl securities motilal oswal edelweiss smallcase wealthdesk us stocks international investment nps ppf sgb gold bond fd booking rd booking national savings post office"], ["SOFTWARE_SUBSCRIPTIONS", "LOW", "google one google workspace microsoft 365 office 365 adobe creative adobe acrobat canva pro notion slack zoom pro dropbox icloud bitdefender kaspersky quickheal norton mcafee tally busy marg erp zoho freshbooks hubspot salesforce github digitalocean aws azure gcp hostinger godaddy namecheap cloudflare"],
   ["SOCIAL_MEDIA_CREATOR", "LOW", "twitter blue x premium meta verified linkedin premium youtube facebook ads instagram ads snapchat+ telegram premium discord nitro medium substack patreon buymeacoffee razorpay pages instamojo"], ["UTILITIES_DIGITAL", "LOW", "electricity water bill gas bill igl mgl adani gas piped gas landline broadband wifi plan tata sky dish tv sun direct tata play hathway d2h airtel xtreme jio fiber act fibernet spectranet"], ["PERSONAL_CARE_WELLNESS", "LOW", "nykaa purplle sugar cosmetics dot and key mamaearth wow skin beardo bombay shaving ustraa plum forest essentials kama ayurveda salon beauty parlour spa massage wellness centre"],
   ["CHARITY_DONATIONS", "LOW", "giveindia milaap ketto impact guru cry india child rights pm relief cm relief fund red cross unicef pmo pm cares disaster relief ngo trust donation temple donation church offering masjid gurdwara religious donation bhumi foundation"], ["GOVERNMENT_CIVIC_PAYMENTS", "LOW", "bbps govt passport fee visa fee mca21 roc filing pan application aadhar update epfo esic pf withdrawal nps withdrawal court fee stamp duty registration sub-registrar property tax municipal tax vehicle tax rto fee driving licence"]
-].map(([category, risk, terms]) => ({ category, risk, terms: terms.split(" ").join("|").split("|") }));
-
+].map(([category, risk, terms]) => ({
+  category,
+  risk,
+  terms: terms.split(" ").join("|").split("|")
+}));
 // The document lists multi-word merchant aliases.  The compact master list
 // above is tokenised for maintainability; this guard prevents generic words
 // (for example "cash", "payment" or "game") from becoming categories by
@@ -100,11 +107,149 @@ export const DIGITAL_CATEGORY_RULES = [
 // eligible matches, while phrase-only aliases are represented by their most
 // distinctive token.
 const DIGITAL_GENERIC_TOKENS = new Set(["and", "the", "app", "apps", "game", "games", "cash", "card", "payment", "payments", "transfer", "wallet", "coin", "token", "service", "services", "content", "loan", "loans", "hotel", "hotels", "bank", "bills", "fee", "fees", "web", "shop", "store", "india", "digital", "online", "international", "subscription", "subscriptions", "insurance", "care", "fund", "funds", "gold", "money", "travel", "trust", "gas", "water", "office", "cloud"]);
-const matchesDigitalCategory = (text, rule) => rule.terms.some(term => term.length >= 4 && !DIGITAL_GENERIC_TOKENS.has(term) && text.includes(term));
+const matchesDigitalCategory = (text, rule) => {
+    const normalized = clean(text);
 
+    return rule.terms.some(term =>
+        term.length >= 4 &&
+        !DIGITAL_GENERIC_TOKENS.has(term) &&
+        normalized.includes(term)
+    );
+};
 export const CRYPTO_EXCHANGES = [
-  ["WazirX", "MEDIUM", "wazirx wzrx zanmai labs wazirx@hdfcbank wazirx@icici"], ["CoinDCX", "MEDIUM", "coindcx neblio technologies coindcx@kotak coindcx@yesbank"], ["CoinSwitch Kuber", "MEDIUM", "coinswitch kuber bitcipher labs coinswitch@icici kuber@upi"], ["ZebPay", "MEDIUM", "zebpay awlencan innovations zebpay@axis zebpay@hdfc"], ["BitBNS", "MEDIUM", "bitbns buyhatke internet bitbns@icici"], ["Giottus", "LOW", "giottus giottus@kotak"], ["Unocoin", "LOW", "unocoin unocoin@ybl"], ["BuyUCoin", "LOW", "buyucoin buyucoin@upi"], ["Mudrex", "LOW", "mudrex mudrex@icici"], ["Binance", "HIGH", "binance bnb"], ["Bybit", "HIGH", "bybit"], ["KuCoin", "HIGH", "kucoin"], ["OKX", "HIGH", "okx okex"], ["Coinbase", "CRITICAL", "coinbase coinbase inc usa"], ["Kraken", "CRITICAL", "kraken payward inc"]
-].map(([entity, risk, terms]) => ({ entity, risk, terms: terms.split(" ").join("|").split("|") }));
+  [
+    "WazirX",
+    "MEDIUM",
+    [
+      "wazirx",
+      "wzrx",
+      "zanmai labs",
+      "wazirx@hdfcbank",
+      "wazirx@icici"
+    ]
+  ],
+  [
+    "CoinDCX",
+    "MEDIUM",
+    [
+      "coindcx",
+      "coindcx@kotak",
+      "coindcx@yesbank"
+    ]
+  ],
+  [
+    "CoinSwitch Kuber",
+    "MEDIUM",
+    [
+      "coinswitch",
+      "kuber",
+      "bitcipher labs",
+      "coinswitch@icici",
+      "kuber@upi"
+    ]
+  ],
+  [
+    "ZebPay",
+    "MEDIUM",
+    [
+      "zebpay",
+      "awlencan innovations",
+      "zebpay@axis",
+      "zebpay@hdfc"
+    ]
+  ],
+  [
+    "BitBNS",
+    "MEDIUM",
+    [
+      "bitbns",
+      "buyhatke internet",
+      "bitbns@icici"
+    ]
+  ],
+  [
+    "Giottus",
+    "LOW",
+    [
+      "giottus",
+      "giottus@kotak"
+    ]
+  ],
+  [
+    "Unocoin",
+    "LOW",
+    [
+      "unocoin",
+      "unocoin@ybl"
+    ]
+  ],
+  [
+    "BuyUCoin",
+    "LOW",
+    [
+      "buyucoin",
+      "buyucoin@upi"
+    ]
+  ],
+  [
+    "Mudrex",
+    "LOW",
+    [
+      "mudrex",
+      "mudrex@icici"
+    ]
+  ],
+  [
+    "Binance",
+    "HIGH",
+    [
+      "binance",
+      "bnb"
+    ]
+  ],
+  [
+    "Bybit",
+    "HIGH",
+    [
+      "bybit"
+    ]
+  ],
+  [
+    "KuCoin",
+    "HIGH",
+    [
+      "kucoin"
+    ]
+  ],
+  [
+    "OKX",
+    "HIGH",
+    [
+      "okx",
+      "okex"
+    ]
+  ],
+  [
+    "Coinbase",
+    "CRITICAL",
+    [
+      "coinbase",
+      "coinbase inc usa"
+    ]
+  ],
+  [
+    "Kraken",
+    "CRITICAL",
+    [
+      "kraken",
+      "payward inc"
+    ]
+  ]
+].map(([entity, risk, terms]) => ({
+  entity,
+  risk,
+  terms: terms.map(term => term.toLowerCase().trim())
+}));
 
 const classify = tx => {
   const narration = textOf(tx);
@@ -220,8 +365,18 @@ export function enrichTransactions(transactions = []) {
     const narration_raw = String(source.description || source.narration_raw || source.narration || "");
     const classification = classify({ ...source, description: narration_raw }); const upi = classification.channel === "UPI" ? parseUpi(narration_raw) : {};
     const narration_clean = clean(narration_raw); const keyword_tags = Object.entries(KEYWORD_RULES).filter(([, terms]) => any(narration_clean, terms)).map(([tag]) => tag);
-    const digital = DIGITAL_CATEGORY_RULES.find(rule => matchesDigitalCategory(narration_clean, rule)); const exchange = CRYPTO_EXCHANGES.find(rule => any(`${narration_clean} ${upi.counterparty_vpa || ""}`, rule.terms));
-    const type = directionOf(source); const txn_type = classification.txn_type === "UNKNOWN" ? (type === "credit" ? "UNKNOWN_CREDIT" : type === "debit" ? "UNKNOWN_DEBIT" : "UNKNOWN") : classification.txn_type;
+    const digital = DIGITAL_CATEGORY_RULES.find(rule => matchesDigitalCategory(narration_clean, rule)); 
+const cryptoText = [
+    narration_clean,
+    upi.counterparty_vpa,
+    upi.counterparty_name
+]
+.filter(Boolean)
+.join(" ");
+
+const exchange = CRYPTO_EXCHANGES.find(rule =>
+    any(cryptoText, rule.terms)
+);    const type = directionOf(source); const txn_type = classification.txn_type === "UNKNOWN" ? (type === "credit" ? "UNKNOWN_CREDIT" : type === "debit" ? "UNKNOWN_DEBIT" : "UNKNOWN") : classification.txn_type;
     const tx = { ...source, txn_id: source.txn_id || source.id || `txn_${index}`, narration_raw, narration_clean, debit: type === "debit" ? amountOf(source) : null, credit: type === "credit" ? amountOf(source) : null, txn_type, channel: classification.channel, ...upi, counterparty_name: source.counterparty_name || source.counterpartyName || upi.counterparty_name || null, counterparty_account: source.counterparty_account || source.counterpartyAccount || null, counterparty_ifsc: source.counterparty_ifsc || source.metaIfscCode || narration_raw.match(/\b[A-Z]{4}0[A-Z0-9]{6}\b/i)?.[0] || null, reference_no: source.reference_no || source.referenceNumber || source.chqNo || null, keyword_tags, digital_category: digital?.category || "UNCATEGORISED", digital_risk_level: digital?.risk || "LOW", is_crypto: Boolean(exchange || digital?.category === "CRYPTO_BLOCKCHAIN"), crypto_entity: exchange?.entity || null, crypto_risk_level: exchange?.risk || null, crypto_direction: exchange ? (type === "debit" ? "OUT_TO_EXCHANGE" : "IN_FROM_EXCHANGE") : null, mule_score: 0, mule_rules_hit: [], rule_hits: [], risk_level: maxRisk(digital?.risk || "LOW", exchange?.risk || "LOW"), analysis_version: "2026.07", analysis_generated_at: new Date().toISOString() };
     applyPerTransactionRules(tx); return tx;
   });
