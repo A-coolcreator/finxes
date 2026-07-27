@@ -28,8 +28,30 @@ export interface TransactionRow {
   metaIfscCode?: string;
 }
 
+// Utility to escape special regex characters in keyword strings
+const escapeRegExp = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+/**
+ * Normalizes text by replacing slashes ('/', '//'), dashes, underscores, 
+ * colons, and extra whitespace with single spaces, then performs a full-word match.
+ */
+export const matchesFullWord = (desc: string, keyword: string): boolean => {
+  if (!desc || !keyword) return false;
+
+  // Normalize delimiters (spaces, /, //, -, _, :, |) into single spaces
+  const normalizedDesc = desc.replace(/[\/\\|\-_:=]+/g, " ").replace(/\s+/g, " ").trim();
+  const normalizedKw = keyword.replace(/[\/\\|\-_:=]+/g, " ").replace(/\s+/g, " ").trim();
+
+  if (!normalizedKw) return false;
+
+  // Enforce strict full-word boundary regex match
+  const regex = new RegExp(`\\b${escapeRegExp(normalizedKw)}\\b`, "i");
+  return regex.test(normalizedDesc);
+};
+
 export const CHIP_DEFINITIONS: ChipDefinition[] = [
-  // --- Existing Core Chips (Updated & Guarded) ---
   {
     id: "salary",
     label: "Salary",
@@ -50,7 +72,7 @@ export const CHIP_DEFINITIONS: ChipDefinition[] = [
   {
     id: "auto_debit",
     label: "Auto debit",
-    regex: /\b(AUTO\s*DEBIT|AUTODEBIT|AUTO-DR|AUTO\s*PAY|AUTOPAY|AUTO\s*PAYMENT|AUTO\s*PMT|AUTO\s*COLLECTION|AUTO\s*RECOVERY|AUTO\s*CHARGE|AUTO\s*TRANSFER|AUTO\s*TRF|AUTO\s*SWEEP|AUTO\s*SETTLEMENT|STANDING\s+INSTRUCTION|STANDING\s+INST|\bSI\b\s+PAYMENT|\bSI\s+DEBIT|MANDATE|MANDATE\s+DEBIT|MANDATE\s+PAYMENT|E-MANDATE|EMANDATE|\bE\s+NACH\b|\bNACH\b|\bACH\b|\bECS\b|RECURRING\s+PAYMENT|RECURRING\s+DEBIT|RECURRING\s+BILL|AUTO\s+BILL\s+PAY|AUTO\s+BILL\s+PAYMENT|SCHEDULED\s+PAYMENT|SCHEDULED\s+DEBIT)\b/i,
+    regex: /\b(AUTO\s*DEBIT|AUTODEBIT|AUTO-DR|AUTO\s*PAY|AUTOPAY|AUTO\s*PAYMENT|AUTO\s*PMT|AUTO\s*COLLECTION|AUTO\s*RECOVERY|AUTO\s*CHARGE|AUTO\s*TRANSFER|AUTO\s*TRF|AUTO\s*SWEEP|AUTO\s*SETTLEMENT|STANDING\s+INSTRUCTION|STANDING\s+INST|SI\s+PAYMENT|SI\s+DEBIT|MANDATE|MANDATE\s+DEBIT|MANDATE\s+PAYMENT|E-MANDATE|EMANDATE|E\s+NACH|NACH|ACH|ECS|RECURRING\s+PAYMENT|RECURRING\s+DEBIT|RECURRING\s+BILL|AUTO\s+BILL\s+PAY|AUTO\s+BILL\s+PAYMENT|SCHEDULED\s+PAYMENT|SCHEDULED\s+DEBIT)\b/i,
     keywords: ["AUTO DEBIT", "AUTODEBIT", "AUTO-DR", "AUTO PAY", "AUTOPAY", "AUTO PAYMENT", "AUTO PMT", "AUTO COLLECTION", "AUTO RECOVERY", "AUTO CHARGE", "AUTO TRANSFER", "AUTO TRF", "AUTO SWEEP", "AUTO SETTLEMENT", "STANDING INSTRUCTION", "STANDING INST", "SI PAYMENT", "SI DEBIT", "MANDATE", "MANDATE DEBIT", "MANDATE PAYMENT", "E-MANDATE", "EMANDATE", "E NACH", "NACH", "ACH", "ECS", "RECURRING PAYMENT", "RECURRING DEBIT", "RECURRING BILL", "AUTO BILL PAY", "AUTO BILL PAYMENT", "SCHEDULED PAYMENT", "SCHEDULED DEBIT"]
   },
   {
@@ -96,7 +118,7 @@ export const CHIP_DEFINITIONS: ChipDefinition[] = [
   {
     id: "foreign_remittance",
     label: "Foreign Remittance",
-    regex: /\b(SWIFT|REMITTANCE|FOREIGN\s+INWARD|FOREIGN\s+OUTWARD|WIRE\s+TRANSFER|\bTT\b|FCY|USD|EUR|GBP|REMITLY|WISE|TRANSFERWISE|WESTERN\s+UNION|MONEYGRAM|XOOM|PAYONEER|DEEL|RIPPLING|PAYPAL|WORLDREMIT|RIA\s+MONEY\s+TRANSFER|SKRILL|REVOLUT|MONEY2INDIA|MONEY2WORLD|FOREXPLUS|INSTAREM|BOOKMYFOREX|THOMAS\s+COOK\s+FOREX|NOSTRO|VOSTRO|FIRC|FEMA|LRS|PURPOSE\s+CODE|LETTER\s+OF\s+CREDIT)\b/i,
+    regex: /\b(SWIFT|REMITTANCE|FOREIGN\s+INWARD|FOREIGN\s+OUTWARD|WIRE\s+TRANSFER|TT|FCY|USD|EUR|GBP|REMITLY|WISE|TRANSFERWISE|WESTERN\s+UNION|MONEYGRAM|XOOM|PAYONEER|DEEL|RIPPLING|PAYPAL|WORLDREMIT|RIA\s+MONEY\s+TRANSFER|SKRILL|REVOLUT|MONEY2INDIA|MONEY2WORLD|FOREXPLUS|INSTAREM|BOOKMYFOREX|THOMAS\s+COOK\s+FOREX|NOSTRO|VOSTRO|FIRC|FEMA|LRS|PURPOSE\s+CODE|LETTER\s+OF\s+CREDIT)\b/i,
     keywords: ["SWIFT", "REMITTANCE", "FOREIGN INWARD", "FOREIGN OUTWARD", "WIRE TRANSFER", "TT", "FCY", "USD", "EUR", "GBP", "REMITLY", "WISE", "WESTERN UNION", "MONEYGRAM", "XOOM", "PAYONEER", "DEEL", "RIPPLING", "PAYPAL", "TRANSFERWISE", "WORLDREMIT", "RIA MONEY TRANSFER", "MONEY2INDIA", "MONEY2WORLD", "BOOKMYFOREX"]
   },
   {
@@ -145,8 +167,6 @@ export const CHIP_DEFINITIONS: ChipDefinition[] = [
     label: "Business GST",
     keywords: ["GST", "GSTN", "GST PAYMENT", "GST REFUND", "GST CHALLAN", "GSTIN", "CBIC", "TAX PAYMENT", "INPUT TAX", "OUTPUT TAX", "GSTR1", "GSTR3B", "GST COMPOSITION", "EWAY BILL", "ITC", "CGST", "SGST", "IGST"]
   },
-
-  // --- New Categories (CAT Taxonomy Integration) ---
   {
     id: "upi_app",
     label: "UPI Apps",
@@ -448,27 +468,36 @@ export const extractTxnDetails = (txn: TransactionRow) => {
   const descIfsc = desc.match(/\b[A-Z]{4}0[A-Z0-9]{6}\b/)?.[0] || null;
   const metaIfsc = txn.metaIfscCode && txn.metaIfscCode !== "UNKNOWN" ? txn.metaIfscCode : null;
 
-  const descLower = desc.toLowerCase();
   const descUpper = desc.toUpperCase();
+  const txnId = txn.id || "unknown";
 
-  // Initial candidate matching
-  let matchedChips = CHIP_DEFINITIONS.filter(chip => 
-    chip.regex ? chip.regex.test(desc) : chip.keywords.some(kw => descLower.includes(kw.toLowerCase()))
-  );
+  // Strict full-word matching across all chips
+  let matchedChips = CHIP_DEFINITIONS.filter(chip => {
+    let matched = false;
+    if (chip.regex) {
+      matched = chip.regex.test(desc);
+      if (matched && typeof window !== "undefined") {
+        console.log(`[TXN-RULE-LOG] [${txnId}] Regex pattern "${chip.regex.toString()}" matched in desc: "${desc.substring(0, 80)}..." -> CHIP: ${chip.label}`);
+      }
+    } else {
+      matched = chip.keywords.some(kw => matchesFullWord(desc, kw));
+      if (matched && typeof window !== "undefined") {
+        const matchedKeyword = chip.keywords.find(kw => matchesFullWord(desc, kw));
+        console.log(`[TXN-RULE-LOG] [${txnId}] Keyword pattern "${matchedKeyword || kw}" matched in desc: "${desc.substring(0, 80)}..." -> CHIP: ${chip.label}`);
+      }
+    }
+    return matched;
+  });
 
-  // --- Disambiguation & False-Positive Suppression Layer ---
-
-  // 1. RENTOMOJO: Subscription override over Rent
+  // --- Disambiguation Layer ---
   if (descUpper.includes("RENTOMOJO")) {
     matchedChips = matchedChips.filter(c => c.id !== "rent");
   }
 
-  // 2. CASHFREE: Payment Gateway override over Cash Deposit
   if (descUpper.includes("CASHFREE")) {
     matchedChips = matchedChips.filter(c => c.id !== "cash_deposit");
   }
 
-  // 3. AMAZON disambiguation
   if (descUpper.includes("AMAZON PAY BALANCE")) {
     matchedChips = matchedChips.filter(c => c.id !== "marketplace_payments" && c.id !== "upi_app");
   } else if (descUpper.includes("AMAZON PAY") || descUpper.includes("AMAZONPAY")) {
@@ -479,7 +508,6 @@ export const extractTxnDetails = (txn: TransactionRow) => {
     matchedChips = matchedChips.filter(c => c.id !== "marketplace_payments" && c.id !== "upi_app");
   }
 
-  // 4. Gig Economy Payout vs Food Delivery / Mobility Spend
   if (descUpper.includes("SWIGGY PAYOUT") || descUpper.includes("ZOMATO PAYOUT")) {
     matchedChips = matchedChips.filter(c => c.id !== "food_delivery");
   }
@@ -487,7 +515,6 @@ export const extractTxnDetails = (txn: TransactionRow) => {
     matchedChips = matchedChips.filter(c => c.id !== "mobility");
   }
 
-  // 5. MAX Life vs MAX Healthcare
   if (descUpper.includes("MAX LIFE")) {
     matchedChips = matchedChips.filter(c => c.id !== "healthcare");
   }
@@ -495,7 +522,6 @@ export const extractTxnDetails = (txn: TransactionRow) => {
     matchedChips = matchedChips.filter(c => c.id !== "insurance_premium");
   }
 
-  // 6. VISA / MasterCard / RuPay POS vs Card Settlement
   if (descUpper.includes("SETTLEMENT") && (descUpper.includes("VISA") || descUpper.includes("MASTERCARD") || descUpper.includes("RUPAY"))) {
     matchedChips = matchedChips.filter(c => c.id !== "merchant_pos");
   }
@@ -558,7 +584,7 @@ export const calculateRisk = (txn: TransactionRow): "High" | "Medium" | "Low" =>
     "AIRPAY", "FOREX", "REMITTANCE", "WESTERN UNION", "MONEYGRAM"
   ];
 
-  if (highRiskKw.some(kw => desc.includes(kw))) return "High";
-  if (medRiskKw.some(kw => desc.includes(kw))) return "Medium";
+  if (highRiskKw.some(kw => matchesFullWord(desc, kw))) return "High";
+  if (medRiskKw.some(kw => matchesFullWord(desc, kw))) return "Medium";
   return "Low";
 };

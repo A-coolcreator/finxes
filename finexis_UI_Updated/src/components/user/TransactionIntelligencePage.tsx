@@ -33,7 +33,7 @@ const HIDDEN_CHIPS = [
   "Realstate ans stamp dutiy", "Mictofinance sfb"
 ];
 
-const TXN_TYPES = ["UPI", "IMPS", "RTGS", "NEFT", "NACH", "AEPS", "CASH", "OTHER"];
+const TXN_TYPES = ["UPI", "IMPS", "RTGS", "NEFT", "NACH", "AEPS", "CASH_WITHDRAW", "CASH_DEPOSIT", "OTHER"];
 const ROWS_PER_PAGE = 10;
 
 export default function TransactionIntelligencePage() {
@@ -68,7 +68,12 @@ export default function TransactionIntelligencePage() {
         "DR";
 
       const date = row.date || row.txnDate || row.transactionDate || "—";
-      const type = row.mode || row.txnType || row.type || "OTHER";
+      let type = row.mode || row.txnType || row.type || "OTHER";
+      
+      // Split CASH into CASH_WITHDRAW (DR) and CASH_DEPOSIT (CR)
+      if (String(type).toUpperCase() === "CASH") {
+        type = drCr?.toLowerCase().startsWith("d") ? "CASH_WITHDRAW" : "CASH_DEPOSIT";
+      }
 
       return {
         id: row.id || `txn-${idx}`,
@@ -101,7 +106,21 @@ const filtered = useMemo(() => {
       }
 
       // 2. Transaction Type Filter
-      if (types.length && !types.includes(row.type)) return false;
+      if (types.length) {
+        // Handle "CASH" selector to match both CASH_WITHDRAW and CASH_DEPOSIT
+        const hasCashType = types.includes("CASH");
+        const hasWithdraw = types.includes("CASH_WITHDRAW");
+        const hasDeposit = types.includes("CASH_DEPOSIT");
+        
+        let typeMatches = false;
+        if (hasCashType) {
+          typeMatches = row.type === "CASH_WITHDRAW" || row.type === "CASH_DEPOSIT";
+        }
+        if (hasWithdraw && row.type === "CASH_WITHDRAW") typeMatches = true;
+        if (hasDeposit && row.type === "CASH_DEPOSIT") typeMatches = true;
+        
+        if (!typeMatches) return false;
+      }
 
       // 3. Person / Entity Filter
       if (selectedPerson !== "all" && row.personId !== selectedPerson) return false;

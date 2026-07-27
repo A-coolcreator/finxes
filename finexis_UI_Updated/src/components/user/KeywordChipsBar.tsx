@@ -1,5 +1,5 @@
 import React from "react";
-import { CHIP_DEFINITIONS } from "../../utils/txnRules";
+import { CHIP_DEFINITIONS } from "../../utils/txnRules.tsx";
 
 interface ChipsBarProps {
   activeChips: string[];
